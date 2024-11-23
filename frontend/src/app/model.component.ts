@@ -2,7 +2,6 @@ import { Component } from "@angular/core";
 
 @Component({
   selector: "app-model",
-  standalone: true,
   imports: [],
   template: `
     <!-- Button trigger modal -->

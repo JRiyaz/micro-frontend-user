@@ -7,10 +7,10 @@ import { HttpClient } from "@angular/common/http";
   providedIn: "root",
 })
 export class UserService {
-  private apiUrl = "https://jsonplaceholder.typicode.com/users";
+  private readonly apiUrl = "https://jsonplaceholder.typicode.com/users";
   users: WritableSignal<User[]> = signal([]);
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   getUsers() {
     this.http

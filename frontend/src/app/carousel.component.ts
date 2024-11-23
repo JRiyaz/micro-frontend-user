@@ -4,7 +4,6 @@ import { CommonModule } from "@angular/common";
 
 @Component({
   selector: "app-carousel",
-  standalone: true,
   imports: [CommonModule],
   template: `
     <table class="table m-3">
@@ -18,7 +17,7 @@ import { CommonModule } from "@angular/common";
         </tr>
       </thead>
       <tbody>
-        @for (user of this.userService.users(); track $index) {
+        @for (user of userService.users(); track $index) {
           <tr>
             <th scope="row">{{ user.id }}</th>
             <td>{{ user.name }}</td>
