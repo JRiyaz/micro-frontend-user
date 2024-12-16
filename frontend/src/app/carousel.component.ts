@@ -1,10 +1,17 @@
-import { Component, OnInit, signal, WritableSignal } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  signal,
+  WritableSignal,
+} from '@angular/core';
 import { UserService } from './user.service';
 import { CommonModule } from '@angular/common';
 import { User } from './user';
 
 @Component({
   selector: 'app-carousel',
+  standalone: true,
   imports: [CommonModule],
   template: `
     <div class="flex flex-col">
@@ -50,11 +57,10 @@ import { User } from './user';
 })
 export class CarouselComponent implements OnInit {
   public users: WritableSignal<User[]> = signal([]);
-  constructor(private userService: UserService) {
-    this.userService.getUsers().subscribe((usrs) => this.users.set(usrs));
-  }
+
+  constructor(private userService: UserService) {}
 
   ngOnInit() {
-    // this.userService.getUsers().subscribe(usrs => this.users.set(usrs));
+    this.userService.getUsers().subscribe((usrs) => this.users.set(usrs));
   }
 }

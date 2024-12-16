@@ -3,6 +3,7 @@ import { SharedUiService } from 'shared-ui';
 
 @Component({
   selector: 'app-model',
+  standalone: true,
   imports: [],
   template: `
     <div>
