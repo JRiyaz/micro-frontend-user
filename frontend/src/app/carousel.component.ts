@@ -11,7 +11,6 @@ import { User } from './user';
 
 @Component({
   selector: 'app-carousel',
-  standalone: true,
   imports: [CommonModule],
   template: `
     <div class="flex flex-col">

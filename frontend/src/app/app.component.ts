@@ -3,7 +3,6 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [RouterOutlet, RouterLink],
   template: `
     <nav class="bg-gray-800">
