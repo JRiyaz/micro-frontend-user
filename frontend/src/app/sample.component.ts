@@ -100,4 +100,4 @@ import { Component } from '@angular/core';
   `,
   styles: ``,
 })
-export class SampleComponent {}
+export default class SampleComponent {}

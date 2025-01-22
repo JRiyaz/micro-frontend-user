@@ -55,7 +55,7 @@ import { User } from './user';
   `,
   styles: ``,
 })
-export class CarouselComponent implements OnInit {
+export default class CarouselComponent implements OnInit {
   public users: WritableSignal<User[]> = signal([]);
 
   constructor(private userService: UserService) {}

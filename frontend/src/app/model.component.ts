@@ -48,7 +48,7 @@ import { SharedUiService } from 'shared-ui';
   `,
   styles: ``,
 })
-export class ModelComponent {
+export default class ModelComponent {
   value: number = 0;
 
   constructor(private uisharedService: SharedUiService) {}
