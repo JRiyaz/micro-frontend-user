@@ -6,7 +6,7 @@ RUN pnpm install
 COPY . .
 RUN ng build --project=shared-ui && ng build --base-href=/user/ --project=user
 
-FROM nginx:alpine
+FROM nginx:stable-alpine3.21
 WORKDIR /usr/share/nginx/user
 COPY --from=builder /app/dist/user/browser ./
 COPY ./projects/user/frontend/nginx.conf /etc/nginx/nginx.conf
