@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 
-from ..model.user import User, UserIn, UserEdit, UserPassword, UserInfo
+from ..model.user import User, UserEdit, UserIn, UserInfo, UserPassword
 from ..utils.constants import DEFAULT_USERS
 from ..utils.utils import encrypt_password, is_encrypted
 

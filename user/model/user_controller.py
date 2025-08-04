@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
 from ..model.generic import DetailMessage, Message
-from ..model.user import User, UserIn, UserIn, UserEdit
+from ..model.user import User, UserEdit, UserIn
 from ..utils.constants import USERS
 
 

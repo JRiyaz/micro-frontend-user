@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from fastapi import HTTPException, APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
 from ..model.generic import DetailMessage, Message
-from ..model.user import User, UserIn, UserEdit, UserPassword
+from ..model.user import User, UserEdit, UserIn, UserPassword
 from ..service.user import UserService
 
 service = UserService()

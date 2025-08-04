@@ -1,4 +1,4 @@
-from cryptography.fernet import InvalidToken, Fernet
+from cryptography.fernet import Fernet, InvalidToken
 
 from ..utils.constants import SECRET_KEY
 

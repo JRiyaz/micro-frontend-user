@@ -1,7 +1,7 @@
 from typing import Self, TypedDict
 from uuid import UUID
 
-from pydantic import BaseModel, Field, EmailStr, model_validator
+from pydantic import BaseModel, EmailStr, Field, model_validator
 
 
 class UserIn(BaseModel):
