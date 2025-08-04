@@ -42,7 +42,7 @@ async def update_user(user_id: UUID, user: UserIn):
     return JSONResponse(status_code=200, content={"msg": "User updated successfully..."})
 
 
-@user_routes.delete("/users/{user_id}", responses={404: {"model": Message}})
+@user_routes.delete("/users/{user_id}", responses={200: {"model": Message}, 404: {"model": Message}})
 async def delete_user(user_id: UUID):
     db_user: User = next(filter(lambda u: u.id == user_id, USERS), None)
     if not db_user:
@@ -51,7 +51,7 @@ async def delete_user(user_id: UUID):
     return JSONResponse(status_code=200, content={"msg": "User deleted successfully..."})
 
 
-@user_routes.patch("/users/{user_id}", responses={404: {"model": Message}})
+@user_routes.patch("/users/{user_id}", responses={200: {"model": Message}, 404: {"model": Message}})
 async def patch_user(user_id: UUID, user: UserEdit):
     db_user: User = next(filter(lambda u: u.id == user_id, USERS), None)
     if not db_user:
@@ -63,7 +63,7 @@ async def patch_user(user_id: UUID, user: UserEdit):
     return JSONResponse(status_code=200, content={"msg": "User updated successfully..."})
 
 
-@user_routes.post("/users/{user_id}/password", responses={400: {"model": DetailMessage}})
+@user_routes.post("/users/{user_id}/password", responses={200: {"model": Message}, 400: {"model": DetailMessage}})
 async def set_password(user_id: UUID, pwd: UserPassword):
     db_user: User = next(filter(lambda u: u.id == user_id, USERS), None)
     if not db_user:
@@ -75,7 +75,7 @@ async def set_password(user_id: UUID, pwd: UserPassword):
     return JSONResponse(status_code=200, content={"msg": "Password set successfully..."})
 
 
-@user_routes.get("/users/{user_id}/password", responses={404: {"model": Message}})
+@user_routes.get("/users/{user_id}/password", responses={200: {"model": Message}, 404: {"model": Message}})
 async def get_user_password(user_id: UUID):
     db_user: User = next(filter(lambda u: u.id == user_id, USERS), None)
     if not db_user:
@@ -87,7 +87,7 @@ async def get_user_password(user_id: UUID):
     return JSONResponse(status_code=404, content={"msg": "Password is invalid, please set it correctly..."})
 
 
-@user_routes.put("/users/{user_id}/password", responses={400: {"model": DetailMessage}})
+@user_routes.put("/users/{user_id}/password", responses={200: {"model": Message}, 400: {"model": DetailMessage}})
 async def set_user_password(user_id: UUID, pwd: UserPassword):
     db_user: User = next(filter(lambda u: u.id == user_id, USERS), None)
     if not db_user:
