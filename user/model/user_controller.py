@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
 from ..model.generic import DetailMessage, Message
-from ..model.user import User, UserOut, UserIn, UserPath
+from ..model.user import User, UserIn, UserIn, UserEdit
 from ..utils.constants import USERS
 
 
@@ -39,7 +39,7 @@ class UserController:
         USERS.append(new_user)
         return JSONResponse(status_code=201, content={"msg": "User created successfully..."})
 
-    async def update_user(self, user_id: UUID, user: UserOut):
+    async def update_user(self, user_id: UUID, user: UserIn):
         db_user: User = next(filter(lambda u: u.id == user_id, USERS), None)
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found...")
@@ -55,7 +55,7 @@ class UserController:
         USERS.remove(db_user)
         return JSONResponse(status_code=200, content={"msg": "User deleted successfully..."})
 
-    async def patch_user(self, user_id: UUID, user: UserPath):
+    async def patch_user(self, user_id: UUID, user: UserEdit):
         db_user: User = next(filter(lambda u: u.id == user_id, USERS), None)
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found...")
