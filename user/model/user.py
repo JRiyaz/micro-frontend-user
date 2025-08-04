@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Self, TypedDict
 from uuid import UUID
 
 from pydantic import BaseModel, Field, EmailStr, model_validator
@@ -21,6 +21,11 @@ class UserEdit(BaseModel):
 
 class User(UserIn):
     id: UUID
+
+
+class UserInfo(TypedDict):
+    user: User | None
+    index: int
 
 
 class UserPassword(BaseModel):
