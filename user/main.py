@@ -1,6 +1,6 @@
-from typing import Union
-
 from fastapi import FastAPI
+
+from .routes.user import user_routes
 
 
 def create_app() -> FastAPI:
@@ -8,18 +8,9 @@ def create_app() -> FastAPI:
         title="User-Service",
         description="Service for managing user accounts and profiles",
         version="1.0.0",
+        swagger_ui_parameters={"defaultModelsExpandDepth": -1, "deepLinking": False},
     )
 
-    @app.get("/")
-    def read_root():
-        return {"version": app.version}
-
-    @app.get("/items/{item_id}")
-    def read_item(item_id: int, q: Union[str, None] = None):
-        return {"item_id": item_id, "q": q}
-
-    # Include routers, middleware, etc.
-    # from .routers import user_router
-    # app.include_router(user_router)
+    app.include_router(user_routes)
 
     return app
