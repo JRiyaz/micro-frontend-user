@@ -13,10 +13,10 @@ class UserIn(BaseModel):
 
 
 class UserEdit(BaseModel):
-    username: str | None = Field(None, min_length=3, max_length=64)
+    username: str | None = Field(None, min_length=3, max_length=64, examples=["username"])
     email: EmailStr | None = None
-    firstName: str | None = Field(None, min_length=3, max_length=64)
-    lastName: str | None = Field(None, min_length=3, max_length=64)
+    firstName: str | None = Field(None, min_length=3, max_length=64, examples=["firstName"])
+    lastName: str | None = Field(None, min_length=3, max_length=64, examples=["lastName"])
 
 
 class User(UserIn):

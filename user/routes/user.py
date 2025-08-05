@@ -1,6 +1,7 @@
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 
 from ..model.generic import DetailMessage, Message
@@ -12,8 +13,8 @@ user_routes = APIRouter(tags=["user"])
 
 
 @user_routes.get("/users", response_model=list[User])
-async def get_users():
-    return await service.get_users()
+async def get_users(skip: Annotated[int, Query(ge=0)], limit: Annotated[int | None, Query(ge=1, le=100)] = 100):
+    return await service.get_users(skip, limit)
 
 
 @user_routes.get("/users/{user_id}", response_model=User, responses={404: {"model": DetailMessage}})

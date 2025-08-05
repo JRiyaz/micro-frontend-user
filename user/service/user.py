@@ -13,8 +13,8 @@ class UserService:
                 usr.password = encrypt_password("pass")
                 break
 
-    async def get_users(self) -> list[User]:
-        return self._users
+    async def get_users(self, skip: int, limit: int) -> list[User]:
+        return self._users[skip:limit]
 
     async def get_user(self, user_id: UUID) -> User | None:
         # return next(filter(lambda usr: usr.id == user_id, self.users), None)
