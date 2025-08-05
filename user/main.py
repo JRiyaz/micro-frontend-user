@@ -32,7 +32,7 @@ def create_app() -> FastAPI:
 
     @app.get("/favicon.ico", include_in_schema=False)
     async def favicon():
-        return FileResponse(path.joinpath("favicon.png"))
+        return FileResponse(path.joinpath("favicon.ico"))
 
     app.include_router(user_routes)
 
