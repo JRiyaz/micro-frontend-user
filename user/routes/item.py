@@ -5,9 +5,8 @@ from fastapi import APIRouter, HTTPException, Query
 
 from ..model.generic import Message
 from ..model.item import Item, ItemsResponse, Tag
-from ..service.item import ItemService
+from ..service.item import service as item_service
 
-item_service = ItemService()
 item_routes = APIRouter(tags=["item"])
 
 

@@ -6,9 +6,8 @@ from fastapi.responses import JSONResponse
 
 from ..model.generic import DetailMessage, Message
 from ..model.user import User, UserEdit, UserPassword
-from ..service.user import UserService
+from ..service.user import service
 
-service = UserService()
 user_routes = APIRouter(tags=["user"])
 
 

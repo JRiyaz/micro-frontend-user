@@ -41,7 +41,7 @@ class Item(BaseModel):
 class ItemsBought(BaseModel):
     id: UUID
     quantity: int = Field(gt=0)
-    date: datetime = Field(datetime.now())
+    date: datetime = datetime.now()
 
 
 class ItemsResponse(BaseModel):

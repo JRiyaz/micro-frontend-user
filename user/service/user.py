@@ -85,3 +85,6 @@ class UserService:
         for item in item_ids:
             db_user.items.remove(item)
         return True
+
+
+service = UserService()

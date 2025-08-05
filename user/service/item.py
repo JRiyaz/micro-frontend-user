@@ -29,3 +29,6 @@ class ItemService:
             if item.id == item_id:
                 return item
         return None
+
+
+service = ItemService()
