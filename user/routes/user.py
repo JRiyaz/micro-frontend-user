@@ -13,12 +13,12 @@ user_routes = APIRouter(tags=["user"])
 
 @user_routes.get("/users", response_model=list[User])
 async def get_users():
-    return service.get_users()
+    return await service.get_users()
 
 
 @user_routes.get("/users/{user_id}", response_model=User, responses={404: {"model": DetailMessage}})
 async def get_user(user_id: UUID):
-    user: User = await service.get_user(user_id)["user"]
+    user: User = await service.get_user(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found...")
     return user
@@ -31,7 +31,7 @@ async def create_user(user: UserIn):
 
 
 @user_routes.put("/users/{user_id}", responses={200: {"model": Message}, 404: {"model": DetailMessage}})
-async def update_user(user_id: UUID, user: UserIn):
+async def update_user(user_id: UUID, user: UserEdit):
     if await service.update_user(user_id, user):
         return JSONResponse(status_code=200, content={"msg": "User updated successfully..."})
     raise HTTPException(status_code=404, detail="User not found...")
