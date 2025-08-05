@@ -4,13 +4,14 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
 from ..model.generic import DetailMessage, Message
-from ..model.user import User, UserEdit, UserIn
-from ..utils.constants import USERS
+from ..model.user import User, UserEdit
+from ..utils.constants import DEFAULT_USERS
 
 
 class UserController:
     def __init__(self):
         self.user_router = APIRouter(tags=["user"])
+        self._users: list[User] = [User(**usr) for usr in DEFAULT_USERS]
         self.register_routes()
 
     def register_routes(self):
@@ -26,43 +27,43 @@ class UserController:
         self.user_router.patch("/users/{user_id}", responses={404: {"model": Message}})(self.patch_user)
 
     async def get_users(self):
-        return USERS
+        return self._users
 
     async def get_user(self, user_id: UUID):
-        user: User = next(filter(lambda u: u.id == user_id, USERS), None)
+        user: User = next(filter(lambda u: u.id == user_id, self._users), None)
         if not user:
             raise HTTPException(status_code=404, detail="User not found...")
         return user
 
-    async def create_user(self, user: UserIn):
+    async def create_user(self, user: User):
         new_user = User(id=uuid4(), **user.model_dump())
-        USERS.append(new_user)
+        self._users.append(new_user)
         return JSONResponse(status_code=201, content={"msg": "User created successfully..."})
 
-    async def update_user(self, user_id: UUID, user: UserIn):
-        db_user: User = next(filter(lambda u: u.id == user_id, USERS), None)
+    async def update_user(self, user_id: UUID, user: User):
+        db_user: User = next(filter(lambda u: u.id == user_id, self._users), None)
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found...")
         update_usr: User = User(id=user_id, **user.model_dump())
-        USERS.remove(db_user)
-        USERS.append(update_usr)
+        self._users.remove(db_user)
+        self._users.append(update_usr)
         return JSONResponse(status_code=200, content={"msg": "User updated successfully..."})
 
     async def delete_user(self, user_id: UUID):
-        db_user: User = next(filter(lambda u: u.id == user_id, USERS), None)
+        db_user: User = next(filter(lambda u: u.id == user_id, self._users), None)
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found...")
-        USERS.remove(db_user)
+        self._users.remove(db_user)
         return JSONResponse(status_code=200, content={"msg": "User deleted successfully..."})
 
     async def patch_user(self, user_id: UUID, user: UserEdit):
-        db_user: User = next(filter(lambda u: u.id == user_id, USERS), None)
+        db_user: User = next(filter(lambda u: u.id == user_id, self._users), None)
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found...")
         update_data = db_user.model_dump()
         update_data |= user.model_dump(exclude_unset=True)
-        USERS.remove(db_user)
-        USERS.append(User(**update_data))
+        self._users.remove(db_user)
+        self._users.append(User(**update_data))
         return JSONResponse(status_code=200, content={"msg": "User updated successfully..."})
 
 

@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 
 from ..model.generic import DetailMessage, Message
-from ..model.user import User, UserEdit, UserIn, UserPassword
+from ..model.user import User, UserEdit, UserPassword
 from ..service.user import UserService
 
 service = UserService()
@@ -26,7 +26,7 @@ async def get_user(user_id: UUID):
 
 
 @user_routes.post("/users", responses={201: {"model": Message}})
-async def create_user(user: UserIn):
+async def create_user(user: User):
     await service.create_user(user)
     return JSONResponse(status_code=201, content={"msg": "User created successfully..."})
 

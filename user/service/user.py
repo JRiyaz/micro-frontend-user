@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 
-from ..model.user import User, UserEdit, UserIn, UserPassword
+from ..model.user import User, UserEdit, UserPassword
 from ..utils.constants import DEFAULT_USERS
 from ..utils.utils import encrypt_password, is_encrypted
 
@@ -23,8 +23,7 @@ class UserService:
                 return usr
         return None
 
-    async def create_user(self, user: UserIn) -> bool:
-        user = User(id=uuid4(), **user.model_dump())
+    async def create_user(self, user: User) -> bool:
         self._users.append(user)
         return True
 

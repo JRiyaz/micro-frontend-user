@@ -1,10 +1,12 @@
-from typing import Self, TypedDict
-from uuid import UUID
+from typing import Self
+from uuid import UUID, uuid4
 
 from pydantic import BaseModel, EmailStr, Field, model_validator
+from pydantic.json_schema import SkipJsonSchema
 
 
-class UserIn(BaseModel):
+class User(BaseModel):
+    id: SkipJsonSchema[UUID] = Field(uuid4(), alias="id")
     username: str = Field(min_length=3, max_length=64)
     email: EmailStr
     firstName: str = Field(min_length=3, max_length=64)
@@ -17,15 +19,6 @@ class UserEdit(BaseModel):
     email: EmailStr | None = None
     firstName: str | None = Field(None, min_length=3, max_length=64, examples=["firstName"])
     lastName: str | None = Field(None, min_length=3, max_length=64, examples=["lastName"])
-
-
-class User(UserIn):
-    id: UUID
-
-
-class UserInfo(TypedDict):
-    user: User | None
-    index: int
 
 
 class UserPassword(BaseModel):
