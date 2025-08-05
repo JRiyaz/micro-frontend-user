@@ -4,6 +4,8 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, EmailStr, Field, model_validator
 from pydantic.json_schema import SkipJsonSchema
 
+from .item import ItemsBought
+
 
 class User(BaseModel):
     id: SkipJsonSchema[UUID] = Field(uuid4(), alias="id")
@@ -12,6 +14,7 @@ class User(BaseModel):
     firstName: str = Field(min_length=3, max_length=64)
     lastName: str = Field(min_length=3, max_length=64)
     password: str | None = Field(None, min_length=3, exclude=True)
+    items: SkipJsonSchema[list[ItemsBought]] = Field(default_factory=list, exclude=True)
 
 
 class UserEdit(BaseModel):

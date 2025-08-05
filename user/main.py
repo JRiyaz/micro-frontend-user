@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import FileResponse, JSONResponse
 
+from .routes.item import item_routes
 from .routes.user import user_routes
 
 
@@ -45,5 +46,6 @@ def create_app() -> FastAPI:
         return FileResponse(path.joinpath("favicon.ico"))
 
     app.include_router(user_routes)
+    app.include_router(item_routes)
 
     return app

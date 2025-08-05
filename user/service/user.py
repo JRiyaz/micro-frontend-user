@@ -1,5 +1,6 @@
-from uuid import UUID, uuid4
+from uuid import UUID
 
+from ..model.item import ItemsBought
 from ..model.user import User, UserEdit, UserPassword
 from ..utils.constants import DEFAULT_USERS
 from ..utils.utils import encrypt_password, is_encrypted
@@ -69,3 +70,18 @@ class UserService:
 
     async def set_user_password(self, user_id: UUID, pwd: UserPassword):
         pass
+
+    async def add_items(self, user_id: UUID, items: list[ItemsBought]) -> bool:
+        db_user: User = await self.get_user(user_id)
+        if not db_user:
+            return False
+        db_user.items.extend(items)
+        return True
+
+    async def remove_items(self, user_id: UUID, item_ids: list[ItemsBought]) -> bool:
+        db_user: User = await self.get_user(user_id)
+        if not db_user:
+            return False
+        for item in item_ids:
+            db_user.items.remove(item)
+        return True
