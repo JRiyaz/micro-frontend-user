@@ -1,8 +1,10 @@
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from .routes.user import user_routes
 
@@ -28,6 +30,14 @@ def create_app() -> FastAPI:
             swagger_ui_parameters={"defaultModelsExpandDepth": -1, "deepLinking": False},
             # swagger_favicon_url="/static/favicon.png",
             # swagger_favicon_url=str(path.joinpath("favicon.png")),
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            # content="Data validation error",
+            content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
         )
 
     @app.get("/favicon.ico", include_in_schema=False)
