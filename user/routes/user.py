@@ -13,7 +13,7 @@ user_routes = APIRouter(tags=["user"])
 
 
 @user_routes.get("/users", response_model=list[User])
-async def get_users(skip: Annotated[int, Query(ge=0)], limit: Annotated[int | None, Query(ge=1, le=100)] = 100):
+async def get_users(skip: Annotated[int, Query(ge=0)] = 0, limit: Annotated[int | None, Query(ge=1, le=100)] = 100):
     return await service.get_users(skip, limit)
 
 
@@ -55,11 +55,11 @@ async def patch_user(user_id: UUID, user: UserEdit):
 @user_routes.post("/users/{user_id}/password", responses={200: {"model": Message}, 400: {"model": DetailMessage}})
 async def set_password(user_id: UUID, pwd: UserPassword):
     status: int = await service.set_password(user_id, pwd)
-    if status == 200:
-        return JSONResponse(status_code=200, content={"msg": "Password set successfully..."})
+    if status == 204:
+        raise HTTPException(status_code=204, detail="Password already set...")
     elif status == 404:
         raise HTTPException(status_code=404, detail="User not found...")
-    raise HTTPException(status_code=401, detail="Password already set...")
+    return JSONResponse(status_code=200, content={"msg": "Password set successfully..."})
 
 
 @user_routes.get("/users/{user_id}/password", responses={200: {"model": Message}, 404: {"model": Message}})

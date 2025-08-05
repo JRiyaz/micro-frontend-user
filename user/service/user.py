@@ -54,7 +54,7 @@ class UserService:
         if not db_user:
             return 404
         if db_user.password:
-            return 401
+            return 204
         db_user.password = encrypt_password(pwd.password)
         return 200
 
