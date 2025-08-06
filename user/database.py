@@ -1,4 +1,14 @@
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Numeric, VARCHAR, text
+from sqlalchemy import (
+    VARCHAR,
+    Column,
+    Integer,
+    MetaData,
+    Numeric,
+    String,
+    Table,
+    create_engine,
+    text,
+)
 
 """
 Docker command to setup postgres

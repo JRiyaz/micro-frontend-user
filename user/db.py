@@ -1,10 +1,11 @@
-from sqlalchemy import create_engine, Integer, String, Column
+from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, Session
 
 conn = "postgresql://username:password@localhost:5432/dbname"
 
 # CONNECTION_STRING = "postgresql+psycopg2://admin:admin@localhost:5432/fastapi"
-CONNECTION_STRING = "postgresql://admin:admin@localhost:5432/fastapi"
+# CONNECTION_STRING = "postgresql://admin:admin@localhost:5432/fastapi"
+CONNECTION_STRING = "postgresql+psycopg2://admin:admin@localhost/fastapi"
 
 engine = create_engine(CONNECTION_STRING)
 
