@@ -1,10 +1,10 @@
-from concurrent.futures import ThreadPoolExecutor
-
-import requests
+import asyncio
 import threading
 import time
-import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
 import aiohttp
+import requests
 
 URL = "http://127.0.0.1:8000/?msg={msg}&sleep={sleep}"
 ITEMS_URL = "http://localhost:8000/items/{item_id}"

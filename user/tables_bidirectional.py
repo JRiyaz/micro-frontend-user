@@ -23,6 +23,11 @@ class Address(Base):
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), unique=True)
     user: Mapped["User"] = relationship("User", back_populates="address", uselist=False)
 
+    def __repr__(self):
+        return (
+            f"<Address(id: {self.id}, street: {self.street}, city: {self.city}, state: {self.state}, zip: {self.zip})>"
+        )
+
 
 class User(Base):
     __tablename__ = "users"
@@ -46,6 +51,9 @@ class User(Base):
     orders: Mapped[list["Order"]] = relationship(
         "Order", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
+
+    def __repr__(self):
+        return f"<User(Id: {self.id}, username: {self.username}, email: {self.email}, gender: {self.gender}, status: {self.status})>"
 
 
 # Many-to-Many between Order and Products
@@ -72,6 +80,9 @@ class Order(Base):
     # Many-to-Many with Products
     products: Mapped[list["Product"]] = relationship("Product", secondary=order_product, back_populates="orders")
 
+    def __repr__(self):
+        return f"<Order(Id: {self.id}, amount: {self.amount}, status: {self.status})>"
+
 
 # Many-to-Many requires separate table
 product_tag = Table(
@@ -96,6 +107,9 @@ class Product(Base):
     # Many-to-Many with Orders
     orders: Mapped[list["Order"]] = relationship("Order", secondary=order_product, back_populates="products")
 
+    def __repr__(self):
+        return f"<Product(id: {self.id}, name: {self.name}, price: {self.price}, quantity: {self.quantity})>"
+
 
 class Tag(Base):
     __tablename__ = "tags"
@@ -105,3 +119,6 @@ class Tag(Base):
 
     # Many-to-Many relationship with Product
     products: Mapped[list["Product"]] = relationship("Product", secondary=product_tag, back_populates="tags")
+
+    def __repr__(self):
+        return f"<Tag(Id: {self.id}, label: {self.label})>"
