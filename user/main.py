@@ -11,9 +11,11 @@ def create_app() -> FastAPI:
     app: FastAPI = FastAPI(
         title="User-Service",
         description="Service for managing user accounts and profiles",
-        version="1.0.0",
         docs_url=None,
     )
+    user_service_path: Path = Path(__file__).parent.parent
+    version: str = user_service_path.joinpath(".version").read_text()
+    app.version = version.strip()
 
     # from fastapi.staticfiles import StaticFiles
     # app.mount("/static", StaticFiles(directory=path), name="static")
@@ -29,6 +31,11 @@ def create_app() -> FastAPI:
             # swagger_favicon_url=str(path.joinpath("favicon.png")),
         )
 
+    @app.get("/favicon.ico", include_in_schema=False)
+    async def favicon():
+        path = user_service_path.joinpath("static-files")
+        return FileResponse(path.joinpath("favicon.ico"))
+
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
         return JSONResponse(
@@ -36,10 +43,5 @@ def create_app() -> FastAPI:
             # content="Data validation error",
             content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
         )
-
-    @app.get("/favicon.ico", include_in_schema=False)
-    async def favicon():
-        path = Path(__file__).parent.parent.joinpath("static-files")
-        return FileResponse(path.joinpath("favicon.ico"))
 
     return app
