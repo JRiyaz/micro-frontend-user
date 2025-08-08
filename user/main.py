@@ -1,10 +1,12 @@
 from pathlib import Path
 
-from fastapi import FastAPI, Request, status
-from fastapi.encoders import jsonable_encoder
+from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
+
+from .db import Database
+from .exceptions import validation_handler
 
 
 def create_app() -> FastAPI:
@@ -19,6 +21,11 @@ def create_app() -> FastAPI:
 
     # from fastapi.staticfiles import StaticFiles
     # app.mount("/static", StaticFiles(directory=path), name="static")
+    app.database = Database()
+
+    @app.on_event("startup")
+    def startup_event() -> None:
+        app.database.create_tables()
 
     @app.get("/docs", include_in_schema=False)
     def docs():
@@ -36,12 +43,6 @@ def create_app() -> FastAPI:
         path = user_service_path.joinpath("static-files")
         return FileResponse(path.joinpath("favicon.ico"))
 
-    @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(request: Request, exc: RequestValidationError):
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            # content="Data validation error",
-            content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
-        )
+    app.add_exception_handler(RequestValidationError, validation_handler)
 
     return app
