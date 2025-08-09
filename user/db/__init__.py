@@ -1,4 +1,4 @@
-from typing import Generator, Annotated
+from typing import Annotated, Generator
 
 from fastapi import Depends
 from sqlalchemy.engine.base import Engine

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Sequence, Annotated
+from typing import Annotated, Sequence
 
 from fastapi import Depends
 from sqlmodel import Session, select
@@ -37,4 +37,4 @@ class UserService:
         return user
 
 
-UsrService = Annotated[UserService, Depends(UserService)]
+user_service = Annotated[UserService, Depends(UserService)]

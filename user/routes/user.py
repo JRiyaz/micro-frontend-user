@@ -1,16 +1,20 @@
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Query
 
 from ..model import User
-from ..service.user import UsrService
+from ..model.general import UserQuery
+from ..security.auth import auth_token
+from ..service.user import user_service
 
-router = APIRouter(tags=["user"])
+router = APIRouter(tags=["user"], dependencies=[Depends(auth_token)])
 
 
 @router.get("/users")
-def get_users(svc: UsrService, skip: int = 0, limit: int = 100) -> list[User]:
-    return svc.get_users(skip, limit)
+def get_users(query: Annotated[UserQuery, Query()], svc: user_service) -> list[User]:
+    return svc.get_users(query.skip, query.limit)
 
 
 @router.post("/users")
-def create_user(svc: UsrService, user: User) -> User:
+def create_user(user: User, svc: user_service, token: auth_token) -> User:
     return svc.create_user(user)
