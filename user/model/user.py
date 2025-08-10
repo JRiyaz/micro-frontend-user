@@ -1,9 +1,9 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable
+from typing import Annotated, Any, Callable
 from uuid import UUID, uuid4
 
-from pydantic import EmailStr
+from pydantic import EmailStr, ValidatorFunctionWrapHandler, WrapValidator
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import Enum as SQLEnum
 from sqlmodel import Field, SQLModel
@@ -25,6 +25,17 @@ class Gender(Enum):
     female = "female"
     other = "other"
     unknown = "unknown"
+
+
+def validate_gender(value: Any, handler: ValidatorFunctionWrapHandler) -> Gender:
+    if isinstance(value, Gender):
+        return value
+    if isinstance(value, str):
+        try:
+            return Gender(value)
+        except ValueError:
+            raise ValueError(f"Gender value '{value}' is invalid.")
+    raise TypeError("Gender must be a string or a Gender enum member")
 
 
 class UserRoles(SQLModel, table=True):
@@ -54,7 +65,9 @@ class User(UserOptional, table=True):
     email: EmailStr = Field(unique=True)
     first_name: str = Field(max_length=50)
     last_name: str = Field(max_length=50)
-    gender: Gender = Field(sa_type=SQLEnum(Gender, values_callable=enum_values))
+    gender: Annotated[
+        Gender | str, Field(sa_type=SQLEnum(Gender, values_callable=enum_values)), WrapValidator(validate_gender)
+    ]
     status: SkipJsonSchema[bool] = Field(default=False, exclude=True)
 
     created_at: SkipJsonSchema[datetime] = Field(exclude=True)
