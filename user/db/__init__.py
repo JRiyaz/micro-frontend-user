@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated, Generator
 
 from fastapi import Depends
@@ -6,6 +7,8 @@ from sqlmodel import Session, create_engine
 
 from ..config import config
 from ..model import SQLModel
+
+logger = logging.getLogger(__name__)
 
 
 class Database:
@@ -33,6 +36,7 @@ db: Database = Database()
 
 
 def create_db_tables() -> None:
+    logger.error("Creating database tables")
     db.create_tables()
 
 

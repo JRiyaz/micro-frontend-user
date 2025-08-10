@@ -17,9 +17,9 @@ def create_app() -> FastAPI:
         docs_url=None,
         lifespan=initialize_db,
     )
-    root_path: Path = Path(__file__).parent.parent
-    app.root_path = root_path
-    app.version = root_path.joinpath(".version").read_text().strip()
+    project_path: Path = Path(__file__).parent.parent
+    app.project_path = project_path
+    app.version = project_path.joinpath(".version").read_text().strip()
 
     app.add_exception_handler(RequestValidationError, validation_handler)
     app.add_middleware(TimeIt, some_attribute="time")

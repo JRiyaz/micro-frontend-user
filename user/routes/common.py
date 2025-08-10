@@ -23,5 +23,5 @@ def docs() -> HTMLResponse:
 
 @routes.get("/favicon.ico", include_in_schema=False)
 async def favicon(req: Request) -> FileResponse:
-    path = req.app.root_path.joinpath("static-files")
+    path = req.app.project_path.joinpath("static-files")
     return FileResponse(path.joinpath("favicon.ico"))
