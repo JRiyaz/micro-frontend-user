@@ -1,6 +1,10 @@
 from enum import Enum
+from typing import Annotated, Literal
 
+from pydantic import AfterValidator
 from pydantic.v1 import BaseSettings
+
+from .utils.string import to_upper
 
 
 class Databases(Enum):
@@ -16,10 +20,14 @@ class Databases(Enum):
 
 class Config(BaseSettings):
     # Environment Configuration
-    ENV: str = "development"
+    ENV: Literal["development", "production", "testing"] = "development"
+
+    # Log Configuration
+    LOG_LEVEL: Annotated[str, AfterValidator(to_upper)] = "ERROR"
+    LOG_UVICORN: Annotated[str, AfterValidator(to_upper)] = "INFO"
 
     # Auth Configuration
-    AUTH_COOKIE_NAME: str = "access_token"
+    AUTH_COOKIE_NAME: str = "auth_token"
 
     # Database Configuration
     DB: Databases
