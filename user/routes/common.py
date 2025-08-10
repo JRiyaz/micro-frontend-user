@@ -10,7 +10,7 @@ routes = APIRouter(tags=["common"])
 
 
 @routes.get("/docs", include_in_schema=False)
-def docs() -> HTMLResponse:
+async def docs() -> HTMLResponse:
     return get_swagger_ui_html(
         openapi_url="/openapi.json",
         title="User-Service",

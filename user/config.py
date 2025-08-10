@@ -9,7 +9,7 @@ class Databases(Enum):
 
     def get_db_str(self) -> str:
         if self.value == "postgres":
-            return "postgresql+psycopg2"
+            return "postgresql+asyncpg"
         else:
             return "mysql"
 
@@ -28,6 +28,10 @@ class Config(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
     DB_DATABASE: str
+    DB_POOL_SIZE: int
+    DB_MAX_OVERFLOW: int
+    DB_POOL_TIMEOUT: int
+    DB_POOL_RECYCLE: int
     DB_LOGS: bool = False
 
 

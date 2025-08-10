@@ -2,38 +2,40 @@ from datetime import datetime
 from typing import Annotated, Sequence
 
 from fastapi import Depends
-from sqlmodel import Session, select
+from sqlalchemy.engine.result import Result
+from sqlalchemy.ext.asyncio.session import AsyncSession
+from sqlmodel import select
 from sqlmodel.sql.expression import SelectOfScalar
 
-from ..db import SessionDep
+from ..database.db import SessionDep
 from ..model import Role, User, UserRoles
 
 
 class UserService:
     def __init__(self, db: SessionDep):
-        self.db: Session = db
+        self.db: AsyncSession = db
 
-    def get_users(self, skip: int = 0, limit: int = 100) -> list[User]:
+    async def get_users(self, skip: int = 0, limit: int = 100) -> Sequence[User]:
         stmt: SelectOfScalar = select(User).offset(skip).limit(limit)
-        users: Sequence[User] = self.db.exec(stmt).all()
-        return list(users)
+        result: Result[tuple[User]] = await self.db.execute(stmt)
+        return result.scalars().all()
 
-    def create_user(self, user: User) -> User:
+    async def create_user(self, user: User) -> User:
         # Update created_at
         user.created_at = datetime.now()
 
         # Add user to DB
         self.db.add(user)
-        self.db.commit()
+        await self.db.commit()
         # Refresh user with DB values
-        self.db.refresh(user)
+        await self.db.refresh(user)
 
         # Create USER role for user
         role: UserRoles = UserRoles(role=Role.USER, user_id=user.id)
 
         # Save the role to DB
         self.db.add(role)
-        self.db.commit()
+        await self.db.commit()
         return user
 
 

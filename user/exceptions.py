@@ -4,7 +4,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 
-def validation_handler(request: Request, exc: Exception | RequestValidationError) -> JSONResponse:
+async def validation_handler(request: Request, exc: Exception | RequestValidationError) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         # content="Data validation error",

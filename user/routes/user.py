@@ -11,12 +11,12 @@ routes = APIRouter(tags=["user"], dependencies=[Depends(Security(auto_error=True
 
 
 @routes.get("/users")
-def get_users(query: Annotated[UserQuery, Query()], svc: user_service, req: Request) -> list[User]:
+async def get_users(query: Annotated[UserQuery, Query()], svc: user_service, req: Request) -> list[User]:
     print("Request time is set to:", req.state.start_time)
     print("Auth token:", req.state.context)
-    return svc.get_users(query.skip, query.limit)
+    return await svc.get_users(query.skip, query.limit)
 
 
 @routes.post("/users")
-def create_user(user: User, svc: user_service) -> User:
-    return svc.create_user(user)
+async def create_user(user: User, svc: user_service) -> User:
+    return await svc.create_user(user)
