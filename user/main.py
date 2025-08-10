@@ -1,13 +1,16 @@
+import logging
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 
 from .exceptions import validation_handler
-from .hooks import initialize_db
+from .hooks import app_lifespan
 from .middlewares import TimeIt
 from .routes.common import routes as common_routes
 from .routes.user import routes as user_routes
+
+logger = logging.getLogger(__name__)
 
 
 def create_app() -> FastAPI:
@@ -15,8 +18,9 @@ def create_app() -> FastAPI:
         title="User-Service",
         description="Service for managing user accounts and profiles",
         docs_url=None,
-        lifespan=initialize_db,
+        lifespan=app_lifespan,
     )
+    logger.info("Starting user service application...")
     project_path: Path = Path(__file__).parent.parent
     app.project_path = project_path
     app.version = project_path.joinpath(".version").read_text().strip()

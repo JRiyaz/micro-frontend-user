@@ -6,7 +6,7 @@ from .database.db import create_db_tables, close_db_conn
 
 
 @asynccontextmanager
-async def initialize_db(app: FastAPI):
+async def app_lifespan(app: FastAPI):
     # Startup
     await create_db_tables()
 
