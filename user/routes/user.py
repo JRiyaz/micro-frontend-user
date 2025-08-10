@@ -1,17 +1,18 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
 from ..model import User, UserOptional
-from ..model.general import NotFound, UserQuery
-from ..security.auth import Security
+from ..model.general import JSONResp, NotFound, UserQuery
+from ..security.auth import auth_security
 from ..service.user import user_service
 
-routes = APIRouter(tags=["user"], dependencies=[Depends(Security(auto_error=True))])
+routes = APIRouter(tags=["User API's"], dependencies=[auth_security])
 
 
+# User routes
 @routes.get("/users")
 async def get_users(query: Annotated[UserQuery, Query()], svc: user_service, req: Request) -> list[User]:
     print("Request time is set to:", req.state.start_time)
@@ -48,7 +49,7 @@ async def patch_user(user_id: UUID, user: UserOptional, svc: user_service) -> Us
     return result
 
 
-@routes.delete("/users/{user_id}", responses={404: {"model": NotFound}, 200: {"model": JSONResponse}})
+@routes.delete("/users/{user_id}", responses={404: {"model": NotFound}, 200: {"model": JSONResp}})
 async def delete_user(user_id: UUID, svc: user_service):
     result: None | bool = await svc.delete_user(user_id)
     if result is None:

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import HTTPException, Request
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer
 
 from ..config import config
@@ -23,3 +23,6 @@ class Security(HTTPBearer):
                 )
         request.state.context = token
         return token
+
+
+auth_security: Depends = Depends(Security(auto_error=True))

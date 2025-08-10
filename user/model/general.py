@@ -10,5 +10,5 @@ class NotFound(BaseModel):
     detail: str = "Not found"
 
 
-class JSONResponse(BaseModel):
+class JSONResp(BaseModel):
     msg: str

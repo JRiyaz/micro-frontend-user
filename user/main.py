@@ -8,6 +8,7 @@ from .exceptions import validation_handler
 from .hooks import app_lifespan
 from .middlewares import LogIt, TimeIt
 from .routes.common import routes as common_routes
+from .routes.roles import routes as roles_routes
 from .routes.user import routes as user_routes
 
 logger = logging.getLogger(__name__)
@@ -31,5 +32,6 @@ def create_app() -> FastAPI:
 
     app.include_router(common_routes)
     app.include_router(user_routes)
+    app.include_router(roles_routes)
 
     return app

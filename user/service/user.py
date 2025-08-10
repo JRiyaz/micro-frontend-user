@@ -5,6 +5,7 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy.engine.result import Result
 from sqlalchemy.ext.asyncio.session import AsyncSession
+from sqlalchemy.orm.session import Session
 from sqlalchemy.sql.selectable import SelectBase
 from sqlmodel import select
 from sqlmodel.sql.expression import SelectOfScalar
