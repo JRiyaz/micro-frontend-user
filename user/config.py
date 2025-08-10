@@ -18,6 +18,9 @@ class Config(BaseSettings):
     # Environment Configuration
     ENV: str = "development"
 
+    # Auth Configuration
+    AUTH_COOKIE_NAME: str = "access_token"
+
     # Database Configuration
     DB: Databases
     DB_HOST: str
