@@ -5,13 +5,13 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy.engine.result import Result
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from sqlalchemy.orm.session import Session
 from sqlalchemy.sql.selectable import SelectBase
 from sqlmodel import select
 from sqlmodel.sql.expression import SelectOfScalar
 
 from ..database.db import SessionDep
-from ..model import Role, User, UserOptional, UserRoles
+from ..model import ForgotPassword, Role, User, UserOptional, UserPassword, UserRoles
+from ..security.auth import Crypt
 from ..utils.string import is_valid_email, is_valid_uuid
 
 
@@ -24,20 +24,20 @@ class UserService:
         result: Result[tuple[User]] = await self.db.execute(stmt)
         return result.first()
 
-    async def get_user_by_username(self, username: str) -> User | None:
-        stmt: SelectBase[User] = select(User).where(User.username == username)
+    async def get_user_by_mobile(self, mobile_no: int) -> User | None:
+        stmt: SelectBase[User] = select(User).where(User.mobile_no == mobile_no)
         result: Result[tuple[User]] = await self.db.execute(stmt)
         return result.first()
 
     async def get_user_by_id(self, user_id: UUID) -> User | None:
         return await self.db.get(User, user_id)
 
-    async def get_user(self, data: str | UUID) -> User | None:
+    async def get_user(self, data: str | UUID | int) -> User | None:
         if is_valid_uuid(data):
             return await self.get_user_by_id(data)
         elif is_valid_email(data):
             return await self.get_user_by_email(data)
-        return await self.get_user_by_username(data)
+        return await self.get_user_by_mobile(data)
 
     async def get_users(self, skip: int = 0, limit: int = 100) -> Sequence[User]:
         stmt: SelectOfScalar = select(User).offset(skip).limit(limit)
@@ -102,9 +102,70 @@ class UserService:
         if not db_user:
             return None
 
+        # TODO: move the code to roles service
+        stmt: SelectBase[UserRoles] = select(UserRoles).where(UserRoles.user_id == user_id)
+        result: Result[tuple[UserRoles]] = await self.db.execute(stmt)
+        roles: Sequence[UserRoles] = result.scalars().all()
+
+        for role in roles:
+            await self.db.delete(role)
+
+        # Commit the roles deleted part before deleting user
+        await self.db.commit()
+
         # Delete the User
         await self.db.delete(db_user)
         await self.db.commit()
+        return True
+
+    async def create_password(self, user_id: UUID, usr_pass: UserPassword) -> None | bool:
+        # Fetch User
+        db_user: User | None = await self.get_user_by_id(user_id)
+        if not db_user:
+            return None
+
+        # Encrypt password
+        enc_password: str = Crypt.hash_it(usr_pass.password)
+
+        # Update User information
+        db_user.updated_at = datetime.now()
+        db_user.password = enc_password
+
+        # Activate the user
+        db_user.is_active = True
+
+        # Commit changes to DB
+        await self.db.commit()
+        return True
+
+    async def forgot_password(self, user_id: UUID, usr_pass: ForgotPassword) -> bool | None:
+        # Fetch User
+        db_user: User | None = await self.get_user_by_id(user_id)
+        if not db_user:
+            return None
+
+        # Check if old and new passwords are matching
+        if not Crypt.compare_password(db_user.password, usr_pass.old_password):
+            return False
+
+        # Encrypt password
+        enc_password: str = Crypt.hash_it(usr_pass.password)
+
+        # Update User information
+        db_user.updated_at = datetime.now()
+        db_user.password = enc_password
+
+        # Commit changes to DB
+        await self.db.commit()
+        return True
+
+    async def is_password_set(self, user_id: UUID) -> bool | None:
+        # Fetch User
+        db_user: User | None = await self.get_user_by_id(user_id)
+        if not db_user:
+            return None
+        if not db_user.password:
+            return False
         return True
 
 

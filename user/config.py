@@ -1,8 +1,9 @@
+import base64
 from enum import Enum
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator
-from pydantic.v1 import BaseSettings
+from pydantic import AfterValidator, Field
+from pydantic.v1 import BaseSettings, validator
 
 from .utils.string import to_upper
 
@@ -27,6 +28,7 @@ class Config(BaseSettings):
     LOG_UVICORN: Annotated[str, AfterValidator(to_upper)] = "INFO"
 
     # Auth Configuration
+    AUTH_SECRET_KEY: str = Field(min_length=44)
     AUTH_COOKIE_NAME: str = "auth_token"
 
     # Database Configuration
@@ -41,6 +43,17 @@ class Config(BaseSettings):
     DB_POOL_TIMEOUT: int
     DB_POOL_RECYCLE: int
     DB_LOGS: bool = False
+
+    @validator("AUTH_SECRET_KEY")
+    def validate_secret_key(cls, value: str) -> bytes:
+        try:
+            # Decode with URL-safe base64
+            decoded = base64.urlsafe_b64decode(value)
+            if len(decoded) != 32:
+                raise ValueError("Decoded key must be 32 bytes long.")
+        except Exception as e:
+            raise ValueError(f"Invalid Fernet key: {e}")
+        return value.encode("utf-8")
 
 
 config = Config()

@@ -1,9 +1,18 @@
 from datetime import datetime
 from enum import Enum
-from typing import Annotated, Any, Callable
+from typing import Annotated, Any, Callable, Self
 from uuid import UUID, uuid4
 
-from pydantic import EmailStr, ValidatorFunctionWrapHandler, WrapValidator
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    ValidatorFunctionWrapHandler,
+    WrapValidator,
+    model_validator,
+)
+from pydantic import (
+    Field as PydanticField,
+)
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import Enum as SQLEnum
 from sqlmodel import Field, SQLModel
@@ -49,8 +58,29 @@ class UserRoles(SQLModel, table=True):
         return f"<UserRole(ID={self.id}, role={self.role}, user_id={self.user_id})>"
 
 
+class UserPassword(BaseModel):
+    password: str = Field(min_length=3, max_length=64)
+    confirm_password: str = Field(min_length=3, max_length=64)
+
+    @model_validator(mode="after")
+    def check_passwords_match(self) -> Self:
+        if self.password != self.confirm_password:
+            raise ValueError("Passwords do not match")
+        return self
+
+
+class ForgotPassword(UserPassword):
+    old_password: str = Field(min_length=3, max_length=64)
+
+    @model_validator(mode="after")
+    def check_passwords_match(self) -> Self:
+        if self.password == self.old_password:
+            raise ValueError("Old and new passwords should not be same")
+        return self
+
+
 class UserOptional(SQLModel):
-    username: str | None
+    mobile_no: str | None = PydanticField(None, pattern=r"^[6789]\d{9}$", validate_default=False)
     email: EmailStr | None
     first_name: str | None
     last_name: str | None
@@ -61,20 +91,21 @@ class User(UserOptional, table=True):
     # __tablename__: str = "users"
 
     id: SkipJsonSchema[UUID | None] = Field(default_factory=lambda: uuid4(), primary_key=True)
-    username: str = Field(unique=True, min_length=3, max_length=50)
-    email: EmailStr = Field(unique=True)
+    email: EmailStr = Field(unique=True, index=True)
+    mobile_no: str = Field(unique=True, index=True, max_length=10)
     first_name: str = Field(max_length=50)
     last_name: str = Field(max_length=50)
     gender: Annotated[
         Gender | str, Field(sa_type=SQLEnum(Gender, values_callable=enum_values)), WrapValidator(validate_gender)
     ]
-    status: SkipJsonSchema[bool] = Field(default=False, exclude=True)
+    is_active: SkipJsonSchema[bool] = Field(default=False, exclude=True)
+    password: SkipJsonSchema[str | None] = Field(default=None, exclude=True)
 
     created_at: SkipJsonSchema[datetime] = Field(exclude=True)
     updated_at: SkipJsonSchema[datetime | None] = Field(default_factory=lambda: datetime.now(), exclude=True)
 
     def __repr__(self) -> str:
         return (
-            f"<User(id: {self.id}, username: {self.username}, email: {self.email}, first_name: {self.first_name}, "
-            f"last_name: {self.last_name}, gender: {self.gender}, status: {self.status})>"
+            f"<User(id: {self.id}, mobile_no: {self.mobile_no}, email: {self.email}, first_name: {self.first_name}, "
+            f"last_name: {self.last_name}, gender: {self.gender}, status: {self.is_active})>"
         )

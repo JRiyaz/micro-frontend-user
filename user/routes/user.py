@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
-from ..model import User, UserOptional
+from ..model import ForgotPassword, User, UserOptional, UserPassword
 from ..model.general import JSONResp, NotFound, UserQuery
 from ..security.auth import auth_security
 from ..service.user import user_service
@@ -55,3 +55,35 @@ async def delete_user(user_id: UUID, svc: user_service):
     if result is None:
         raise HTTPException(status_code=404, detail="User not found")
     return JSONResponse(status_code=200, content={"msg": "User deleted successfully..."})
+
+
+pass_routes = APIRouter(tags=["User Password API's"], dependencies=[auth_security])
+
+
+@pass_routes.post("/users/{user_id}/check-password", responses={404: {"model": NotFound}, 200: {"model": JSONResp}})
+async def check_password(user_id: UUID, svc: user_service):
+    result: None | bool = await svc.is_password_set(user_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not result:
+        return JSONResponse(status_code=200, content={"msg": "Password is not set"})
+    return JSONResponse(status_code=200, content={"msg": "OK"})
+
+
+@pass_routes.post("/users/{user_id}/password", responses={404: {"model": NotFound}, 200: {"model": JSONResp}})
+async def create_password(user_id: UUID, usr_pass: UserPassword, svc: user_service):
+    result: bool | None = await svc.create_password(user_id, usr_pass)
+    if result is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return JSONResponse(status_code=200, content={"msg": "Password created successfully..."})
+
+
+@pass_routes.post("/users/{user_id}/change-password", responses={404: {"model": NotFound}, 200: {"model": JSONResp}})
+@pass_routes.post("/users/{user_id}/forgot-password", responses={404: {"model": NotFound}, 200: {"model": JSONResp}})
+async def forgot_password(user_id: UUID, usr_pass: ForgotPassword, svc: user_service):
+    result: bool = await svc.forgot_password(user_id, usr_pass)
+    if result is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not result:
+        return JSONResponse(status_code=400, content={"msg": "Incorrect password"})
+    return JSONResponse(status_code=200, content={"msg": "Password changed successfully..."})
