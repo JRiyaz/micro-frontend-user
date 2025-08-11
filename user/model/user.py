@@ -58,6 +58,11 @@ class UserRoles(SQLModel, table=True):
         return f"<UserRole(ID={self.id}, role={self.role}, user_id={self.user_id})>"
 
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+
 class UserPassword(BaseModel):
     password: str = Field(min_length=3, max_length=64)
     confirm_password: str = Field(min_length=3, max_length=64)

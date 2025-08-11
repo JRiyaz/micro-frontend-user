@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from pydantic import EmailStr, ValidationError
 
@@ -21,3 +21,10 @@ def is_valid_email(value: str) -> bool:
     except ValidationError:
         return False
     return True
+
+
+def get_unique_id(hex_fmt=False) -> str:
+    unique_id = uuid4()
+    if hex_fmt:
+        return unique_id.hex
+    return str(unique_id)

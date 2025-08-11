@@ -1,7 +1,9 @@
+import json
 from base64 import urlsafe_b64encode
+from datetime import datetime, timedelta
 from hashlib import sha512
 from hmac import compare_digest
-from typing import Optional
+from typing import TYPE_CHECKING, Annotated, Optional, Sequence
 from uuid import uuid4
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -9,6 +11,12 @@ from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer
 
 from ..config import config
+from ..model import User, UserLogin, UserOptional, UserRoles
+from ..service.token import TokenService
+from ..utils.string import get_unique_id
+
+if TYPE_CHECKING:
+    from ..service.roles import UserRolesService
 
 
 class Crypt:
@@ -78,6 +86,37 @@ class Security(HTTPBearer):
                 )
         request.state.context = token
         return token
+
+    @classmethod
+    async def login(cls, user: UserLogin, db_user: User, usr_roles_ser: "UserRolesService") -> dict | None:
+        if not (db_user and db_user.is_active and db_user.password):
+            return None
+
+        if not Crypt.compare_password(db_user.password, user.password):
+            return None
+
+        user_roles: Sequence[UserRoles] = await usr_roles_ser.roles(db_user.id)
+        user_fields: set[str] = set(UserOptional.model_fields.keys())
+        expiry_time = datetime.now() + timedelta(minutes=config.AUTH_EXPIRATION_TIME)
+        csrf_token = get_unique_id()
+        data = {
+            "user_data": db_user.model_dump(include=user_fields),
+            "created_at": datetime.now(),
+            "csrf": csrf_token,
+            "expires_at": expiry_time,
+        }
+        roles = tuple(role.role.value for role in user_roles)
+        data["user_data"]["roles"] = roles
+
+        print(data)  # TODO: Remove this line
+        auth_token: str = get_unique_id()
+        # encrypt_data: str = Crypt.encrypt(json.dumps(data))
+        #
+        # print(encrypt_data)  # TODO: Remove this line
+        #
+        # TokenService().set(auth_token, encrypt_data)
+
+        return {"auth_token": auth_token, "csrf_token": csrf_token}
 
 
 auth_security: Depends = Depends(Security(auto_error=True))

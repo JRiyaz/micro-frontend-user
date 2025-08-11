@@ -9,15 +9,31 @@ from sqlalchemy.sql.selectable import SelectBase
 from sqlmodel import select
 from sqlmodel.sql.expression import SelectOfScalar
 
+from .roles import UserRolesService
 from ..database.db import SessionDep
-from ..model import ForgotPassword, Role, User, UserOptional, UserPassword, UserRoles
-from ..security.auth import Crypt
+from ..model import (
+    ForgotPassword,
+    Role,
+    User,
+    UserLogin,
+    UserOptional,
+    UserPassword,
+    UserRoles,
+)
+from ..security.auth import Crypt, Security
 from ..utils.string import is_valid_email, is_valid_uuid
 
 
 class UserService:
     def __init__(self, db: SessionDep):
         self.db: AsyncSession = db
+
+    async def login(self, user: UserLogin):
+        # Fetch the User
+        db_user: User = await self.get_user(user.email)
+        if not db_user:
+            return None
+        return Security.login(user, db_user, UserRolesService(self.db))
 
     async def get_user_by_email(self, email: str) -> User | None:
         stmt: SelectBase[User] = select(User).where(User.email == email)
@@ -69,7 +85,7 @@ class UserService:
             return None
 
         # Update the User details
-        user_data: dict = UserOptional.model_fields.keys()
+        user_data: list = UserOptional.model_fields.keys()
         db_user.updated_at = datetime.now()
         for field in user_data:
             setattr(db_user, field, getattr(user, field))

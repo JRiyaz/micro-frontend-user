@@ -29,6 +29,7 @@ class Config(BaseSettings):
 
     # Auth Configuration
     AUTH_SECRET_KEY: str = Field(min_length=44)
+    AUTH_EXPIRATION_TIME: int = Field(default=1800)
     AUTH_COOKIE_NAME: str = "auth_token"
 
     # Database Configuration

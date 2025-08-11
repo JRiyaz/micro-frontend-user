@@ -4,12 +4,20 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
-from ..model import ForgotPassword, User, UserOptional, UserPassword
+from ..model import ForgotPassword, User, UserLogin, UserOptional, UserPassword
 from ..model.general import JSONResp, NotFound, UserQuery
 from ..security.auth import auth_security
 from ..service.user import user_service
 
 routes = APIRouter(tags=["User API's"], dependencies=[auth_security])
+
+
+@routes.post("/login", dependencies=[])
+async def login(user: UserLogin, svc: user_service):
+    data = await svc.login(user)
+    if data is None:
+        return JSONResponse(status_code=401, content={"error": "Invalid credentials"})
+    return JSONResponse(status_code=200, content=data)
 
 
 # User routes
