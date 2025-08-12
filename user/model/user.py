@@ -10,9 +10,7 @@ from pydantic import (
     WrapValidator,
     model_validator,
 )
-from pydantic import (
-    Field as PydanticField,
-)
+from pydantic import Field as PydanticField
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import Enum as SQLEnum
 from sqlmodel import Field, SQLModel

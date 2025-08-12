@@ -4,20 +4,12 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
-from ..model import ForgotPassword, User, UserLogin, UserOptional, UserPassword
+from ..model import ForgotPassword, User, UserOptional, UserPassword
 from ..model.general import JSONResp, NotFound, UserQuery
-from ..security.auth import auth_security
+from ..security.security import auth_security
 from ..service.user import user_service
 
 routes = APIRouter(tags=["User API's"], dependencies=[auth_security])
-
-
-@routes.post("/login", dependencies=[])
-async def login(user: UserLogin, svc: user_service):
-    data = await svc.login(user)
-    if data is None:
-        return JSONResponse(status_code=401, content={"error": "Invalid credentials"})
-    return JSONResponse(status_code=200, content=data)
 
 
 # User routes
@@ -30,7 +22,7 @@ async def get_users(query: Annotated[UserQuery, Query()], svc: user_service, req
 
 @routes.get("/users/{user_id}", responses={404: {"model": NotFound}})
 async def get_user(user_id: UUID, svc: user_service) -> User:
-    result: None | User = await svc.get_user(user_id)
+    result: None | User = await svc.get_user_by_id(user_id)
     if not result:
         raise HTTPException(status_code=404, detail="User not found")
     return result

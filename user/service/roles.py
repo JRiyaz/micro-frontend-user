@@ -82,4 +82,4 @@ class UserRolesService:
         return list(set(mapped_roles.keys()).difference(roles))
 
 
-roles_service = Annotated[UserRolesService, Depends(UserRolesService)]
+roles_service = Annotated[UserRolesService, Depends(UserRolesService, use_cache=True)]

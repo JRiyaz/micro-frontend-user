@@ -2,48 +2,33 @@ from datetime import datetime
 from typing import Annotated, Sequence
 from uuid import UUID
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from sqlalchemy.engine.result import Result
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql.selectable import SelectBase
 from sqlmodel import select
 from sqlmodel.sql.expression import SelectOfScalar
 
-from .roles import UserRolesService
 from ..database.db import SessionDep
-from ..model import (
-    ForgotPassword,
-    Role,
-    User,
-    UserLogin,
-    UserOptional,
-    UserPassword,
-    UserRoles,
-)
-from ..security.auth import Crypt, Security
+from ..model import ForgotPassword, Role, User, UserOptional, UserPassword, UserRoles
+from ..security.utils import Crypt
 from ..utils.string import is_valid_email, is_valid_uuid
 
 
 class UserService:
-    def __init__(self, db: SessionDep):
+    def __init__(self, db: SessionDep, req: Request):
         self.db: AsyncSession = db
-
-    async def login(self, user: UserLogin):
-        # Fetch the User
-        db_user: User = await self.get_user(user.email)
-        if not db_user:
-            return None
-        return Security.login(user, db_user, UserRolesService(self.db))
+        self.req: Request = req
 
     async def get_user_by_email(self, email: str) -> User | None:
         stmt: SelectBase[User] = select(User).where(User.email == email)
-        result: Result[tuple[User]] = await self.db.execute(stmt)
-        return result.first()
+        result: User = await self.db.scalar(stmt)
+        return result
 
     async def get_user_by_mobile(self, mobile_no: int) -> User | None:
         stmt: SelectBase[User] = select(User).where(User.mobile_no == mobile_no)
-        result: Result[tuple[User]] = await self.db.execute(stmt)
-        return result.first()
+        result: User = await self.db.scalar(stmt)
+        return result
 
     async def get_user_by_id(self, user_id: UUID) -> User | None:
         return await self.db.get(User, user_id)
@@ -185,4 +170,4 @@ class UserService:
         return True
 
 
-user_service = Annotated[UserService, Depends(UserService)]
+user_service = Annotated[UserService, Depends(UserService, use_cache=True)]

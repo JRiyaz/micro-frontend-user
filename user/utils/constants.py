@@ -1,0 +1,1 @@
+CSRF_METHODS = ("POST", "PUT", "PATCH", "DELETE")

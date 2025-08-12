@@ -1,21 +1,15 @@
 import logging
 from typing import Annotated, AsyncGenerator
 
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    AsyncSession,
-)
-from sqlalchemy.ext.asyncio import (
-    async_sessionmaker as session_maker,
-)
-from sqlalchemy.ext.asyncio import (
-    create_async_engine as create_engine,
-)
+from fastapi import Depends, FastAPI, Request
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
+from sqlalchemy.ext.asyncio import async_sessionmaker as session_maker
+from sqlalchemy.ext.asyncio import create_async_engine as create_engine
 from sqlmodel import Session
 
 from ..config import config
 from ..model import SQLModel
+from .redis import RedisStorage
 
 logger = logging.getLogger(__name__)
 
@@ -72,4 +66,20 @@ async def get_db() -> AsyncGenerator[AsyncSession]:
         yield session
 
 
-SessionDep = Annotated[Session, Depends(get_db)]
+async def set_auth_storage(app: FastAPI) -> None:
+    auth_db: str = config.AUTH_DB
+    storage = None
+    if auth_db == "db":
+        logger.info("Initializing db as auth storage")
+    elif auth_db == "redis":
+        logger.info("Initializing redis as auth storage")
+        storage = RedisStorage()
+    app.auth_storage = storage
+
+
+async def get_auth_storage(req: Request):
+    return req.app.auth_storage
+
+
+SessionDep = Annotated[Session, Depends(get_db, use_cache=False)]
+Storage = Annotated[Session, Depends(get_auth_storage, use_cache=True)]

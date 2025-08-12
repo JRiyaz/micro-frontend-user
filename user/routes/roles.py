@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from ..model import Role
 from ..model.general import NotFound
-from ..security.auth import auth_security
+from ..security.security import auth_security
 from ..service.roles import roles_service
 
 routes = APIRouter(tags=["User Roles API's"], dependencies=[auth_security])

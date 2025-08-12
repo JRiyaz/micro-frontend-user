@@ -1,122 +1,91 @@
 import json
-from base64 import urlsafe_b64encode
 from datetime import datetime, timedelta
-from hashlib import sha512
-from hmac import compare_digest
-from typing import TYPE_CHECKING, Annotated, Optional, Sequence
-from uuid import uuid4
+from typing import TYPE_CHECKING, Sequence
 
-from cryptography.fernet import Fernet, InvalidToken
-from fastapi import Depends, HTTPException, Request
-from fastapi.security import HTTPBearer
+from fastapi import HTTPException, Request
 
 from ..config import config
-from ..model import User, UserLogin, UserOptional, UserRoles
-from ..service.token import TokenService
+from ..database.db import Storage
+from ..model import Gender, User, UserLogin, UserOptional, UserRoles
+from ..utils.constants import CSRF_METHODS
 from ..utils.string import get_unique_id
+from .utils import Crypt
 
 if TYPE_CHECKING:
     from ..service.roles import UserRolesService
+    from ..service.user import UserService
 
 
-class Crypt:
-    secret_key = Fernet(config.AUTH_SECRET_KEY)
+class Auth:
+    def __init__(self, store: Storage):
+        self.store = store
 
-    @classmethod
-    def hash_it(cls, password: str) -> str:
-        hashed_pass, salt = cls.hash_password(password)
-        return f"{hashed_pass.decode('utf-8')}:{salt.decode('utf-8')}"
+    async def login(self, user: UserLogin, svc: "UserService", role_svc: "UserRolesService"):
+        # Fetch the User
+        db_user: User = await svc.get_user(user.email)
+        if db_user is None:
+            return db_user
 
-    @classmethod
-    def hash_password(cls, password: str, salt: bytes | None = None) -> tuple[bytes, bytes]:
-        # Create random salt
-        if not salt:
-            salt: bytes = urlsafe_b64encode(uuid4().bytes)
-
-        # Create sha with salt and password
-        sha: bytes = sha512(password.encode("utf-8") + salt).digest()
-
-        # Create hashed password
-        hashed_pass: bytes = urlsafe_b64encode(sha)
-
-        return hashed_pass, salt
-
-    @classmethod
-    def encrypt(cls, data: str) -> str:
-        return cls.secret_key.encrypt(data.encode("utf-8")).decode("utf-8")
-
-    @classmethod
-    def decrypt(cls, data: str) -> str:
-        return cls.secret_key.decrypt(data.encode("utf-8")).decode("utf-8")
-
-    @classmethod
-    def is_encrypted(cls, data: str) -> bool:
-        try:
-            cls.decrypt(data)
-        except InvalidToken:
-            return False
-        else:
-            return True
-
-    @classmethod
-    def compare_password(cls, db_pass: str, pass_in: str) -> bool:
-        # Extract password and salt
-        password, salt = db_pass.split(":")
-
-        # Hash the incoming password
-        pass_in_hash, _ = cls.hash_password(pass_in, salt.encode("utf-8"))
-
-        return compare_digest(password.encode("utf-8"), pass_in_hash)
-
-
-class Security(HTTPBearer):
-    async def __call__(self, request: Request) -> Optional[str]:
-        token = None
-        try:
-            if auth := await super().__call__(request):
-                token = auth.credentials
-        except HTTPException:
-            # Cookie for client app
-            token = request.cookies.get(config.AUTH_COOKIE_NAME)
-            if not token and self.auto_error:
-                raise HTTPException(
-                    status_code=401,
-                    detail="Not authenticated",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-        request.state.context = token
-        return token
-
-    @classmethod
-    async def login(cls, user: UserLogin, db_user: User, usr_roles_ser: "UserRolesService") -> dict | None:
         if not (db_user and db_user.is_active and db_user.password):
             return None
 
         if not Crypt.compare_password(db_user.password, user.password):
             return None
 
-        user_roles: Sequence[UserRoles] = await usr_roles_ser.roles(db_user.id)
+        user_roles: Sequence[UserRoles] = await role_svc.roles(db_user.id)
         user_fields: set[str] = set(UserOptional.model_fields.keys())
         expiry_time = datetime.now() + timedelta(minutes=config.AUTH_EXPIRATION_TIME)
         csrf_token = get_unique_id()
         data = {
             "user_data": db_user.model_dump(include=user_fields),
-            "created_at": datetime.now(),
+            "created_at": datetime.now().isoformat(),
             "csrf": csrf_token,
-            "expires_at": expiry_time,
+            "expires_at": expiry_time.isoformat(),
         }
+        gender: Gender = data["user_data"]["gender"]
+        data["user_data"]["gender"] = gender.value
         roles = tuple(role.role.value for role in user_roles)
         data["user_data"]["roles"] = roles
 
-        print(data)  # TODO: Remove this line
         auth_token: str = get_unique_id()
-        # encrypt_data: str = Crypt.encrypt(json.dumps(data))
-        #
-        # print(encrypt_data)  # TODO: Remove this line
-        #
-        # TokenService().set(auth_token, encrypt_data)
+        encrypt_data: str = Crypt.encrypt(json.dumps(data))
+        await self.store.set(auth_token, encrypt_data, config.AUTH_EXPIRATION_TIME)
 
         return {"auth_token": auth_token, "csrf_token": csrf_token}
 
+    @classmethod
+    async def authenticate(cls, req: Request) -> str:
+        cls.req = req
+        cls.store: Storage = cls.req.app.auth_storage
 
-auth_security: Depends = Depends(Security(auto_error=True))
+        data = {}
+        if token := req.headers.get("Authorization"):
+            bearer, _, token = token.partition(" ")
+            data: dict = await cls.validate_token(token)
+        elif token := req.cookies.get(config.AUTH_COOKIE_NAME):
+            if req.method in CSRF_METHODS:
+                data: dict = await cls.validate_token_and_csrf(token)
+            else:
+                data: dict = await cls.validate_token(token)
+        if not data:
+            raise HTTPException(status_code=401, detail="Token not found")
+        req.state.context = data
+        await cls.store.set_expire(token, config.AUTH_EXPIRATION_TIME)
+        return token
+
+    @classmethod
+    async def validate_token(cls, token: str) -> dict:
+        enc_token = await cls.store.get(token)
+        if enc_token is None:
+            raise HTTPException(status_code=401, detail="Token has expired")
+        return json.loads(Crypt.decrypt(enc_token))
+
+    @classmethod
+    async def validate_token_and_csrf(cls, cookie: str) -> dict:
+        csrf: str = cls.req.cookies.get(config.AUTH_COOKIE_CSRF)
+        if not csrf:
+            raise HTTPException(status_code=401, detail="CSRF token not found")
+        user_data: dict = await cls.validate_token(cookie)
+        if not Crypt.compare_password(user_data["csrf"], csrf):
+            raise HTTPException(status_code=401, detail="CSRF token incorrect")
+        return user_data

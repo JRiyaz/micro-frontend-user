@@ -28,9 +28,17 @@ class Config(BaseSettings):
     LOG_UVICORN: Annotated[str, AfterValidator(to_upper)] = "INFO"
 
     # Auth Configuration
+    AUTH_DB: Literal["db", "redis"] = "redis"
     AUTH_SECRET_KEY: str = Field(min_length=44)
     AUTH_EXPIRATION_TIME: int = Field(default=1800)
     AUTH_COOKIE_NAME: str = "auth_token"
+    AUTH_COOKIE_CSRF: str = "CSRF_TOKEN"
+
+    # Redis Configuration
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_PASSWORD: str = "admin"
+    REDIS_DB: int = 0
 
     # Database Configuration
     DB: Databases

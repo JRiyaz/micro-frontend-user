@@ -11,6 +11,7 @@ from .routes.common import routes as common_routes
 from .routes.roles import routes as roles_routes
 from .routes.user import pass_routes
 from .routes.user import routes as user_routes
+from .security.routes import routes as auth_routes
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,7 @@ def create_app() -> FastAPI:
     app.add_middleware(TimeIt, some_attribute="time")
     app.add_middleware(LogIt)
 
+    app.include_router(auth_routes)
     app.include_router(common_routes)
     app.include_router(user_routes)
     app.include_router(pass_routes)
