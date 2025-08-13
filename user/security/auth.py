@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING, Sequence
 
 from fastapi import HTTPException, Request
 
+from .utils import Crypt
 from ..config import config
 from ..database.db import Storage
 from ..model import Gender, User, UserLogin, UserOptional, UserRoles
 from ..utils.constants import CSRF_METHODS
 from ..utils.string import get_unique_id
-from .utils import Crypt
 
 if TYPE_CHECKING:
     from ..service.roles import UserRolesService
@@ -58,18 +58,21 @@ class Auth:
         cls.req = req
         cls.store: Storage = cls.req.app.auth_storage
 
-        data = {}
-        if token := req.headers.get("Authorization"):
-            bearer, _, token = token.partition(" ")
-            data: dict = await cls.validate_token(token)
-        elif token := req.cookies.get(config.AUTH_COOKIE_NAME):
+        if token := req.cookies.get(config.AUTH_COOKIE_NAME):
             if req.method in CSRF_METHODS:
                 data: dict = await cls.validate_token_and_csrf(token)
             else:
                 data: dict = await cls.validate_token(token)
-        if not data:
+        elif bearer := req.headers.get("Authorization"):
+            if not bearer.startswith("Bearer "):
+                raise HTTPException(status_code=401, detail="Signature verification failed")
+            bearer, _, token = bearer.partition(" ")
+            data: dict = await cls.validate_token(token)
+        else:
             raise HTTPException(status_code=401, detail="Token not found")
         req.state.context = data
+        req.state.is_authenticated = True
+        req.state.token = token
         await cls.store.set_expire(token, config.AUTH_EXPIRATION_TIME)
         return token
 

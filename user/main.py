@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 
 from .exceptions import validation_handler
 from .hooks import app_lifespan
-from .middlewares import LogIt, TimeIt
+from .middlewares import LogIt, TimeIt, AuthenticationMiddleware
 from .routes.common import routes as common_routes
 from .routes.roles import routes as roles_routes
 from .routes.user import pass_routes
@@ -31,6 +31,7 @@ def create_app() -> FastAPI:
     app.add_exception_handler(RequestValidationError, validation_handler)
     app.add_middleware(TimeIt, some_attribute="time")
     app.add_middleware(LogIt)
+    app.add_middleware(AuthenticationMiddleware)
 
     app.include_router(auth_routes)
     app.include_router(common_routes)

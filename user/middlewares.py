@@ -4,6 +4,8 @@ import time
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from .security.auth import Auth
+
 logger = logging.getLogger(__name__)
 
 
@@ -37,4 +39,11 @@ class LogIt(BaseHTTPMiddleware):
             }
         )
 
+        return response
+
+
+class AuthenticationMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        await Auth.authenticate(request)
+        response = await call_next(request)
         return response

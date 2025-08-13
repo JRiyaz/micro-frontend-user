@@ -1,3 +1,4 @@
+import logging
 from typing import TYPE_CHECKING, Optional
 
 from fastapi import Depends, Request
@@ -8,9 +9,15 @@ from .auth import Auth
 if TYPE_CHECKING:
     pass
 
+logger = logging.getLogger(__name__)
+
 
 class Security(HTTPBearer):
     async def __call__(self, request: Request) -> Optional[str]:
+        if hasattr(request.state, "is_authenticated"):
+            token = request.state.token
+            logger.info("Authentication is already done with token:", token)
+            return token
         return await Auth.authenticate(request)
         # token = None
         # try:
