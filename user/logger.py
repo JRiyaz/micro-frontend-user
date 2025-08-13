@@ -6,7 +6,7 @@ from .config import config
 
 LOGGING_CONFIG = {
     "version": 1,
-    "disable_existing_loggers": True,
+    "disable_existing_loggers": False,
     "formatters": {
         "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
         "custom_formatter": {
@@ -33,6 +33,7 @@ LOGGING_CONFIG = {
             "formatter": "custom_formatter",
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stdout",  # Default is stderr
+            "level": config.LOG_LEVEL,
         },
         "file_handler": {
             "formatter": "custom_formatter",
@@ -48,12 +49,13 @@ LOGGING_CONFIG = {
     #     "uvicorn.error": {"handlers": ["stream_handler", "file_handler"], "level": "TRACE", "propagate": False},
     #     "uvicorn.asgi": {"handlers": ["stream_handler", "file_handler"], "level": "TRACE", "propagate": False},
     # },
-    "loggers": {
-        "uvicorn": {"handlers": ["default"], "level": config.LOG_LEVEL, "propagate": False},
-        "uvicorn.access": {"handlers": ["stream_handler"], "level": config.LOG_LEVEL, "propagate": False},
-        "uvicorn.error": {"handlers": ["stream_handler"], "level": config.LOG_UVICORN, "propagate": False},
-        "uvicorn.asgi": {"handlers": ["stream_handler"], "level": config.LOG_LEVEL, "propagate": False},
-    },
+    # "loggers": {
+    #     "uvicorn": {"handlers": ["default"], "level": config.LOG_LEVEL, "propagate": False},
+    #     "uvicorn.access": {"handlers": ["stream_handler"], "level": config.LOG_LEVEL, "propagate": False},
+    #     "uvicorn.error": {"handlers": ["stream_handler"], "level": config.LOG_UVICORN, "propagate": False},
+    #     "uvicorn.asgi": {"handlers": ["stream_handler"], "level": config.LOG_LEVEL, "propagate": False},
+    # },
+    "root": {"handlers": ["stream_handler"], "level": "NOTSET"},
 }
 
 
@@ -89,3 +91,27 @@ class CustomJSONFormatter(logging.Formatter):
 
 def setup_logging():
     dictConfig(LOGGING_CONFIG)
+
+
+corr_logger = {
+    "disable_existing_loggers": False,
+    "filters": {"custom_filter": {"()": "jivacore.logger.log.LogFilter"}},
+    "formatters": {
+        "basic": {"datefmt": "%d %b %y %H:%M:%S", "format": "%(asctime)s %(name)s %(levelname)s: %(message)s"},
+        "extended": {
+            "datefmt": "%d %b %y %H:%M:%S",
+            "format": "%(asctime)-15s %(name)-5s %(levelname)-8s %(message)s: http_method=%(http_method)-6s user=%(user)s host=%(host)s user_agent=%(user_agent)s remote_addr=%(remote_addr)s request_id=%(request_id)s",
+        },
+    },
+    "handlers": {
+        "StreamHandler": {
+            "class": "logging.StreamHandler",
+            "filters": ["custom_filter"],
+            "formatter": "extended",
+            "level": "DEBUG",
+            "stream": "ext://sys.stdout",
+        }
+    },
+    "root": {"handlers": ["StreamHandler"], "level": "NOTSET"},
+    "version": 1,
+}

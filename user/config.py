@@ -56,7 +56,7 @@ class Config(BaseSettings):
     # Kafka Configuration
     KAFKA_BOOTSTRAP_HOST: str = "localhost"
     KAFKA_BOOTSTRAP_PORT: int = 9092
-    KAFKA_BOOTSTRAP_SERVER: str | None = None
+    KAFKA_BOOTSTRAP_SERVER: str = f"{KAFKA_BOOTSTRAP_HOST}:{KAFKA_BOOTSTRAP_PORT}"
 
     @validator("AUTH_SECRET_KEY")
     def validate_secret_key(cls, value: str) -> bytes:
@@ -68,10 +68,6 @@ class Config(BaseSettings):
         except Exception as e:
             raise ValueError(f"Invalid Fernet key: {e}")
         return value.encode("utf-8")
-
-    @validator("KAFKA_BOOTSTRAP_SERVER")
-    def set_kafka_bootstrap_servers(cls, value: str) -> str:
-        return f"{cls.KAFKA_BOOTSTRAP_HOST}:{cls.KAFKA_BOOTSTRAP_PORT}"
 
 
 config = Config()
