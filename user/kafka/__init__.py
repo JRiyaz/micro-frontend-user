@@ -1,2 +1,2 @@
-from .producer import *
 from .consumer import *
+from .producer import *

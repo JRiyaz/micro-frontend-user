@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #controls button {
+            margin: 5px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #f1f1f1;
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .connected {
+            color: green;
+        }
+        .disconnected {
+            color: red;
+        }
+        .neutral {
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+<h1>
+    <span id="chatIcon" class="neutral">💬</span>
+    WebSocket Chat
+    <span id="statusText" class="neutral" style="font-size: 0.8em;"></span>
+</h1>
+
+
+<div id="controls">
+    <button onclick="connectWebSocket()">🔌 Chat</button>
+    <button onclick="startAuto()" id="autoBtn" disabled>🤖 Automate</button>
+    <button onclick="stopAuto()" id="stopBtn" disabled>❌ Cancel</button>
+</div>
+
+<div id="chat" style="margin-top: 20px;">
+    <input type="text" id="messageInput" autocomplete="off" placeholder="Type a message..." disabled/>
+    <button onclick="sendMessage()" id="sendBtn" disabled>Send</button>
+    <ul id="messages"></ul>
+</div>
+
+<script>
+    let ws = null;
+    let autoInterval = null;
+    const clientInfo = "{{ client_info }}";
+
+    function connectWebSocket() {
+        if (ws) {
+            alert("Already connected.");
+            return;
+        }
+
+        const encodedClientInfo = encodeURIComponent(clientInfo);
+        ws = new WebSocket(`ws://localhost:8000/ws?client=${encodedClientInfo}`);
+
+        ws.onopen = function () {
+            updateStatus(true);
+            document.getElementById("messageInput").disabled = false;
+            document.getElementById("sendBtn").disabled = false;
+            document.getElementById("autoBtn").disabled = false;
+        };
+
+        ws.onmessage = function (event) {
+            log("Server: " + event.data);
+        };
+
+        ws.onclose = function () {
+            updateStatus(false);
+            ws = null;
+            document.getElementById("messageInput").disabled = true;
+            document.getElementById("sendBtn").disabled = true;
+            document.getElementById("autoBtn").disabled = true;
+            document.getElementById("stopBtn").disabled = true;
+        };
+
+        ws.onerror = function (err) {
+            updateStatus(false);
+            console.error("WebSocket error:", err);
+        };
+    }
+
+
+    function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const message = input.value.trim();
+        if (message && ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(message);
+            input.value = '';
+        }
+    }
+
+    function generateRandomText(length = 10) {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    function startAuto() {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            alert("Connect to chat first!");
+            return;
+        }
+        autoInterval = setInterval(() => {
+            const msg = generateRandomText(8);
+            ws.send(msg);
+            log("Auto: " + msg);
+        }, 5000);
+        document.getElementById("stopBtn").disabled = false;
+        document.getElementById("autoBtn").disabled = true;
+    }
+
+    function stopAuto() {
+        clearInterval(autoInterval);
+        autoInterval = null;
+        document.getElementById("stopBtn").disabled = true;
+        document.getElementById("autoBtn").disabled = false;
+        log("⛔ Auto messaging stopped");
+    }
+
+    function log(text) {
+        const messages = document.getElementById('messages');
+        const li = document.createElement('li');
+        li.textContent = text;
+        messages.appendChild(li);
+    }
+
+    function updateStatus(connected) {
+        const icon = document.getElementById("chatIcon");
+        const status = document.getElementById("statusText");
+
+        if (connected) {
+            icon.style.color = "green";
+            status.className = "connected";
+            status.textContent = `{Connected} (${clientInfo})`;
+        } else {
+            icon.style.color = "red";
+            status.className = "disconnected";
+            status.textContent = "{Disconnected}";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.getElementById("messageInput");
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                if (!input.disabled) {
+                    sendMessage();
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

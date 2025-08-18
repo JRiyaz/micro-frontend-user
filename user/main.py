@@ -3,6 +3,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
+from fastapi.templating import Jinja2Templates
 
 from .exceptions import validation_handler
 from .hooks import app_lifespan
@@ -23,6 +24,9 @@ def create_app() -> FastAPI:
         docs_url=None,
         lifespan=app_lifespan,
     )
+
+    templates = Jinja2Templates(directory="static-files")
+    app.templates = templates
     logger.info("Starting user service application...")
     project_path: Path = Path(__file__).parent.parent
     app.project_path = project_path

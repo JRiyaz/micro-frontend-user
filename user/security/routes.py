@@ -3,10 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
-from .auth import Auth
-from ..model.user import UserLogin, User
+from ..model.user import User, UserLogin
 from ..service.roles import roles_service
 from ..service.user import user_service
+from .auth import Auth
 
 routes = APIRouter(tags=["Auth"])
 
