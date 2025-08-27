@@ -1,13 +1,14 @@
 from uuid import UUID, uuid4
 
 from pydantic import EmailStr, ValidationError
+from pydantic_core import PydanticCustomError
 
 
 def to_upper(value: str) -> str:
     return value.upper()
 
 
-def is_valid_uuid(value: str) -> bool:
+def is_valid_uuid(value: EmailStr | UUID | str) -> bool:
     try:
         uuid_obj = UUID(value)
         return str(uuid_obj) == value  # Ensure it's in correct format
@@ -15,10 +16,12 @@ def is_valid_uuid(value: str) -> bool:
         return False
 
 
-def is_valid_email(value: str) -> bool:
+def is_valid_email(value: EmailStr | UUID | str) -> bool:
     try:
         EmailStr._validate(value)
     except ValidationError:
+        return False
+    except PydanticCustomError:
         return False
     return True
 

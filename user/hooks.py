@@ -2,18 +2,21 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from .database.db import close_db_conn, create_db_tables, set_auth_storage
-from .logger import setup_logging
+from .database.db import auth_storage, database
 
 
 @asynccontextmanager
 async def app_lifespan(app: FastAPI):
     # Startup
-    setup_logging()
-    await create_db_tables()
-    await set_auth_storage(app)
+    await database.setup_db()
+    await auth_storage.setup_db()
+    app.state.db = database
+    app.state.auth_db = auth_storage.storage
 
     yield
 
     # Shutdown
-    await close_db_conn()
+    del app.state.auth_db
+    del app.state.db
+    await database.close()
+    await auth_storage.close()

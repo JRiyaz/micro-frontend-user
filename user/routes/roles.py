@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 from ..model import Role
 from ..model.general import NotFound
 from ..security.security import auth_security
-from ..service.roles import roles_service
+from ..service.roles import RolesSvc
 
 routes = APIRouter(tags=["User Roles API's"], dependencies=[auth_security])
 
@@ -13,7 +13,7 @@ routes = APIRouter(tags=["User Roles API's"], dependencies=[auth_security])
 # User Roles routes
 # @roles_routes.get("/users/roles/{user_id}", responses={404: {"model": NotFound}})
 @routes.get("/roles/{user_id}", responses={404: {"model": NotFound}})
-async def get_user_roles(user_id: UUID, svc: roles_service) -> list[Role]:
+async def get_user_roles(user_id: UUID, svc: RolesSvc) -> list[Role]:
     result: list[Role] | None = await svc.get_roles(user_id)
     if result is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -21,7 +21,7 @@ async def get_user_roles(user_id: UUID, svc: roles_service) -> list[Role]:
 
 
 @routes.post("/roles/{user_id}", responses={404: {"model": NotFound}})
-async def update_user_roles(user_id: UUID, roles: list[Role], svc: roles_service) -> list[Role]:
+async def update_user_roles(user_id: UUID, roles: list[Role], svc: RolesSvc) -> list[Role]:
     result: list[Role] | None = await svc.update_roles(user_id, roles)
     if result is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -29,7 +29,7 @@ async def update_user_roles(user_id: UUID, roles: list[Role], svc: roles_service
 
 
 @routes.delete("/roles/{user_id}", responses={404: {"model": NotFound}, 400: {"model": NotFound}})
-async def delete_user_roles(user_id: UUID, roles: list[Role], svc: roles_service) -> list[Role]:
+async def delete_user_roles(user_id: UUID, roles: list[Role], svc: RolesSvc) -> list[Role]:
     result: list[Role] | int | None = await svc.delete_roles(user_id, roles)
     if result is None:
         raise HTTPException(status_code=404, detail="User not found")

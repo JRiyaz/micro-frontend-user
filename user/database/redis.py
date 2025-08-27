@@ -26,3 +26,7 @@ class RedisStorage:
 
     async def set_expire(self, key, expire):
         await self.redis.expire(key, expire)
+
+    async def close(self):
+        await self.redis.close()
+        await self.redis.connection_pool.disconnect()

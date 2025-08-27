@@ -57,7 +57,7 @@ class UserRoles(SQLModel, table=True):
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    user_id: EmailStr | UUID | str
     password: str
 
 

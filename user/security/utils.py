@@ -64,3 +64,7 @@ class Crypt:
         pass_in_hash, _ = cls.hash_password(pass_in, salt.encode("utf-8"))
 
         return compare_digest(password.encode("utf-8"), pass_in_hash)
+
+    @classmethod
+    def compare(cls, value_1, value_2) -> bool:
+        return compare_digest(value_1, value_2)

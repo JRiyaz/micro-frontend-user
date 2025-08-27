@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 
 logger = logging.getLogger(__name__)
 
-routes = APIRouter(tags=["common"])
+routes = APIRouter(tags=["common"], include_in_schema=False)
 
 # from fastapi.staticfiles import StaticFiles
 # app.mount("/static", StaticFiles(directory=path), name="static")
@@ -47,7 +47,7 @@ async def websocket_endpoint(websocket: WebSocket, client: str = Query(None)):
         del connected_clients[client]
 
 
-@routes.get("/docs", include_in_schema=False)
+@routes.get("/docs")
 async def docs() -> HTMLResponse:
     return get_swagger_ui_html(
         openapi_url="/openapi.json",
@@ -59,7 +59,7 @@ async def docs() -> HTMLResponse:
     )
 
 
-@routes.get("/favicon.ico", include_in_schema=False)
+@routes.get("/favicon.ico")
 async def favicon(req: Request) -> FileResponse:
     path = req.app.project_path.joinpath("static-files")
     return FileResponse(path.joinpath("favicon.ico"))

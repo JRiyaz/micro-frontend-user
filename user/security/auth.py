@@ -5,10 +5,11 @@ from typing import TYPE_CHECKING, Sequence
 from fastapi import HTTPException, Request
 
 from ..config import config
-from ..database.db import Storage
+from ..database.db import AuthDB
 from ..model import Gender, User, UserLogin, UserOptional, UserRoles
 from ..utils.constants import CSRF_METHODS
 from ..utils.string import get_unique_id
+from ..utils.utils import get_auth_storage
 from .utils import Crypt
 
 if TYPE_CHECKING:
@@ -17,12 +18,12 @@ if TYPE_CHECKING:
 
 
 class Auth:
-    def __init__(self, store: Storage):
+    def __init__(self, store: AuthDB):
         self.store = store
 
     async def login(self, user: UserLogin, svc: "UserService", role_svc: "UserRolesService"):
         # Fetch the User
-        db_user: User = await svc.get_user(user.email)
+        db_user: User = await svc.get_user(user.user_id)
         if db_user is None:
             return db_user
 
@@ -56,7 +57,7 @@ class Auth:
     @classmethod
     async def authenticate(cls, req: Request) -> str:
         cls.req = req
-        cls.store: Storage = cls.req.app.auth_storage
+        cls.store: AuthDB = get_auth_storage(req)
 
         if token := req.cookies.get(config.AUTH_COOKIE_NAME):
             if req.method in CSRF_METHODS:
@@ -85,10 +86,10 @@ class Auth:
 
     @classmethod
     async def validate_token_and_csrf(cls, cookie: str) -> dict:
-        csrf: str = cls.req.cookies.get(config.AUTH_COOKIE_CSRF)
+        csrf: str = cls.req.headers.get(config.AUTH_COOKIE_CSRF)
         if not csrf:
             raise HTTPException(status_code=401, detail="CSRF token not found")
         user_data: dict = await cls.validate_token(cookie)
-        if not Crypt.compare_password(user_data["csrf"], csrf):
+        if not Crypt.compare(user_data["csrf"], csrf):
             raise HTTPException(status_code=401, detail="CSRF token incorrect")
         return user_data

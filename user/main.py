@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 
 from .exceptions import validation_handler
 from .hooks import app_lifespan
+from .logger import setup_logging
 from .middlewares import LogIt, TimeIt
 from .routes.common import routes as common_routes
 from .routes.roles import routes as roles_routes
@@ -24,6 +25,9 @@ def create_app() -> FastAPI:
         docs_url=None,
         lifespan=app_lifespan,
     )
+
+    # Setup logging
+    setup_logging()
 
     templates = Jinja2Templates(directory="static-files")
     app.templates = templates

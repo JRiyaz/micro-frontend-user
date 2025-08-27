@@ -7,12 +7,12 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql.selectable import SelectBase
 from sqlmodel import select
 
-from ..database.db import SessionDep
+from ..database.db import DB
 from ..model import Role, UserRoles
 
 
 class UserRolesService:
-    def __init__(self, db: SessionDep):
+    def __init__(self, db: DB):
         self.db: AsyncSession = db
 
     # UserRoles routes
@@ -82,4 +82,4 @@ class UserRolesService:
         return list(set(mapped_roles.keys()).difference(roles))
 
 
-roles_service = Annotated[UserRolesService, Depends(UserRolesService, use_cache=True)]
+RolesSvc = Annotated[UserRolesService, Depends(UserRolesService, use_cache=True)]

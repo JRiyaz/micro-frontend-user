@@ -3,29 +3,30 @@ from typing import Annotated, Sequence
 from uuid import UUID
 
 from fastapi import Depends, Request
+from pydantic import EmailStr
 from sqlalchemy.engine.result import Result
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql.selectable import SelectBase
 from sqlmodel import select
 from sqlmodel.sql.expression import SelectOfScalar
 
-from ..database.db import SessionDep
+from ..database.db import DB
 from ..model import ForgotPassword, Role, User, UserOptional, UserPassword, UserRoles
 from ..security.utils import Crypt
 from ..utils.string import is_valid_email, is_valid_uuid
 
 
 class UserService:
-    def __init__(self, db: SessionDep, req: Request):
+    def __init__(self, db: DB, req: Request):
         self.db: AsyncSession = db
         self.req: Request = req
 
-    async def get_user_by_email(self, email: str) -> User | None:
+    async def get_user_by_email(self, email: EmailStr) -> User | None:
         stmt: SelectBase[User] = select(User).where(User.email == email)
         result: User = await self.db.scalar(stmt)
         return result
 
-    async def get_user_by_mobile(self, mobile_no: int) -> User | None:
+    async def get_user_by_mobile(self, mobile_no: str) -> User | None:
         stmt: SelectBase[User] = select(User).where(User.mobile_no == mobile_no)
         result: User = await self.db.scalar(stmt)
         return result
@@ -33,7 +34,7 @@ class UserService:
     async def get_user_by_id(self, user_id: UUID) -> User | None:
         return await self.db.get(User, user_id)
 
-    async def get_user(self, data: str | UUID | int) -> User | None:
+    async def get_user(self, data: EmailStr | UUID | str) -> User | None:
         if is_valid_uuid(data):
             return await self.get_user_by_id(data)
         elif is_valid_email(data):
@@ -63,9 +64,9 @@ class UserService:
         await self.db.commit()
         return user
 
-    async def update_user(self, user_id: UUID, user: User) -> User | None:
+    async def update_user(self, user_id: EmailStr | UUID | str, user: User) -> User | None:
         # Fetch the User
-        db_user: User = await self.get_user_by_id(user_id)
+        db_user: User = await self.get_user(user_id)
         if not db_user:
             return None
 
@@ -80,9 +81,9 @@ class UserService:
         await self.db.refresh(db_user)
         return db_user
 
-    async def path_user(self, user_id: UUID, user: UserOptional) -> User | None:
+    async def path_user(self, user_id: EmailStr | UUID | str, user: UserOptional) -> User | None:
         # Fetch the User
-        db_user: User = await self.get_user_by_id(user_id)
+        db_user: User = await self.get_user(user_id)
         if not db_user:
             return None
 
@@ -97,9 +98,9 @@ class UserService:
         await self.db.refresh(db_user)
         return db_user
 
-    async def delete_user(self, user_id: UUID) -> bool | None:
+    async def delete_user(self, user_id: EmailStr | UUID | str) -> bool | None:
         # Fetch the User
-        db_user: User | None = await self.get_user_by_id(user_id)
+        db_user: User | None = await self.get_user(user_id)
         if not db_user:
             return None
 
@@ -121,7 +122,7 @@ class UserService:
 
     async def create_password(self, user_id: UUID, usr_pass: UserPassword) -> None | bool:
         # Fetch User
-        db_user: User | None = await self.get_user_by_id(user_id)
+        db_user: User | None = await self.get_user(user_id)
         if not db_user:
             return None
 
@@ -139,9 +140,9 @@ class UserService:
         await self.db.commit()
         return True
 
-    async def forgot_password(self, user_id: UUID, usr_pass: ForgotPassword) -> bool | None:
+    async def forgot_password(self, user_id: EmailStr | UUID | str, usr_pass: ForgotPassword) -> bool | None:
         # Fetch User
-        db_user: User | None = await self.get_user_by_id(user_id)
+        db_user: User | None = await self.get_user(user_id)
         if not db_user:
             return None
 
@@ -160,9 +161,9 @@ class UserService:
         await self.db.commit()
         return True
 
-    async def is_password_set(self, user_id: UUID) -> bool | None:
+    async def is_password_set(self, user_id: EmailStr | UUID | str) -> bool | None:
         # Fetch User
-        db_user: User | None = await self.get_user_by_id(user_id)
+        db_user: User | None = await self.get_user(user_id)
         if not db_user:
             return None
         if not db_user.password:
@@ -170,4 +171,4 @@ class UserService:
         return True
 
 
-user_service = Annotated[UserService, Depends(UserService, use_cache=True)]
+UserSrv = Annotated[UserService, Depends(UserService, use_cache=True)]

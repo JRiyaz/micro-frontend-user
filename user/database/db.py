@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated, AsyncGenerator
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker as session_maker
 from sqlalchemy.ext.asyncio import create_async_engine as create_engine
@@ -29,6 +29,11 @@ class Database:
         self.db_logs: bool = config.DB_LOGS
 
         self.conn_str: str = f"{self.db}://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+        self.engine = None
+        self.async_session = None
+
+    async def connect(self):
+        logger.info(f"Connecting to database: {config.DB_DATABASE}")
         self.engine: AsyncEngine = create_engine(
             self.conn_str,
             echo=self.db_logs,
@@ -40,46 +45,61 @@ class Database:
         self.async_session: session_maker = session_maker(self.engine, class_=AsyncSession, expire_on_commit=False)
 
     async def create_tables(self) -> None:
+        logger.error("Creating database tables")
         async with self.engine.begin() as conn:
             await conn.run_sync(SQLModel.metadata.create_all)
+
+    async def close(self) -> None:
+        logger.error("Closing database connection")
+        await self.engine.dispose()
+
+    async def get_db(self) -> AsyncGenerator[AsyncSession]:
+        async with self.async_session() as session:
+            logger.debug(f"********** Getting database session: {session} **********")
+            yield session
+            logger.debug(f"************ closing database session: {session} **********")
+
+    async def setup_db(self) -> None:
+        await self.connect()
+        await self.create_tables()
 
     # def db_session(self):
     #     with Session(self.engine) as session:
     #         yield session
 
 
-db: Database = Database()
+database = Database()
+
+# async def get_db(req: Request) -> AsyncGenerator[AsyncSession, None]:
+#     async for session in req.app.db.get_async_session():
+#         yield session
 
 
-async def create_db_tables() -> None:
-    logger.error("Creating database tables")
-    await db.create_tables()
+class AuthStorage:
+    def __init__(self):
+        self.storage = None
+
+    async def setup_db(self):
+        auth_db: str = config.AUTH_DB
+        storage = None
+        if auth_db == "db":
+            logger.info("Initializing db as auth storage")
+        elif auth_db == "redis":
+            logger.info("Initializing redis as auth storage")
+            storage = RedisStorage()
+        self.storage = storage
+
+    async def get_db(self):
+        return self.storage
+
+    async def close(self):
+        if self.storage:
+            logger.info("Closing auth storage")
+            await self.storage.close()
 
 
-async def close_db_conn() -> None:
-    logger.error("Closing database connection")
-    await db.engine.dispose()
+auth_storage = AuthStorage()
 
 
-async def get_db() -> AsyncGenerator[AsyncSession]:
-    async with db.async_session() as session:
-        yield session
-
-
-async def set_auth_storage(app: FastAPI) -> None:
-    auth_db: str = config.AUTH_DB
-    storage = None
-    if auth_db == "db":
-        logger.info("Initializing db as auth storage")
-    elif auth_db == "redis":
-        logger.info("Initializing redis as auth storage")
-        storage = RedisStorage()
-    app.auth_storage = storage
-
-
-async def get_auth_storage(req: Request):
-    return req.app.auth_storage
-
-
-SessionDep = Annotated[Session, Depends(get_db, use_cache=False)]
-Storage = Annotated[Session, Depends(get_auth_storage, use_cache=True)]
+DB = Annotated[Session, Depends(database.get_db, use_cache=False)]
+AuthDB = Annotated[Session, Depends(auth_storage.get_db, use_cache=True)]
