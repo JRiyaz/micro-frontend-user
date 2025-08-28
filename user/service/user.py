@@ -10,10 +10,10 @@ from sqlalchemy.sql.selectable import SelectBase
 from sqlmodel import select
 from sqlmodel.sql.expression import SelectOfScalar
 
-from ..database.db import DB
 from ..model import ForgotPassword, Role, User, UserOptional, UserPassword, UserRoles
 from ..security.utils import Crypt
 from ..utils.string import is_valid_email, is_valid_uuid
+from ..utils.utils import DB
 
 
 class UserService:

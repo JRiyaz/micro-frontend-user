@@ -4,13 +4,12 @@ from typing import TYPE_CHECKING, Sequence
 
 from fastapi import HTTPException, Request
 
+from .utils import Crypt
 from ..config import config
-from ..database.db import AuthDB
 from ..model import Gender, User, UserLogin, UserOptional, UserRoles
 from ..utils.constants import CSRF_METHODS
 from ..utils.string import get_unique_id
-from ..utils.utils import get_auth_storage
-from .utils import Crypt
+from ..utils.utils import AuthDB, get_auth_storage
 
 if TYPE_CHECKING:
     from ..service.roles import UserRolesService
