@@ -72,7 +72,7 @@ class UserPassword(BaseModel):
         return self
 
 
-class ForgotPassword(UserPassword):
+class ChangePassword(UserPassword):
     old_password: str = Field(min_length=3, max_length=64)
 
     @model_validator(mode="after")

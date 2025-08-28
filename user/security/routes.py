@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
+from ..model.general import Tokens
 from ..model.user import User, UserLogin
 from ..service.roles import RolesSvc
 from ..service.user import UserSrv
@@ -11,7 +12,7 @@ from .auth import Auth
 routes = APIRouter(tags=["Auth"])
 
 
-@routes.post("/sign-in")
+@routes.post("/sign-in", responses={200: {"model": Tokens}})
 async def sign_in(user: UserLogin, svc: UserSrv, role_svc: RolesSvc, auth: Annotated[Auth, Depends(Auth)]):
     data = await auth.login(user, svc, role_svc)
     if data is None:

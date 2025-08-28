@@ -3,10 +3,27 @@ import logging
 from fastapi import APIRouter, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import FileResponse, HTMLResponse
+from sqlalchemy.exc import SQLAlchemyError
+from sqlmodel import text
+
+from ..database.db import DB
+from ..model.general import Root
 
 logger = logging.getLogger(__name__)
 
 routes = APIRouter(tags=["common"], include_in_schema=False)
+health_routes = APIRouter(tags=["health"])
+
+
+@health_routes.get("/health", responses={200: {"model": Root}})
+async def health(db: DB):
+    try:
+        await db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        return "DB Connection Failed"
+
+    return "OK"
+
 
 # from fastapi.staticfiles import StaticFiles
 # app.mount("/static", StaticFiles(directory=path), name="static")

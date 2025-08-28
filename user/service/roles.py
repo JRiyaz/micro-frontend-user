@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql.selectable import SelectBase
 from sqlmodel import select
 
+from ..database.db import DB
 from ..model import Role, UserRoles
-from ..utils.utils import DB
 
 
 class UserRolesService:

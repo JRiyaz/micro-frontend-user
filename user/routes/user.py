@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import EmailStr
 
-from ..model import ForgotPassword, User, UserOptional, UserPassword
+from ..model import ChangePassword, User, UserOptional, UserPassword
 from ..model.general import JSONResp, NotFound, UserQuery
 from ..security.security import auth_security
 from ..service.user import UserSrv
@@ -80,8 +80,17 @@ async def create_password(user_id: EmailStr | UUID | str, usr_pass: UserPassword
 
 
 @pass_routes.post("/users/{user_id}/change-password", responses={404: {"model": NotFound}, 200: {"model": JSONResp}})
+async def change_password(user_id: EmailStr | UUID | str, usr_pass: ChangePassword, svc: UserSrv):
+    result: bool = await svc.change_password(user_id, usr_pass)
+    if result is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not result:
+        return JSONResponse(status_code=400, content={"msg": "Incorrect password"})
+    return JSONResponse(status_code=200, content={"msg": "Password changed successfully..."})
+
+
 @pass_routes.post("/users/{user_id}/forgot-password", responses={404: {"model": NotFound}, 200: {"model": JSONResp}})
-async def forgot_password(user_id: EmailStr | UUID | str, usr_pass: ForgotPassword, svc: UserSrv):
+async def forgot_password(user_id: EmailStr | UUID | str, usr_pass: UserPassword, svc: UserSrv):
     result: bool = await svc.forgot_password(user_id, usr_pass)
     if result is None:
         raise HTTPException(status_code=404, detail="User not found")

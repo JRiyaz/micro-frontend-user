@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 
 class UserQuery(BaseModel):
@@ -10,5 +10,14 @@ class NotFound(BaseModel):
     detail: str = "Not found"
 
 
+class Tokens(BaseModel):
+    auth_token: str
+    csrf_token: str
+
+
 class JSONResp(BaseModel):
     msg: str
+
+
+class Root(RootModel):
+    pass

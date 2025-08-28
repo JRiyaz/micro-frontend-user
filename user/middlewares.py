@@ -9,6 +9,24 @@ from .security.auth import Auth
 logger = logging.getLogger(__name__)
 
 
+class DBSession(BaseHTTPMiddleware):
+    def __init__(self, app):
+        super().__init__(app)
+
+    async def dispatch(self, request: Request, call_next):
+        db = request.app.state.db
+        auth_db = request.app.state.auth_db
+
+        await db.add_session(request)
+        await auth_db.add_session(request)
+
+        response = await call_next(request)
+
+        await db.remove_session(request)
+        await auth_db.remove_session(request)
+        return response
+
+
 class TimeIt(BaseHTTPMiddleware):
     def __init__(self, app, some_attribute: str):
         super().__init__(app)

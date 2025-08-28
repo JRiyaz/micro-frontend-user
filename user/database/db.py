@@ -1,21 +1,20 @@
 import logging
-from typing import AsyncGenerator
+from typing import Annotated, Any, AsyncGenerator
 
-from fastapi import Request, FastAPI
+from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy.ext.asyncio import async_sessionmaker as session_maker
 from sqlalchemy.ext.asyncio import create_async_engine as create_engine
 
-from .redis import RedisStorage
 from ..config import config
 from ..model import SQLModel
+from .redis import RedisStorage
 
 logger = logging.getLogger(__name__)
 
 
 class Database:
-    def __init__(self, app: FastAPI):
-        self.app = app
+    def __init__(self):
         self.host: str = config.DB_HOST
         self.port: int = config.DB_PORT
         self.user: str = config.DB_USER
@@ -59,24 +58,19 @@ class Database:
             yield session
             logger.debug(f"************ closing database session: {session} **********")
 
-    async def setup_db(self, auth_storage: "AuthStorage") -> None:
+    async def setup_db(self) -> None:
         await self.connect()
         await self.create_tables()
-        await self.add_session_middleware(auth_storage)
 
-    async def add_session_middleware(self, auth_storage: "AuthStorage"):
-        @self.app.middleware("http")
-        async def add_db_session(request: Request, call_next):
-            # Create session and attach to request
-            request.state.db_session = self.async_session()
-            request.state.auth_db = auth_storage.storage
-            logger.info(f"Attaching DB session: {request.state.db_session}")
-            try:
-                response = await call_next(request)
-            finally:
-                print(f"Closing DB session: {request.state.db_session}")
-                await request.state.db_session.close()
-            return response
+    async def add_session(self, req: Request):
+        # Create session and attach to request
+        req.state.db_session = self.async_session()
+        logger.debug(f"Attaching DB session: {req.state.db_session}")
+
+    async def remove_session(self, req: Request):
+        logger.debug(f"Closing DB session: {req.state.db_session}")
+        await req.state.db_session.close()
+        del req.state.db_session
 
     # def db_session(self):
     #     with Session(self.engine) as session:
@@ -110,6 +104,25 @@ class AuthStorage:
             logger.info("Closing auth storage")
             await self.storage.close()
 
+    async def add_session(self, req: Request):
+        req.state.auth_db = self.storage
+        logger.debug(f"Adding AuthDB request: {req.state.auth_db}")
+
+    async def remove_session(self, req: Request):
+        logger.debug(f"Closing AuthDB request: {req.state.auth_db}")
+        del req.state.auth_db
+
+
+def get_auth_db(req: Request):
+    return req.state.auth_db
+
+
+def get_db(req: Request) -> AsyncSession:
+    return req.state.db_session
+
+
+DB = Annotated[AsyncSession, Depends(get_db, use_cache=False)]
+AuthDB = Annotated[Any, Depends(get_auth_db, use_cache=False)]
 
 # DB = Annotated[Session, Depends(database.get_db, use_cache=False)]
 # AuthDB = Annotated[Session, Depends(auth_storage.get_db, use_cache=True)]

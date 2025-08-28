@@ -8,7 +8,8 @@ from fastapi.templating import Jinja2Templates
 from .exceptions import validation_handler
 from .hooks import app_lifespan
 from .logger import setup_logging
-from .middlewares import LogIt, TimeIt
+from .middlewares import DBSession, LogIt, TimeIt
+from .routes.common import health_routes
 from .routes.common import routes as common_routes
 from .routes.roles import routes as roles_routes
 from .routes.user import pass_routes
@@ -37,10 +38,12 @@ def create_app() -> FastAPI:
     app.version = project_path.joinpath(".version").read_text().strip()
 
     app.add_exception_handler(RequestValidationError, validation_handler)
+    app.add_middleware(DBSession)
     app.add_middleware(TimeIt, some_attribute="time")
     app.add_middleware(LogIt)
     # app.add_middleware(AuthenticationMiddleware)
 
+    app.include_router(health_routes)
     app.include_router(auth_routes)
     app.include_router(common_routes)
     app.include_router(user_routes)

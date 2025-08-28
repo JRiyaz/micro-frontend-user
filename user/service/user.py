@@ -10,10 +10,10 @@ from sqlalchemy.sql.selectable import SelectBase
 from sqlmodel import select
 from sqlmodel.sql.expression import SelectOfScalar
 
-from ..model import ForgotPassword, Role, User, UserOptional, UserPassword, UserRoles
+from ..database.db import DB
+from ..model import ChangePassword, Role, User, UserOptional, UserPassword, UserRoles
 from ..security.utils import Crypt
 from ..utils.string import is_valid_email, is_valid_uuid
-from ..utils.utils import DB
 
 
 class UserService:
@@ -140,7 +140,7 @@ class UserService:
         await self.db.commit()
         return True
 
-    async def forgot_password(self, user_id: EmailStr | UUID | str, usr_pass: ForgotPassword) -> bool | None:
+    async def change_password(self, user_id: EmailStr | UUID | str, usr_pass: ChangePassword) -> bool | None:
         # Fetch User
         db_user: User | None = await self.get_user(user_id)
         if not db_user:
@@ -149,6 +149,25 @@ class UserService:
         # Check if old and new passwords are matching
         if not Crypt.compare_password(db_user.password, usr_pass.old_password):
             return False
+
+        # Encrypt password
+        enc_password: str = Crypt.hash_it(usr_pass.password)
+
+        # Update User information
+        db_user.updated_at = datetime.now()
+        db_user.password = enc_password
+
+        # Commit changes to DB
+        await self.db.commit()
+        return True
+
+    async def forgot_password(self, user_id: EmailStr | UUID | str, usr_pass: UserPassword) -> bool | None:
+        # Fetch User
+        db_user: User | None = await self.get_user(user_id)
+        if not db_user:
+            return None
+
+        # TODO: Do some validation to check if legitimate user is changing the password
 
         # Encrypt password
         enc_password: str = Crypt.hash_it(usr_pass.password)

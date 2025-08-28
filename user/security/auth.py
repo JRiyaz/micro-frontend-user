@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING, Sequence
 
 from fastapi import HTTPException, Request
 
-from .utils import Crypt
 from ..config import config
+from ..database.db import AuthDB, get_auth_db
 from ..model import Gender, User, UserLogin, UserOptional, UserRoles
 from ..utils.constants import CSRF_METHODS
 from ..utils.string import get_unique_id
-from ..utils.utils import AuthDB, get_auth_storage
+from .utils import Crypt
 
 if TYPE_CHECKING:
     from ..service.roles import UserRolesService
@@ -56,7 +56,7 @@ class Auth:
     @classmethod
     async def authenticate(cls, req: Request) -> str:
         cls.req = req
-        cls.store: AuthDB = get_auth_storage(req)
+        cls.store: AuthDB = get_auth_db(req)
 
         if token := req.cookies.get(config.AUTH_COOKIE_NAME):
             if req.method in CSRF_METHODS:
