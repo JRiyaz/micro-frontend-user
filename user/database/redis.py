@@ -7,6 +7,7 @@ class RedisStorage:
     def __init__(self):
         self.redis_host = config.REDIS_HOST
         self.redis_port = config.REDIS_PORT
+        self.redis_username = config.REDIS_USERNAME
         self.redis_password = config.REDIS_PASSWORD
         self.redis_db = config.REDIS_DB
 

@@ -58,16 +58,16 @@ class Auth:
         cls.req = req
         cls.store: AuthDB = get_auth_db(req)
 
-        if token := req.cookies.get(config.AUTH_COOKIE_NAME):
-            if req.method in CSRF_METHODS:
-                data: dict = await cls.validate_token_and_csrf(token)
-            else:
-                data: dict = await cls.validate_token(token)
-        elif bearer := req.headers.get("Authorization"):
+        if bearer := req.headers.get("Authorization"):
             if not bearer.startswith("Bearer "):
                 raise HTTPException(status_code=401, detail="Signature verification failed")
             bearer, _, token = bearer.partition(" ")
             data: dict = await cls.validate_token(token)
+        elif token := req.cookies.get(config.AUTH_COOKIE_NAME):
+            if req.method in CSRF_METHODS:
+                data: dict = await cls.validate_token_and_csrf(token)
+            else:
+                data: dict = await cls.validate_token(token)
         else:
             raise HTTPException(status_code=401, detail="Token not found")
         req.state.context = data

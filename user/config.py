@@ -37,6 +37,7 @@ class Config(BaseSettings):
     # Redis Configuration
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
+    REDIS_USERNAME: str = "default"
     REDIS_PASSWORD: str = "admin"
     REDIS_DB: int = 0
 
