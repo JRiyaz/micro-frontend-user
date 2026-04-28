@@ -8,13 +8,15 @@ import { ThemeService } from 'ui-shared';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="min-h-screen bg-dark-base p-6 sm:p-8 relative overflow-hidden">
+    <div
+      class="min-h-screen bg-slate-50 dark:bg-dark-base p-6 sm:p-8 relative overflow-hidden"
+    >
       <div class="max-w-3xl mx-auto relative z-10">
         <!-- Header -->
         <div class="mb-8">
           <a
             routerLink="/dashboard"
-            class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-white font-bold uppercase tracking-widest mb-4 transition-colors"
+            class="inline-flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold uppercase tracking-widest mb-4 transition-colors"
           >
             <svg
               class="w-4 h-4"
@@ -31,17 +33,19 @@ import { ThemeService } from 'ui-shared';
             </svg>
             Back to Dashboard
           </a>
-          <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
+          <h1
+            class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white"
+          >
             Account Settings
           </h1>
-          <p class="text-slate-400 text-sm mt-1">
+          <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">
             Manage your profile, preferences and security.
           </p>
         </div>
 
         <!-- Tabs -->
         <div
-          class="flex gap-1 mb-8 bg-white/[0.03] border border-white/[0.06] rounded-xl p-1 overflow-x-auto"
+          class="flex gap-1 mb-8 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] rounded-xl p-1 overflow-x-auto shadow-sm dark:shadow-none"
         >
           <button
             *ngFor="let tab of tabs"
@@ -51,7 +55,9 @@ import { ThemeService } from 'ui-shared';
             [class.text-white]="activeTab() === tab.id"
             [class.shadow-lg]="activeTab() === tab.id"
             [class.text-slate-500]="activeTab() !== tab.id"
-            [class.hover:text-white]="activeTab() !== tab.id"
+            [class.dark:text-slate-400]="activeTab() !== tab.id"
+            [class.hover:text-slate-900]="activeTab() !== tab.id"
+            [class.dark:hover:text-white]="activeTab() !== tab.id"
           >
             {{ tab.label }}
           </button>
@@ -60,10 +66,10 @@ import { ThemeService } from 'ui-shared';
         <!-- Profile Tab -->
         <div *ngIf="activeTab() === 'profile'" class="space-y-6">
           <div
-            class="bg-white/[0.04] border border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8"
+            class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
           >
             <h3
-              class="text-sm font-bold text-white uppercase tracking-widest mb-6"
+              class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
             >
               Profile Information
             </h3>
@@ -96,24 +102,24 @@ import { ThemeService } from 'ui-shared';
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label
-                      class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] block mb-2"
+                      class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
                       >First Name</label
                     >
                     <input
                       type="text"
                       value="Riyaz"
-                      class="w-full bg-dark-base/50 border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                      class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                     />
                   </div>
                   <div>
                     <label
-                      class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] block mb-2"
+                      class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
                       >Last Name</label
                     >
                     <input
                       type="text"
                       value="Khan"
-                      class="w-full bg-dark-base/50 border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                      class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                     />
                   </div>
                 </div>
@@ -122,25 +128,25 @@ import { ThemeService } from 'ui-shared';
             <div class="space-y-4">
               <div>
                 <label
-                  class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] block mb-2"
+                  class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
                   >Email</label
                 >
                 <input
                   type="email"
                   value="riyaz@company.com"
-                  class="w-full bg-dark-base/50 border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                 />
               </div>
               <div>
                 <label
-                  class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] block mb-2"
+                  class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
                   >Role</label
                 >
                 <input
                   type="text"
                   value="Lead Developer"
                   disabled
-                  class="w-full bg-dark-base/30 border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-slate-500 cursor-not-allowed"
+                  class="w-full bg-slate-100 dark:bg-dark-base/30 border border-slate-200 dark:border-white/[0.06] rounded-xl px-4 py-3 text-sm text-slate-500 cursor-not-allowed"
                 />
               </div>
             </div>
@@ -155,21 +161,24 @@ import { ThemeService } from 'ui-shared';
         <!-- Appearance Tab -->
         <div *ngIf="activeTab() === 'appearance'" class="space-y-6">
           <div
-            class="bg-white/[0.04] border border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8"
+            class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
           >
             <h3
-              class="text-sm font-bold text-white uppercase tracking-widest mb-6"
+              class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
             >
               Theme
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div
                 *ngFor="let theme of themes"
-                class="bg-white/[0.03] border rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02]"
+                class="bg-slate-50 dark:bg-white/[0.03] border rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02]"
                 [class.border-primary]="
                   themeService.currentTheme() === theme.id
                 "
-                [class.border-white/[0.08]]="
+                [class.border-slate-200]="
+                  themeService.currentTheme() !== theme.id
+                "
+                [class.dark:border-white/[0.08]]="
                   themeService.currentTheme() !== theme.id
                 "
                 (click)="themeService.setTheme(theme.id)"
@@ -178,9 +187,11 @@ import { ThemeService } from 'ui-shared';
                   class="h-16 rounded-lg mb-3"
                   [style.background]="theme.preview"
                 ></div>
-                <p class="text-sm font-bold text-white">{{ theme.name }}</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-white">
+                  {{ theme.name }}
+                </p>
                 <p
-                  class="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5"
+                  class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5"
                 >
                   {{ theme.desc }}
                 </p>
@@ -192,45 +203,45 @@ import { ThemeService } from 'ui-shared';
         <!-- Security Tab -->
         <div *ngIf="activeTab() === 'security'" class="space-y-6">
           <div
-            class="bg-white/[0.04] border border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8"
+            class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
           >
             <h3
-              class="text-sm font-bold text-white uppercase tracking-widest mb-6"
+              class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
             >
               Change Password
             </h3>
             <div class="space-y-4 max-w-md">
               <div>
                 <label
-                  class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] block mb-2"
+                  class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
                   >Current Password</label
                 >
                 <input
                   type="password"
                   placeholder="••••••••"
-                  class="w-full bg-dark-base/50 border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                 />
               </div>
               <div>
                 <label
-                  class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] block mb-2"
+                  class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
                   >New Password</label
                 >
                 <input
                   type="password"
                   placeholder="Min. 8 characters"
-                  class="w-full bg-dark-base/50 border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                 />
               </div>
               <div>
                 <label
-                  class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] block mb-2"
+                  class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
                   >Confirm Password</label
                 >
                 <input
                   type="password"
                   placeholder="Re-enter password"
-                  class="w-full bg-dark-base/50 border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                 />
               </div>
               <button
@@ -241,14 +252,14 @@ import { ThemeService } from 'ui-shared';
             </div>
           </div>
           <div
-            class="bg-white/[0.04] border border-red-500/20 rounded-2xl p-6 sm:p-8"
+            class="bg-white dark:bg-white/[0.04] border border-red-500/20 rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
           >
             <h3
               class="text-sm font-bold text-red-400 uppercase tracking-widest mb-2"
             >
               Danger Zone
             </h3>
-            <p class="text-xs text-slate-400 mb-4">
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
               Once you delete your account, there is no going back.
             </p>
             <button
