@@ -14,7 +14,10 @@
 
 # Generated files
 .idea/**/contentModel.xml
-frontend/tsconfig.federation.json
+**/tsconfig.federation.json
+**/federation.manifest.json
+**/environments/environment.ts
+**/environments/environment.development.ts
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
