@@ -1,3 +1,55 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
+
 @custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: var(--theme-primary);
+  --color-primary-hover: var(--theme-primary-hover);
+  --color-dark-base: var(--theme-dark-base);
+  --color-dark-surface: var(--theme-dark-surface);
+  --color-dark-elevated: var(--theme-dark-elevated);
+  --color-dark-card: var(--theme-dark-card);
+}
+
+@layer base {
+  :root {
+    /* Void Blue Theme (Default) */
+    --theme-primary: #6d74ff;
+    --theme-primary-hover: #5a61e6;
+    --theme-dark-base: #0a0b1e;
+    --theme-dark-surface: #0d0f2b;
+    --theme-dark-elevated: #111336;
+    --theme-dark-card: #1e2048;
+  }
+
+  :root[data-theme="emerald"] {
+    /* Emerald Theme */
+    --theme-primary: #10b981;
+    --theme-primary-hover: #059669;
+    --theme-dark-base: #022c22;
+    --theme-dark-surface: #064e3b;
+    --theme-dark-elevated: #065f46;
+    --theme-dark-card: #047857;
+  }
+
+  :root[data-theme="rose"] {
+    /* Rose Theme */
+    --theme-primary: #f43f5e;
+    --theme-primary-hover: #e11d48;
+    --theme-dark-base: #2e1022;
+    --theme-dark-surface: #3e122b;
+    --theme-dark-elevated: #4e1434;
+    --theme-dark-card: #60183d;
+  }
+
+  :root[data-theme="obsidian"] {
+    /* Obsidian Theme */
+    --theme-primary: #a855f7;
+    --theme-primary-hover: #9333ea;
+    --theme-dark-base: #0f172a;
+    --theme-dark-surface: #1e293b;
+    --theme-dark-elevated: #334155;
+    --theme-dark-card: #475569;
+  }
+}

@@ -8,13 +8,13 @@ import { RouterModule } from '@angular/router';
   imports: [CommonModule, RouterModule],
   template: `
     <div
-      class="min-h-screen bg-slate-50 dark:bg-[#0a0b1e] flex items-center justify-center p-6 relative overflow-hidden"
+      class="min-h-screen bg-slate-50 dark:bg-dark-base flex items-center justify-center p-6 relative overflow-hidden"
     >
       <div class="w-full max-w-md relative z-10">
         <div class="flex flex-col items-center mb-10">
           <a routerLink="/" class="flex items-center gap-2 mb-6">
             <div
-              class="w-14 h-14 bg-gradient-to-br from-[#6d74ff] to-blue-500 rounded-2xl flex items-center justify-center rotate-3"
+              class="w-14 h-14 bg-gradient-to-br from-primary to-blue-500 rounded-2xl flex items-center justify-center rotate-3"
             >
               <span class="text-white font-black text-2xl">I</span>
             </div>
@@ -41,7 +41,7 @@ import { RouterModule } from '@angular/router';
               <input
                 type="email"
                 placeholder="name&#64;company.com"
-                class="w-full bg-slate-50 dark:bg-[#0a0b1e]/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6d74ff]/50 focus:border-[#6d74ff]/30 transition-all"
+                class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 transition-all"
                 id="login-email"
               />
             </div>
@@ -53,20 +53,20 @@ import { RouterModule } from '@angular/router';
                 >
                 <a
                   href="#"
-                  class="text-[10px] font-bold text-[#6d74ff] hover:underline uppercase tracking-widest"
+                  class="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
                   >Forgot?</a
                 >
               </div>
               <input
                 type="password"
                 placeholder="••••••••"
-                class="w-full bg-slate-50 dark:bg-[#0a0b1e]/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6d74ff]/50 focus:border-[#6d74ff]/30 transition-all"
+                class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 transition-all"
                 id="login-password"
               />
             </div>
             <button
               type="submit"
-              class="w-full bg-[#6d74ff] text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-[#5a61e6] transition-all"
+              class="w-full bg-primary text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-primary-hover transition-all"
               id="login-submit"
             >
               Sign In
@@ -83,7 +83,7 @@ import { RouterModule } from '@angular/router';
               class="relative flex justify-center text-[10px] uppercase font-bold tracking-widest"
             >
               <span
-                class="bg-white dark:bg-[#0e1030] px-4 text-slate-500 dark:text-slate-400"
+                class="bg-white dark:bg-dark-base px-4 text-slate-500 dark:text-slate-400"
                 >Or continue with</span
               >
             </div>
@@ -121,7 +121,7 @@ import { RouterModule } from '@angular/router';
           New here?
           <a
             routerLink="/user/register"
-            class="text-[#6d74ff] font-bold uppercase tracking-widest hover:underline ml-1"
+            class="text-primary font-bold uppercase tracking-widest hover:underline ml-1"
             >Create Account</a
           >
         </p>

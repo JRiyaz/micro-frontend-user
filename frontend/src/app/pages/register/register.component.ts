@@ -8,13 +8,13 @@ import { RouterModule } from '@angular/router';
   imports: [CommonModule, RouterModule],
   template: `
     <div
-      class="min-h-screen bg-slate-50 dark:bg-[#0a0b1e] flex items-center justify-center p-6 relative overflow-hidden"
+      class="min-h-screen bg-slate-50 dark:bg-dark-base flex items-center justify-center p-6 relative overflow-hidden"
     >
       <div class="w-full max-w-xl relative z-10">
         <div class="flex flex-col items-center mb-10">
           <a routerLink="/" class="flex items-center gap-2 mb-6">
             <div
-              class="w-14 h-14 bg-gradient-to-br from-[#6d74ff] to-blue-500 rounded-2xl flex items-center justify-center -rotate-3"
+              class="w-14 h-14 bg-gradient-to-br from-primary to-blue-500 rounded-2xl flex items-center justify-center -rotate-3"
             >
               <span class="text-white font-black text-2xl">I</span>
             </div>
@@ -41,7 +41,7 @@ import { RouterModule } from '@angular/router';
               <input
                 type="text"
                 placeholder="John"
-                class="w-full bg-slate-50 dark:bg-[#0a0b1e]/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6d74ff]/50 transition-all"
+                class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                 id="register-firstname"
               />
             </div>
@@ -53,7 +53,7 @@ import { RouterModule } from '@angular/router';
               <input
                 type="text"
                 placeholder="Doe"
-                class="w-full bg-slate-50 dark:bg-[#0a0b1e]/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6d74ff]/50 transition-all"
+                class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                 id="register-lastname"
               />
             </div>
@@ -65,7 +65,7 @@ import { RouterModule } from '@angular/router';
               <input
                 type="email"
                 placeholder="john.doe&#64;company.com"
-                class="w-full bg-slate-50 dark:bg-[#0a0b1e]/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6d74ff]/50 transition-all"
+                class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                 id="register-email"
               />
             </div>
@@ -77,7 +77,7 @@ import { RouterModule } from '@angular/router';
               <input
                 type="password"
                 placeholder="Min. 8 characters"
-                class="w-full bg-slate-50 dark:bg-[#0a0b1e]/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6d74ff]/50 transition-all"
+                class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                 id="register-password"
               />
             </div>
@@ -85,7 +85,7 @@ import { RouterModule } from '@angular/router';
               <input
                 type="checkbox"
                 id="terms"
-                class="w-4 h-4 rounded bg-white dark:bg-[#0a0b1e] border-slate-300 dark:border-white/[0.15] text-[#6d74ff] focus:ring-[#6d74ff]"
+                class="w-4 h-4 rounded bg-white dark:bg-dark-base border-slate-300 dark:border-white/[0.15] text-primary focus:ring-primary"
               />
               <label
                 for="terms"
@@ -95,7 +95,7 @@ import { RouterModule } from '@angular/router';
             </div>
             <button
               type="submit"
-              class="sm:col-span-2 bg-[#6d74ff] text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-[#5a61e6] transition-all mt-2"
+              class="sm:col-span-2 bg-primary text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-primary-hover transition-all mt-2"
               id="register-submit"
             >
               Create My Account
@@ -107,7 +107,7 @@ import { RouterModule } from '@angular/router';
           Already have an account?
           <a
             routerLink="/user/login"
-            class="text-[#6d74ff] font-bold uppercase tracking-widest hover:underline ml-1"
+            class="text-primary font-bold uppercase tracking-widest hover:underline ml-1"
             >Sign In</a
           >
         </p>
