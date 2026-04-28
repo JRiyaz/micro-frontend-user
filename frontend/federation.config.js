@@ -7,8 +7,6 @@ module.exports = withNativeFederation({
   name: "user-app",
 
   exposes: {
-    "./Sample-Component":
-      "./projects/user/frontend/src/app/sample.component.ts",
     "./USER-ROUTES": "./projects/user/frontend/src/app/app.routes.ts",
   },
 

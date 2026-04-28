@@ -1,39 +1,37 @@
 import { Routes } from "@angular/router";
-import { SampleComponent } from "./sample.component";
+import { LoginComponent } from "./pages/login/login.component";
+import { RegisterComponent } from "./pages/register/register.component";
+import { SettingsComponent } from "./pages/settings/settings.component";
 import { NotFoundComponent } from "./not-found.component";
-import { AppComponent } from "./app.component";
 
 export const USER_ROUTES: Routes = [
   {
-    path: "carousel",
-    title: "Carousel",
-    loadComponent: () =>
-      import("./carousel.component").then((x) => x.CarouselComponent),
+    path: "login",
+    title: "Sign In - Inventory",
+    component: LoginComponent,
   },
   {
-    path: "model",
-    title: "Model",
-    loadComponent: () =>
-      import("./model.component").then((x) => x.ModelComponent),
+    path: "register",
+    title: "Create Account - Inventory",
+    component: RegisterComponent,
+  },
+  {
+    path: "settings",
+    title: "Settings - Inventory",
+    component: SettingsComponent,
+  },
+  {
+    path: "",
+    redirectTo: "login",
+    pathMatch: "full"
   },
   {
     path: "**",
     title: "Not Found",
     component: NotFoundComponent,
   },
-  {
-    path: "",
-    title: "Home",
-    component: AppComponent,
-  },
 ];
 
 export const routes: Routes = [
-  {
-    path: "example",
-    title: "Example",
-    component: SampleComponent,
-  },
-
   ...USER_ROUTES,
 ];
