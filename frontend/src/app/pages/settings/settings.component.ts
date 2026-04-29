@@ -5,6 +5,7 @@ import {
   computed,
   OnInit,
   OnDestroy,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
@@ -29,71 +30,72 @@ import { map, startWith } from 'rxjs/operators';
   selector: 'app-settings',
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div
-      class="min-h-screen bg-slate-50 dark:bg-dark-base p-4 sm:p-8 relative overflow-hidden flex items-center justify-center"
+      class="h-[calc(100vh-80px)] flex flex-col p-4 sm:p-8 max-w-7xl mx-auto animate-fade-in overflow-hidden"
     >
-      <div
-        class="w-full max-w-3xl relative z-10 flex flex-col h-[90vh] max-h-[850px]"
-      >
-        <!-- Header (Fixed) -->
-        <div class="mb-6 flex-shrink-0">
-          <a
-            routerLink="/dashboard"
-            class="inline-flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold uppercase tracking-widest mb-3 transition-colors"
-          >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 19l-7-7 7-7"
-              ></path>
-            </svg>
-            Back to Dashboard
-          </a>
-          <h1
-            class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white"
-          >
-            Settings
-          </h1>
-          <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            Manage your account, preferences and workspace settings.
-          </p>
-        </div>
-
-        <!-- Navigation Tabs (Fixed) -->
-        <div
-          class="flex w-full bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] rounded-xl p-1 shadow-sm dark:shadow-none mb-6 flex-shrink-0"
+      <div class="flex-shrink-0 mb-8">
+        <a
+          routerLink="/dashboard"
+          class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-all mb-4 group"
         >
-          <button
-            *ngFor="let tab of tabs"
-            (click)="activeTab.set(tab.id)"
-            class="flex-1 px-2 py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 text-center"
-            [class.bg-primary]="activeTab() === tab.id"
-            [class.text-white]="activeTab() === tab.id"
-            [class.shadow-lg]="activeTab() === tab.id"
-            [class.text-slate-500]="activeTab() !== tab.id"
-            [class.dark:text-slate-400]="activeTab() !== tab.id"
-            [class.hover:text-slate-900]="activeTab() !== tab.id"
-            [class.dark:hover:text-white]="activeTab() !== tab.id"
+          <svg
+            class="w-3 h-3 transform group-hover:-translate-x-1 transition-transform"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            <span
-              *ngIf="tab.icon"
-              [innerHTML]="tab.icon"
-              class="w-4 h-4 hidden sm:block"
-            ></span>
-            <span class="truncate">{{ tab.label }}</span>
-          </button>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"
+            ></path>
+          </svg>
+          Back to Dashboard
+        </a>
+        <h1
+          class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white"
+        >
+          Settings
+        </h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">
+          Manage your account, preferences and workspace settings.
+        </p>
+      </div>
+
+      <div class="flex-1 flex gap-8 overflow-hidden">
+        <!-- Sidebar Navigation (Left Column) -->
+        <div class="w-64 flex-shrink-0 overflow-y-auto custom-scrollbar pr-4">
+          <div class="space-y-1.5">
+            <button
+              *ngFor="let tab of tabs"
+              (click)="activeTab.set(tab.id)"
+              class="w-full px-4 py-3 text-xs font-black uppercase tracking-widest rounded-2xl transition-all flex items-center gap-3 text-left group"
+              [class.bg-primary]="activeTab() === tab.id"
+              [class.text-white]="activeTab() === tab.id"
+              [class.shadow-xl]="activeTab() === tab.id"
+              [class.shadow-primary/20]="activeTab() === tab.id"
+              [class.text-slate-500]="activeTab() !== tab.id"
+              [class.dark:text-slate-400]="activeTab() !== tab.id"
+              [class.hover:bg-slate-50]="activeTab() !== tab.id"
+              [class.dark:hover:bg-white/[0.03]]="activeTab() !== tab.id"
+            >
+              <div
+                *ngIf="tab.icon"
+                [innerHTML]="tab.icon"
+                class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110"
+                [class.text-white]="activeTab() === tab.id"
+                [class.text-slate-400]="activeTab() !== tab.id"
+              ></div>
+              <span class="truncate">{{ tab.label }}</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Tab Content (Scrollable) -->
-        <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar min-h-0">
+        <!-- Content Area (Right Column) -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 min-w-0">
           <div class="pb-8">
             <!-- Profile Tab -->
             <div
@@ -205,13 +207,13 @@ import { map, startWith } from 'rxjs/operators';
                         <div class="relative sm:col-span-2">
                           <input
                             type="text"
-                            [value]="auth.currentRole()"
+                            [value]="auth.userRoles().join(', ')"
                             disabled
                             class="w-full bg-transparent border-b-2 border-slate-100 dark:border-white/[0.04] py-2 text-sm text-slate-400 cursor-not-allowed opacity-60"
                           />
                           <label
                             class="absolute left-0 -top-3.5 text-slate-400 text-[10px] uppercase font-bold tracking-widest"
-                            >Account Role</label
+                            >Account Roles</label
                           >
                         </div>
                       </div>
@@ -253,20 +255,20 @@ import { map, startWith } from 'rxjs/operators';
                   >
                     <span
                       class="text-[10px] font-black text-primary uppercase tracking-widest"
-                      >Active: {{ auth.currentRole() }}</span
+                      >Active Roles: {{ auth.userRoles().length }}</span
                     >
                   </div>
                 </div>
 
                 <div class="space-y-4 mb-10">
                   <div
-                    *ngFor="let role of auth.roles()"
+                    *ngFor="let role of auth.availableRoles()"
                     class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-xl group transition-all hover:border-primary/30"
                   >
                     <div class="flex items-center gap-3">
                       <div
-                        [class.bg-primary]="auth.currentRole() === role"
-                        [class.bg-slate-200]="auth.currentRole() !== role"
+                        [class.bg-primary]="auth.hasRole(role)"
+                        [class.bg-slate-200]="!auth.hasRole(role)"
                         class="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(109,116,255,0.5)]"
                       ></div>
                       <span
@@ -274,13 +276,28 @@ import { map, startWith } from 'rxjs/operators';
                         >{{ role }}</span
                       >
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-4">
                       <button
-                        *ngIf="auth.currentRole() !== role"
-                        (click)="selectRole(role)"
-                        class="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 rounded-lg transition-all"
+                        (click)="toggleRole(role)"
+                        [class.text-primary]="auth.hasRole(role)"
+                        [class.text-slate-400]="!auth.hasRole(role)"
+                        class="flex items-center gap-2 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest hover:bg-primary/10 rounded-lg transition-all"
                       >
-                        Select
+                        <svg
+                          *ngIf="auth.hasRole(role)"
+                          class="w-3 h-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="3"
+                            d="M5 13l4 4L19 7"
+                          ></path>
+                        </svg>
+                        {{ auth.hasRole(role) ? 'Assigned' : 'Assign' }}
                       </button>
                       <button
                         (click)="deleteRole(role)"
@@ -315,6 +332,7 @@ import { map, startWith } from 'rxjs/operators';
                         type="text"
                         [value]="newRoleName()"
                         (input)="newRoleName.set($any($event.target).value)"
+                        (keyup.enter)="addRole()"
                         placeholder=" "
                         class="floating-input"
                         id="new-role"
@@ -952,7 +970,30 @@ import { map, startWith } from 'rxjs/operators';
   styles: `
     .custom-scrollbar {
       scrollbar-width: thin;
-      scrollbar-color: rgba(109, 116, 255, 0.2) transparent;
+      scrollbar-color: rgba(109, 116, 255, 0.4) transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(109, 116, 255, 0.02);
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(109, 116, 255, 0.3);
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background-clip: padding-box;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(109, 116, 255, 0.6);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   `,
 })
@@ -1004,35 +1045,36 @@ export class SettingsComponent {
   addRole() {
     const role = this.newRoleName().trim();
     if (role) {
-      this.auth.addRole(role);
+      this.auth.addSystemRole(role);
       this.newRoleName.set('');
       this.notificationService.success(
         'Role Created',
-        `Added "${role}" to available permissions.`,
+        `Added "${role}" to available system roles.`,
       );
     }
   }
 
   deleteRole(role: string) {
-    if (this.auth.roles().length <= 1) {
+    if (this.auth.availableRoles().length <= 1) {
       this.notificationService.error(
         'Action Restricted',
-        'Cannot delete the last remaining role.',
+        'Cannot delete the last remaining system role.',
       );
       return;
     }
-    this.auth.deleteRole(role);
+    this.auth.deleteSystemRole(role);
     this.notificationService.success(
       'Role Removed',
       `Deleted "${role}" from the system.`,
     );
   }
 
-  selectRole(role: string) {
-    this.auth.setCurrentRole(role);
+  toggleRole(role: string) {
+    this.auth.toggleRole(role);
+    const hasRole = this.auth.hasRole(role);
     this.notificationService.success(
-      'Role Updated',
-      `Switched active session to "${role}" permissions.`,
+      'Permissions Updated',
+      `${hasRole ? 'Assigned' : 'Removed'} "${role}" permissions.`,
     );
   }
 
