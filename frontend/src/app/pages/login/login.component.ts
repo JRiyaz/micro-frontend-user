@@ -46,20 +46,17 @@ import { map, startWith } from 'rxjs/operators';
             class="space-y-8"
           >
             <!-- Email Field -->
-            <div class="relative group">
+            <div class="floating-input-group">
               <input
                 type="email"
                 formControlName="email"
                 id="login-email"
                 placeholder=" "
-                class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                class="floating-input"
               />
-              <label
-                for="login-email"
-                class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-xs pointer-events-none uppercase font-bold tracking-widest"
+              <label for="login-email" class="floating-label"
+                >Email Address</label
               >
-                Email Address
-              </label>
               <!-- Validation Error -->
               <div *ngIf="emailInvalid()" class="absolute -bottom-5 left-0">
                 <span
@@ -76,20 +73,17 @@ import { map, startWith } from 'rxjs/operators';
             </div>
 
             <!-- Password Field -->
-            <div class="relative group">
+            <div class="floating-input-group">
               <input
                 type="password"
                 formControlName="password"
                 id="login-password"
                 placeholder=" "
-                class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                class="floating-input"
               />
-              <label
-                for="login-password"
-                class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-xs pointer-events-none uppercase font-bold tracking-widest"
+              <label for="login-password" class="floating-label"
+                >Password</label
               >
-                Password
-              </label>
               <!-- Validation Error -->
               <div *ngIf="passwordInvalid()" class="absolute -bottom-5 left-0">
                 <span
@@ -105,7 +99,7 @@ import { map, startWith } from 'rxjs/operators';
               </div>
               <a
                 href="#"
-                class="absolute right-0 top-2 text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
+                class="absolute right-0 top-7 text-[10px] font-bold text-primary hover:underline uppercase tracking-widest z-10"
                 >Forgot?</a
               >
             </div>

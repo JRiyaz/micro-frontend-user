@@ -46,20 +46,17 @@ import { map, startWith } from 'rxjs/operators';
             class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-8"
           >
             <!-- First Name -->
-            <div class="relative group">
+            <div class="floating-input-group">
               <input
                 type="text"
                 formControlName="firstName"
                 id="register-firstname"
                 placeholder=" "
-                class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                class="floating-input"
               />
-              <label
-                for="register-firstname"
-                class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-xs pointer-events-none uppercase font-bold tracking-widest"
+              <label for="register-firstname" class="floating-label"
+                >First Name</label
               >
-                First Name
-              </label>
               <div *ngIf="firstNameInvalid()" class="absolute -bottom-5 left-0">
                 <span
                   *ngIf="registerForm.get('firstName')?.errors?.['required']"
@@ -70,20 +67,17 @@ import { map, startWith } from 'rxjs/operators';
             </div>
 
             <!-- Last Name -->
-            <div class="relative group">
+            <div class="floating-input-group">
               <input
                 type="text"
                 formControlName="lastName"
                 id="register-lastname"
                 placeholder=" "
-                class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                class="floating-input"
               />
-              <label
-                for="register-lastname"
-                class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-xs pointer-events-none uppercase font-bold tracking-widest"
+              <label for="register-lastname" class="floating-label"
+                >Last Name</label
               >
-                Last Name
-              </label>
               <div *ngIf="lastNameInvalid()" class="absolute -bottom-5 left-0">
                 <span
                   *ngIf="registerForm.get('lastName')?.errors?.['required']"
@@ -94,20 +88,17 @@ import { map, startWith } from 'rxjs/operators';
             </div>
 
             <!-- Work Email -->
-            <div class="relative group sm:col-span-2">
+            <div class="floating-input-group sm:col-span-2">
               <input
                 type="email"
                 formControlName="email"
                 id="register-email"
                 placeholder=" "
-                class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                class="floating-input"
               />
-              <label
-                for="register-email"
-                class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-xs pointer-events-none uppercase font-bold tracking-widest"
+              <label for="register-email" class="floating-label"
+                >Work Email</label
               >
-                Work Email
-              </label>
               <div *ngIf="emailInvalid()" class="absolute -bottom-5 left-0">
                 <span
                   *ngIf="registerForm.get('email')?.errors?.['required']"
@@ -123,20 +114,17 @@ import { map, startWith } from 'rxjs/operators';
             </div>
 
             <!-- Password -->
-            <div class="relative group sm:col-span-2">
+            <div class="floating-input-group sm:col-span-2">
               <input
                 type="password"
                 formControlName="password"
                 id="register-password"
                 placeholder=" "
-                class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                class="floating-input"
               />
-              <label
-                for="register-password"
-                class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-xs pointer-events-none uppercase font-bold tracking-widest"
+              <label for="register-password" class="floating-label"
+                >Password</label
               >
-                Password
-              </label>
               <div *ngIf="passwordInvalid()" class="absolute -bottom-5 left-0">
                 <span
                   *ngIf="registerForm.get('password')?.errors?.['required']"

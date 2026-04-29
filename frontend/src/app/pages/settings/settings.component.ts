@@ -136,17 +136,14 @@ import { map, startWith } from 'rxjs/operators';
                       <div
                         class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-8"
                       >
-                        <div class="relative">
+                        <div class="floating-input-group">
                           <input
                             type="text"
                             formControlName="firstName"
                             placeholder=" "
-                            class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                            class="floating-input"
                           />
-                          <label
-                            class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-[10px] transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-[10px] pointer-events-none uppercase font-bold tracking-widest"
-                            >First Name</label
-                          >
+                          <label class="floating-label">First Name</label>
                           <div
                             *ngIf="firstNameInvalid()"
                             class="absolute -bottom-5 left-0"
@@ -157,17 +154,14 @@ import { map, startWith } from 'rxjs/operators';
                             >
                           </div>
                         </div>
-                        <div class="relative">
+                        <div class="floating-input-group">
                           <input
                             type="text"
                             formControlName="lastName"
                             placeholder=" "
-                            class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                            class="floating-input"
                           />
-                          <label
-                            class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-[10px] transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-[10px] pointer-events-none uppercase font-bold tracking-widest"
-                            >Last Name</label
-                          >
+                          <label class="floating-label">Last Name</label>
                           <div
                             *ngIf="lastNameInvalid()"
                             class="absolute -bottom-5 left-0"
@@ -178,17 +172,14 @@ import { map, startWith } from 'rxjs/operators';
                             >
                           </div>
                         </div>
-                        <div class="relative sm:col-span-2">
+                        <div class="floating-input-group sm:col-span-2">
                           <input
                             type="email"
                             formControlName="email"
                             placeholder=" "
-                            class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                            class="floating-input"
                           />
-                          <label
-                            class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-[10px] transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-[10px] pointer-events-none uppercase font-bold tracking-widest"
-                            >Email Address</label
-                          >
+                          <label class="floating-label">Email Address</label>
                           <div
                             *ngIf="emailInvalid()"
                             class="absolute -bottom-5 left-0"
@@ -248,17 +239,14 @@ import { map, startWith } from 'rxjs/operators';
                   Change Password
                 </h3>
                 <form [formGroup]="securityForm" class="space-y-10 max-w-md">
-                  <div class="relative">
+                  <div class="floating-input-group">
                     <input
                       type="password"
                       formControlName="currentPassword"
                       placeholder=" "
-                      class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                      class="floating-input"
                     />
-                    <label
-                      class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-[10px] transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-[10px] pointer-events-none uppercase font-bold tracking-widest"
-                      >Current Password</label
-                    >
+                    <label class="floating-label">Current Password</label>
                     <div
                       *ngIf="currentPasswordInvalid()"
                       class="absolute -bottom-5 left-0"
@@ -269,17 +257,14 @@ import { map, startWith } from 'rxjs/operators';
                       >
                     </div>
                   </div>
-                  <div class="relative">
+                  <div class="floating-input-group">
                     <input
                       type="password"
                       formControlName="newPassword"
                       placeholder=" "
-                      class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                      class="floating-input"
                     />
-                    <label
-                      class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-[10px] transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-[10px] pointer-events-none uppercase font-bold tracking-widest"
-                      >New Password</label
-                    >
+                    <label class="floating-label">New Password</label>
                     <div
                       *ngIf="newPasswordInvalid()"
                       class="absolute -bottom-5 left-0"
@@ -300,17 +285,14 @@ import { map, startWith } from 'rxjs/operators';
                       >
                     </div>
                   </div>
-                  <div class="relative">
+                  <div class="floating-input-group">
                     <input
                       type="password"
                       formControlName="confirmPassword"
                       placeholder=" "
-                      class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                      class="floating-input"
                     />
-                    <label
-                      class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-[10px] transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-[10px] pointer-events-none uppercase font-bold tracking-widest"
-                      >Confirm Password</label
-                    >
+                    <label class="floating-label">Confirm Password</label>
                     <div
                       *ngIf="confirmPasswordInvalid()"
                       class="absolute -bottom-5 left-0"
@@ -858,44 +840,12 @@ import { map, startWith } from 'rxjs/operators';
       </div>
     </div>
   `,
-  styles: [
-    `
-      .animate-fade-in {
-        animation: fadeIn 0.3s ease-out;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      /* Custom Scrollbar */
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: rgba(109, 116, 255, 0.2);
-        border-radius: 10px;
-        transition: background 0.3s ease;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: rgba(109, 116, 255, 0.4);
-      }
-
-      .custom-scrollbar {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(109, 116, 255, 0.2) transparent;
-      }
-    `,
-  ],
+  styles: `
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(109, 116, 255, 0.2) transparent;
+    }
+  `,
 })
 export class SettingsComponent {
   activeTab = signal('profile');
