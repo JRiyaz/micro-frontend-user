@@ -694,6 +694,25 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                             </p>
                           </div>
                         </div>
+
+                        <!-- Services List -->
+                        <div
+                          class="mt-4 pt-4 border-t border-slate-200/50 dark:border-white/5"
+                        >
+                          <p
+                            class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2"
+                          >
+                            Active Services
+                          </p>
+                          <div class="flex flex-wrap gap-2">
+                            <div
+                              *ngFor="let svc of project.services"
+                              class="px-2 py-1 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-lg text-[9px] font-bold text-primary uppercase tracking-tight"
+                            >
+                              {{ svc }}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -839,12 +858,15 @@ export class SettingsComponent {
   workspaceService = inject(WorkspaceService);
 
   get projectsWithDetails() {
-    const versions = ['1.2.0', '1.1.5', '1.0.8', '0.9.4'];
+    const versions = ['1.2.4', '1.1.2', '1.0.0'];
     return this.workspaceService.subProjects().map((p, i) => ({
       ...p,
       ip: `192.168.1.${10 + i}`,
-      version: versions[i % versions.length],
-      lastSeen: '2 mins ago',
+      version: p.name.includes('Shell')
+        ? '1.2.4'
+        : versions[i % versions.length],
+      lastSeen: i === 0 ? 'Live' : `${i * 2 + 1} mins ago`,
+      services: p.services || ['Core Module'],
     }));
   }
 
