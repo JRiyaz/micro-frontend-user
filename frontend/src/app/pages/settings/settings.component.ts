@@ -806,6 +806,12 @@ export class SettingsComponent {
       desc: 'Sleek purple',
       preview: 'linear-gradient(135deg, #0f172a, #334155, #a855f7)',
     },
+    {
+      id: 'gold',
+      name: 'Gold',
+      desc: 'Warm Luxury',
+      preview: 'linear-gradient(135deg, #14120a, #35301b, #d4af37)',
+    },
   ];
 
   notificationService = inject(NotificationService);
