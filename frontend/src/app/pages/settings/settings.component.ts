@@ -1,7 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ThemeService } from 'ui-shared';
+import { ThemeService, NotificationService } from 'ui-shared';
+import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-settings',
@@ -269,6 +270,201 @@ import { ThemeService } from 'ui-shared';
             </button>
           </div>
         </div>
+
+        <!-- Notifications Tab -->
+        <div *ngIf="activeTab() === 'notifications'" class="space-y-6">
+          <div
+            class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
+          >
+            <h3
+              class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
+            >
+              Notification Behavior
+            </h3>
+
+            <div class="space-y-8">
+              <!-- Do Not Disturb -->
+              <div
+                class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4
+                      class="text-sm font-bold text-slate-900 dark:text-white"
+                    >
+                      Do Not Disturb
+                    </h4>
+                    <p
+                      class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
+                    >
+                      Mute all toast notifications while keeping them in
+                      history.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  (click)="
+                    notificationService.updateConfig({
+                      dnd: !notificationService.config().dnd,
+                    })
+                  "
+                  class="w-11 h-6 rounded-full transition-colors relative"
+                  [class.bg-primary]="notificationService.config().dnd"
+                  [class.bg-slate-300]="!notificationService.config().dnd"
+                  [class.dark:bg-white/10]="!notificationService.config().dnd"
+                >
+                  <div
+                    class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"
+                    [class.translate-x-5]="notificationService.config().dnd"
+                  ></div>
+                </button>
+              </div>
+
+              <!-- Duration -->
+              <div>
+                <div class="flex justify-between items-center mb-3">
+                  <label
+                    class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]"
+                    >Display Duration</label
+                  >
+                  <span class="text-xs font-mono text-primary font-bold"
+                    >{{ notificationService.config().duration / 1000 }}s</span
+                  >
+                </div>
+                <input
+                  type="range"
+                  min="2000"
+                  max="10000"
+                  step="500"
+                  [value]="notificationService.config().duration"
+                  (input)="updateDuration($event)"
+                  class="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
+                />
+                <div
+                  class="flex justify-between mt-2 text-[10px] text-slate-400 font-medium"
+                >
+                  <span>2s</span>
+                  <span>5s</span>
+                  <span>10s</span>
+                </div>
+              </div>
+
+              <!-- Placement -->
+              <div>
+                <label
+                  class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-4"
+                  >On-Screen Placement</label
+                >
+                <div class="grid grid-cols-2 gap-3">
+                  <button
+                    *ngFor="let pos of placements"
+                    (click)="
+                      notificationService.updateConfig({ placement: pos.id })
+                    "
+                    class="p-4 border rounded-xl flex flex-col items-center gap-3 transition-all"
+                    [class.border-primary]="
+                      notificationService.config().placement === pos.id
+                    "
+                    [class.bg-primary/5]="
+                      notificationService.config().placement === pos.id
+                    "
+                    [class.border-slate-200]="
+                      notificationService.config().placement !== pos.id
+                    "
+                    [class.dark:border-white/10]="
+                      notificationService.config().placement !== pos.id
+                    "
+                  >
+                    <div
+                      class="w-16 h-12 bg-slate-100 dark:bg-white/5 rounded border border-slate-200 dark:border-white/10 relative overflow-hidden"
+                    >
+                      <div
+                        class="absolute w-3 h-3 bg-primary rounded-sm shadow-[0_0_8px_rgba(109,116,255,0.5)]"
+                        [style.top]="pos.id.startsWith('top') ? '4px' : 'auto'"
+                        [style.bottom]="
+                          pos.id.startsWith('bottom') ? '4px' : 'auto'
+                        "
+                        [style.left]="pos.id.endsWith('left') ? '4px' : 'auto'"
+                        [style.right]="
+                          pos.id.endsWith('right') ? '4px' : 'auto'
+                        "
+                      ></div>
+                    </div>
+                    <span
+                      class="text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400"
+                      >{{ pos.label }}</span
+                    >
+                  </button>
+                </div>
+              </div>
+
+              <!-- Urgent Toggle -->
+              <div
+                class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
+              >
+                <div>
+                  <h4 class="text-sm font-bold text-slate-900 dark:text-white">
+                    Persistent Urgent Alerts
+                  </h4>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Keep urgent notifications on screen until manually
+                    dismissed.
+                  </p>
+                </div>
+                <button
+                  (click)="
+                    notificationService.updateConfig({
+                      urgentStick: !notificationService.config().urgentStick,
+                    })
+                  "
+                  class="w-11 h-6 rounded-full transition-colors relative"
+                  [class.bg-primary]="notificationService.config().urgentStick"
+                  [class.bg-slate-300]="
+                    !notificationService.config().urgentStick
+                  "
+                  [class.dark:bg-white/10]="
+                    !notificationService.config().urgentStick
+                  "
+                >
+                  <div
+                    class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"
+                    [class.translate-x-5]="
+                      notificationService.config().urgentStick
+                    "
+                  ></div>
+                </button>
+              </div>
+            </div>
+
+            <div
+              class="mt-8 pt-6 border-t border-slate-200 dark:border-white/[0.06]"
+            >
+              <button
+                (click)="testUrgent()"
+                class="px-5 py-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl font-bold text-xs hover:bg-rose-500/20 transition-all uppercase tracking-widest"
+              >
+                Test Urgent Alert
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -280,7 +476,15 @@ export class SettingsComponent {
   tabs = [
     { id: 'profile', label: 'Profile' },
     { id: 'appearance', label: 'Appearance' },
+    { id: 'notifications', label: 'Notifications' },
     { id: 'security', label: 'Security' },
+  ];
+
+  placements: { id: any; label: string }[] = [
+    { id: 'top-left', label: 'Top Left' },
+    { id: 'top-right', label: 'Top Right' },
+    { id: 'bottom-left', label: 'Bottom Left' },
+    { id: 'bottom-right', label: 'Bottom Right' },
   ];
 
   themes = [
@@ -310,5 +514,21 @@ export class SettingsComponent {
     },
   ];
 
+  notificationService = inject(NotificationService);
+
   constructor(public themeService: ThemeService) {}
+
+  updateDuration(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.notificationService.updateConfig({ duration: parseInt(value, 10) });
+  }
+
+  testUrgent() {
+    this.notificationService.notify(
+      'error',
+      'System Alert',
+      'This is an urgent persistent notification that will stay until you close it.',
+      true,
+    );
+  }
 }
