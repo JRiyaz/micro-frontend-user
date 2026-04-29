@@ -1,11 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
   template: `
     <div
       class="min-h-screen bg-slate-50 dark:bg-dark-base flex items-center justify-center p-6 relative overflow-hidden"
@@ -32,70 +40,136 @@ import { RouterModule } from '@angular/router';
         <div
           class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md p-8 sm:p-10 rounded-3xl shadow-xl dark:shadow-2xl"
         >
-          <form class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-              <label
-                class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2 px-1"
-                >First Name</label
-              >
+          <form
+            [formGroup]="registerForm"
+            (ngSubmit)="onSubmit()"
+            class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-8"
+          >
+            <!-- First Name -->
+            <div class="relative group">
               <input
                 type="text"
-                placeholder="John"
-                class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                formControlName="firstName"
                 id="register-firstname"
+                placeholder=" "
+                class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
               />
-            </div>
-            <div>
               <label
-                class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2 px-1"
-                >Last Name</label
+                for="register-firstname"
+                class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-xs pointer-events-none uppercase font-bold tracking-widest"
               >
+                First Name
+              </label>
+              <div *ngIf="firstNameInvalid()" class="absolute -bottom-5 left-0">
+                <span
+                  *ngIf="registerForm.get('firstName')?.errors?.['required']"
+                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                  >Required</span
+                >
+              </div>
+            </div>
+
+            <!-- Last Name -->
+            <div class="relative group">
               <input
                 type="text"
-                placeholder="Doe"
-                class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                formControlName="lastName"
                 id="register-lastname"
+                placeholder=" "
+                class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
               />
-            </div>
-            <div class="sm:col-span-2">
               <label
-                class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2 px-1"
-                >Work Email</label
+                for="register-lastname"
+                class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-xs pointer-events-none uppercase font-bold tracking-widest"
               >
+                Last Name
+              </label>
+              <div *ngIf="lastNameInvalid()" class="absolute -bottom-5 left-0">
+                <span
+                  *ngIf="registerForm.get('lastName')?.errors?.['required']"
+                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                  >Required</span
+                >
+              </div>
+            </div>
+
+            <!-- Work Email -->
+            <div class="relative group sm:col-span-2">
               <input
                 type="email"
-                placeholder="john.doe&#64;company.com"
-                class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                formControlName="email"
                 id="register-email"
+                placeholder=" "
+                class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
               />
-            </div>
-            <div class="sm:col-span-2">
               <label
-                class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2 px-1"
-                >Password</label
+                for="register-email"
+                class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-xs pointer-events-none uppercase font-bold tracking-widest"
               >
+                Work Email
+              </label>
+              <div *ngIf="emailInvalid()" class="absolute -bottom-5 left-0">
+                <span
+                  *ngIf="registerForm.get('email')?.errors?.['required']"
+                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                  >Email is required</span
+                >
+                <span
+                  *ngIf="registerForm.get('email')?.errors?.['email']"
+                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                  >Invalid email format</span
+                >
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="relative group sm:col-span-2">
               <input
                 type="password"
-                placeholder="Min. 8 characters"
-                class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                formControlName="password"
                 id="register-password"
+                placeholder=" "
+                class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
               />
+              <label
+                for="register-password"
+                class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-xs pointer-events-none uppercase font-bold tracking-widest"
+              >
+                Password
+              </label>
+              <div *ngIf="passwordInvalid()" class="absolute -bottom-5 left-0">
+                <span
+                  *ngIf="registerForm.get('password')?.errors?.['required']"
+                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                  >Password is required</span
+                >
+                <span
+                  *ngIf="registerForm.get('password')?.errors?.['minlength']"
+                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                  >Min 8 characters required</span
+                >
+              </div>
             </div>
+
+            <!-- Terms -->
             <div class="sm:col-span-2 flex items-center gap-2.5 px-1">
               <input
                 type="checkbox"
+                formControlName="terms"
                 id="terms"
-                class="w-4 h-4 rounded bg-white dark:bg-dark-base border-slate-300 dark:border-white/[0.15] text-primary focus:ring-primary"
+                class="w-4 h-4 rounded bg-white dark:bg-dark-base border-slate-300 dark:border-white/[0.15] text-primary focus:ring-primary cursor-pointer"
               />
               <label
                 for="terms"
-                class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest"
+                class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest cursor-pointer"
                 >I agree to the Terms and Data Policy</label
               >
             </div>
+
             <button
               type="submit"
-              class="sm:col-span-2 bg-primary text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-primary-hover transition-all mt-2"
+              [disabled]="isFormInvalid()"
+              class="sm:col-span-2 bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-primary-hover transition-all mt-2 shadow-lg shadow-primary/20"
               id="register-submit"
             >
               Create My Account
@@ -116,4 +190,82 @@ import { RouterModule } from '@angular/router';
   `,
   styles: [],
 })
-export class RegisterComponent {}
+export class RegisterComponent {
+  private fb = inject(FormBuilder);
+
+  registerForm: FormGroup = this.fb.group({
+    firstName: ['', Validators.required],
+    lastName: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(8)]],
+    terms: [false, Validators.requiredTrue],
+  });
+
+  // Signal for overall form validity
+  private formStatus = toSignal(
+    this.registerForm.statusChanges.pipe(
+      startWith(this.registerForm.status),
+      map((status) => status === 'INVALID'),
+    ),
+    { initialValue: true },
+  );
+
+  isFormInvalid = computed(() => this.formStatus());
+
+  // Field validity signals
+  firstNameInvalid = toSignal(
+    this.registerForm.get('firstName')!.statusChanges.pipe(
+      startWith(this.registerForm.get('firstName')!.status),
+      map(
+        () =>
+          this.registerForm.get('firstName')!.touched &&
+          this.registerForm.get('firstName')!.invalid,
+      ),
+    ),
+    { initialValue: false },
+  );
+
+  lastNameInvalid = toSignal(
+    this.registerForm.get('lastName')!.statusChanges.pipe(
+      startWith(this.registerForm.get('lastName')!.status),
+      map(
+        () =>
+          this.registerForm.get('lastName')!.touched &&
+          this.registerForm.get('lastName')!.invalid,
+      ),
+    ),
+    { initialValue: false },
+  );
+
+  emailInvalid = toSignal(
+    this.registerForm.get('email')!.statusChanges.pipe(
+      startWith(this.registerForm.get('email')!.status),
+      map(
+        () =>
+          this.registerForm.get('email')!.touched &&
+          this.registerForm.get('email')!.invalid,
+      ),
+    ),
+    { initialValue: false },
+  );
+
+  passwordInvalid = toSignal(
+    this.registerForm.get('password')!.statusChanges.pipe(
+      startWith(this.registerForm.get('password')!.status),
+      map(
+        () =>
+          this.registerForm.get('password')!.touched &&
+          this.registerForm.get('password')!.invalid,
+      ),
+    ),
+    { initialValue: false },
+  );
+
+  onSubmit() {
+    if (this.registerForm.valid) {
+      console.log('Register Form Submitted', this.registerForm.value);
+    } else {
+      this.registerForm.markAllAsTouched();
+    }
+  }
+}

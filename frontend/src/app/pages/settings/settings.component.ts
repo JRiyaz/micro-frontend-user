@@ -1,12 +1,20 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
   template: `
     <div
       class="min-h-screen bg-slate-50 dark:bg-dark-base p-4 sm:p-8 relative overflow-hidden flex items-center justify-center"
@@ -82,11 +90,11 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                 class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
               >
                 <h3
-                  class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
+                  class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-8"
                 >
                   Profile Information
                 </h3>
-                <div class="flex flex-col sm:flex-row items-start gap-6 mb-6">
+                <div class="flex flex-col sm:flex-row items-start gap-8 mb-10">
                   <div class="relative group">
                     <img
                       src="https://ui-avatars.com/api/?name=Riyaz+Khan&background=3b429f&color=fff&size=80"
@@ -112,62 +120,105 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                     </div>
                   </div>
                   <div class="flex-1 w-full">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label
-                          class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
-                          >First Name</label
-                        >
-                        <input
-                          type="text"
-                          value="Riyaz"
-                          class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                        />
+                    <form [formGroup]="profileForm" class="space-y-8">
+                      <div
+                        class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-8"
+                      >
+                        <div class="relative">
+                          <input
+                            type="text"
+                            formControlName="firstName"
+                            placeholder=" "
+                            class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                          />
+                          <label
+                            class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-[10px] transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-[10px] pointer-events-none uppercase font-bold tracking-widest"
+                            >First Name</label
+                          >
+                          <div
+                            *ngIf="firstNameInvalid()"
+                            class="absolute -bottom-5 left-0"
+                          >
+                            <span
+                              class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                              >Required</span
+                            >
+                          </div>
+                        </div>
+                        <div class="relative">
+                          <input
+                            type="text"
+                            formControlName="lastName"
+                            placeholder=" "
+                            class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                          />
+                          <label
+                            class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-[10px] transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-[10px] pointer-events-none uppercase font-bold tracking-widest"
+                            >Last Name</label
+                          >
+                          <div
+                            *ngIf="lastNameInvalid()"
+                            class="absolute -bottom-5 left-0"
+                          >
+                            <span
+                              class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                              >Required</span
+                            >
+                          </div>
+                        </div>
+                        <div class="relative sm:col-span-2">
+                          <input
+                            type="email"
+                            formControlName="email"
+                            placeholder=" "
+                            class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                          />
+                          <label
+                            class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-[10px] transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-[10px] pointer-events-none uppercase font-bold tracking-widest"
+                            >Email Address</label
+                          >
+                          <div
+                            *ngIf="emailInvalid()"
+                            class="absolute -bottom-5 left-0"
+                          >
+                            <span
+                              *ngIf="
+                                profileForm.get('email')?.errors?.['required']
+                              "
+                              class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                              >Email is required</span
+                            >
+                            <span
+                              *ngIf="
+                                profileForm.get('email')?.errors?.['email']
+                              "
+                              class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                              >Invalid format</span
+                            >
+                          </div>
+                        </div>
+                        <div class="relative sm:col-span-2">
+                          <input
+                            type="text"
+                            value="Lead Developer"
+                            disabled
+                            class="w-full bg-transparent border-b-2 border-slate-100 dark:border-white/[0.04] py-2 text-sm text-slate-400 cursor-not-allowed opacity-60"
+                          />
+                          <label
+                            class="absolute left-0 -top-3.5 text-slate-400 text-[10px] uppercase font-bold tracking-widest"
+                            >Account Role</label
+                          >
+                        </div>
                       </div>
-                      <div>
-                        <label
-                          class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
-                          >Last Name</label
-                        >
-                        <input
-                          type="text"
-                          value="Khan"
-                          class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                        />
-                      </div>
-                    </div>
+                      <button
+                        [disabled]="isProfileInvalid() || profileForm.pristine"
+                        class="px-8 py-3 bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest"
+                      >
+                        Save Profile
+                      </button>
+                    </form>
                   </div>
                 </div>
-                <div class="space-y-4">
-                  <div>
-                    <label
-                      class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
-                      >Email</label
-                    >
-                    <input
-                      type="email"
-                      value="riyaz@company.com"
-                      class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
-                      >Role</label
-                    >
-                    <input
-                      type="text"
-                      value="Lead Developer"
-                      disabled
-                      class="w-full bg-slate-100 dark:bg-dark-base/30 border border-slate-200 dark:border-white/[0.06] rounded-xl px-4 py-3 text-sm text-slate-500 cursor-not-allowed"
-                    />
-                  </div>
-                </div>
-                <button
-                  class="mt-6 px-6 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
-                >
-                  Save Changes
-                </button>
               </div>
             </div>
 
@@ -180,50 +231,101 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                 class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
               >
                 <h3
-                  class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
+                  class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-10"
                 >
                   Change Password
                 </h3>
-                <div class="space-y-4 max-w-md">
-                  <div>
+                <form [formGroup]="securityForm" class="space-y-10 max-w-md">
+                  <div class="relative">
+                    <input
+                      type="password"
+                      formControlName="currentPassword"
+                      placeholder=" "
+                      class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
+                    />
                     <label
-                      class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
+                      class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-[10px] transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-[10px] pointer-events-none uppercase font-bold tracking-widest"
                       >Current Password</label
                     >
+                    <div
+                      *ngIf="currentPasswordInvalid()"
+                      class="absolute -bottom-5 left-0"
+                    >
+                      <span
+                        class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                        >Required</span
+                      >
+                    </div>
+                  </div>
+                  <div class="relative">
                     <input
                       type="password"
-                      placeholder="••••••••"
-                      class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                      formControlName="newPassword"
+                      placeholder=" "
+                      class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
                     />
-                  </div>
-                  <div>
                     <label
-                      class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
+                      class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-[10px] transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-[10px] pointer-events-none uppercase font-bold tracking-widest"
                       >New Password</label
                     >
+                    <div
+                      *ngIf="newPasswordInvalid()"
+                      class="absolute -bottom-5 left-0"
+                    >
+                      <span
+                        *ngIf="
+                          securityForm.get('newPassword')?.errors?.['required']
+                        "
+                        class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                        >Required</span
+                      >
+                      <span
+                        *ngIf="
+                          securityForm.get('newPassword')?.errors?.['minlength']
+                        "
+                        class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                        >Min 8 characters</span
+                      >
+                    </div>
+                  </div>
+                  <div class="relative">
                     <input
                       type="password"
-                      placeholder="Min. 8 characters"
-                      class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                      formControlName="confirmPassword"
+                      placeholder=" "
+                      class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
                     />
-                  </div>
-                  <div>
                     <label
-                      class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2"
+                      class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-[10px] transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-[10px] pointer-events-none uppercase font-bold tracking-widest"
                       >Confirm Password</label
                     >
-                    <input
-                      type="password"
-                      placeholder="Re-enter password"
-                      class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                    />
+                    <div
+                      *ngIf="confirmPasswordInvalid()"
+                      class="absolute -bottom-5 left-0"
+                    >
+                      <span
+                        *ngIf="
+                          securityForm.get('confirmPassword')?.errors?.[
+                            'required'
+                          ]
+                        "
+                        class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                        >Required</span
+                      >
+                      <span
+                        *ngIf="securityForm.errors?.['mismatch']"
+                        class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                        >Passwords do not match</span
+                      >
+                    </div>
                   </div>
                   <button
-                    class="px-6 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary-hover transition-all"
+                    [disabled]="isSecurityInvalid()"
+                    class="px-8 py-3 bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest"
                   >
                     Update Password
                   </button>
-                </div>
+                </form>
               </div>
             </div>
 
@@ -856,6 +958,121 @@ export class SettingsComponent {
 
   notificationService = inject(NotificationService);
   workspaceService = inject(WorkspaceService);
+  private fb = inject(FormBuilder);
+
+  profileForm: FormGroup = this.fb.group({
+    firstName: ['Riyaz', Validators.required],
+    lastName: ['Khan', Validators.required],
+    email: ['riyaz@company.com', [Validators.required, Validators.email]],
+  });
+
+  securityForm: FormGroup = this.fb.group(
+    {
+      currentPassword: ['', Validators.required],
+      newPassword: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', Validators.required],
+    },
+    { validators: this.passwordMatchValidator },
+  );
+
+  // Signal Bridges for Profile Form
+  private profileStatus = toSignal(
+    this.profileForm.statusChanges.pipe(
+      startWith(this.profileForm.status),
+      map((s) => s === 'INVALID'),
+    ),
+    { initialValue: false },
+  );
+  isProfileInvalid = computed(() => this.profileStatus());
+
+  firstNameInvalid = toSignal(
+    this.profileForm.get('firstName')!.statusChanges.pipe(
+      startWith(this.profileForm.get('firstName')!.status),
+      map(
+        () =>
+          this.profileForm.get('firstName')!.touched &&
+          this.profileForm.get('firstName')!.invalid,
+      ),
+    ),
+    { initialValue: false },
+  );
+
+  lastNameInvalid = toSignal(
+    this.profileForm.get('lastName')!.statusChanges.pipe(
+      startWith(this.profileForm.get('lastName')!.status),
+      map(
+        () =>
+          this.profileForm.get('lastName')!.touched &&
+          this.profileForm.get('lastName')!.invalid,
+      ),
+    ),
+    { initialValue: false },
+  );
+
+  emailInvalid = toSignal(
+    this.profileForm.get('email')!.statusChanges.pipe(
+      startWith(this.profileForm.get('email')!.status),
+      map(
+        () =>
+          this.profileForm.get('email')!.touched &&
+          this.profileForm.get('email')!.invalid,
+      ),
+    ),
+    { initialValue: false },
+  );
+
+  // Signal Bridges for Security Form
+  private securityStatus = toSignal(
+    this.securityForm.statusChanges.pipe(
+      startWith(this.securityForm.status),
+      map((s) => s === 'INVALID'),
+    ),
+    { initialValue: true },
+  );
+  isSecurityInvalid = computed(() => this.securityStatus());
+
+  currentPasswordInvalid = toSignal(
+    this.securityForm.get('currentPassword')!.statusChanges.pipe(
+      startWith(this.securityForm.get('currentPassword')!.status),
+      map(
+        () =>
+          this.securityForm.get('currentPassword')!.touched &&
+          this.securityForm.get('currentPassword')!.invalid,
+      ),
+    ),
+    { initialValue: false },
+  );
+
+  newPasswordInvalid = toSignal(
+    this.securityForm.get('newPassword')!.statusChanges.pipe(
+      startWith(this.securityForm.get('newPassword')!.status),
+      map(
+        () =>
+          this.securityForm.get('newPassword')!.touched &&
+          this.securityForm.get('newPassword')!.invalid,
+      ),
+    ),
+    { initialValue: false },
+  );
+
+  confirmPasswordInvalid = toSignal(
+    this.securityForm.statusChanges.pipe(
+      startWith(this.securityForm.status),
+      map(
+        () =>
+          this.securityForm.get('confirmPassword')!.touched &&
+          (this.securityForm.get('confirmPassword')!.invalid ||
+            this.securityForm.errors?.['mismatch']),
+      ),
+    ),
+    { initialValue: false },
+  );
+
+  passwordMatchValidator(g: FormGroup) {
+    return g.get('newPassword')?.value === g.get('confirmPassword')?.value
+      ? null
+      : { mismatch: true };
+  }
 
   get projectsWithDetails() {
     const versions = ['1.2.4', '1.1.2', '1.0.0'];

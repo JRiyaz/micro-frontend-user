@@ -1,11 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
   template: `
     <div
       class="min-h-screen bg-slate-50 dark:bg-dark-base flex items-center justify-center p-6 relative overflow-hidden"
@@ -32,48 +40,87 @@ import { RouterModule } from '@angular/router';
         <div
           class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md p-8 rounded-3xl shadow-xl dark:shadow-2xl"
         >
-          <form class="space-y-5">
-            <div>
-              <label
-                class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-2 px-1"
-                >Email Address</label
-              >
+          <form
+            [formGroup]="loginForm"
+            (ngSubmit)="onSubmit()"
+            class="space-y-8"
+          >
+            <!-- Email Field -->
+            <div class="relative group">
               <input
                 type="email"
-                placeholder="name&#64;company.com"
-                class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 transition-all"
+                formControlName="email"
                 id="login-email"
+                placeholder=" "
+                class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
               />
-            </div>
-            <div>
-              <div class="flex justify-between items-center mb-2 px-1">
-                <label
-                  class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]"
-                  >Password</label
+              <label
+                for="login-email"
+                class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-xs pointer-events-none uppercase font-bold tracking-widest"
+              >
+                Email Address
+              </label>
+              <!-- Validation Error -->
+              <div *ngIf="emailInvalid()" class="absolute -bottom-5 left-0">
+                <span
+                  *ngIf="loginForm.get('email')?.errors?.['required']"
+                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                  >Email is required</span
                 >
-                <a
-                  href="#"
-                  class="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
-                  >Forgot?</a
+                <span
+                  *ngIf="loginForm.get('email')?.errors?.['email']"
+                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                  >Invalid email format</span
                 >
               </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="relative group">
               <input
                 type="password"
-                placeholder="••••••••"
-                class="w-full bg-slate-50 dark:bg-dark-base/50 border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/30 transition-all"
+                formControlName="password"
                 id="login-password"
+                placeholder=" "
+                class="peer w-full bg-transparent border-b-2 border-slate-200 dark:border-white/[0.08] py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-primary transition-all placeholder-transparent"
               />
+              <label
+                for="login-password"
+                class="absolute left-0 -top-3.5 text-slate-500 dark:text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2 peer-focus:-top-3.5 peer-focus:text-primary peer-focus:text-xs pointer-events-none uppercase font-bold tracking-widest"
+              >
+                Password
+              </label>
+              <!-- Validation Error -->
+              <div *ngIf="passwordInvalid()" class="absolute -bottom-5 left-0">
+                <span
+                  *ngIf="loginForm.get('password')?.errors?.['required']"
+                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                  >Password is required</span
+                >
+                <span
+                  *ngIf="loginForm.get('password')?.errors?.['minlength']"
+                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                  >Min 6 characters required</span
+                >
+              </div>
+              <a
+                href="#"
+                class="absolute right-0 top-2 text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
+                >Forgot?</a
+              >
             </div>
+
             <button
               type="submit"
-              class="w-full bg-primary text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-primary-hover transition-all"
+              [disabled]="isFormInvalid()"
+              class="w-full bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
               id="login-submit"
             >
               Sign In
             </button>
           </form>
 
-          <div class="relative my-8">
+          <div class="relative my-10">
             <div class="absolute inset-0 flex items-center">
               <div
                 class="w-full border-t border-slate-200 dark:border-white/[0.08]"
@@ -130,4 +177,55 @@ import { RouterModule } from '@angular/router';
   `,
   styles: [],
 })
-export class LoginComponent {}
+export class LoginComponent {
+  private fb = inject(FormBuilder);
+
+  loginForm: FormGroup = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+  });
+
+  // Signal for form validity
+  private formStatus = toSignal(
+    this.loginForm.statusChanges.pipe(
+      startWith(this.loginForm.status),
+      map((status) => status === 'INVALID'),
+    ),
+    { initialValue: true },
+  );
+
+  isFormInvalid = computed(() => this.formStatus());
+
+  // Signals for field validity
+  emailInvalid = toSignal(
+    this.loginForm.get('email')!.statusChanges.pipe(
+      startWith(this.loginForm.get('email')!.status),
+      map(
+        () =>
+          this.loginForm.get('email')!.touched &&
+          this.loginForm.get('email')!.invalid,
+      ),
+    ),
+    { initialValue: false },
+  );
+
+  passwordInvalid = toSignal(
+    this.loginForm.get('password')!.statusChanges.pipe(
+      startWith(this.loginForm.get('password')!.status),
+      map(
+        () =>
+          this.loginForm.get('password')!.touched &&
+          this.loginForm.get('password')!.invalid,
+      ),
+    ),
+    { initialValue: false },
+  );
+
+  onSubmit() {
+    if (this.loginForm.valid) {
+      console.log('Login Form Submitted', this.loginForm.value);
+    } else {
+      this.loginForm.markAllAsTouched();
+    }
+  }
+}
