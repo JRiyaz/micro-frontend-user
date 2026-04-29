@@ -1,13 +1,25 @@
-import { Component, signal, inject, computed } from '@angular/core';
+import {
+  Component,
+  signal,
+  inject,
+  computed,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import {
   FormBuilder,
   FormGroup,
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
+import {
+  ThemeService,
+  NotificationService,
+  WorkspaceService,
+  SearchService,
+} from 'ui-shared';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs/operators';
 
@@ -958,6 +970,7 @@ export class SettingsComponent {
 
   notificationService = inject(NotificationService);
   workspaceService = inject(WorkspaceService);
+  private searchService = inject(SearchService);
   private fb = inject(FormBuilder);
 
   profileForm: FormGroup = this.fb.group({
@@ -1087,7 +1100,70 @@ export class SettingsComponent {
     }));
   }
 
-  constructor(public themeService: ThemeService) {}
+  constructor(
+    public themeService: ThemeService,
+    private route: ActivatedRoute,
+  ) {}
+
+  ngOnInit(): void {
+    // Deep link support for tabs via query parameters
+    this.route.queryParamMap.subscribe((params) => {
+      const tabId = params.get('tab');
+      if (tabId && this.tabs.some((t) => t.id === tabId)) {
+        this.activeTab.set(tabId);
+      }
+    });
+
+    // Dynamic Search Registration
+    this.searchService.register([
+      {
+        id: 'settings-profile',
+        title: 'User Profile Settings',
+        path: '/user/settings',
+        category: 'Settings',
+        queryParams: { tab: 'profile' },
+      },
+      {
+        id: 'settings-security',
+        title: 'Security & Password',
+        path: '/user/settings',
+        category: 'Settings',
+        queryParams: { tab: 'security' },
+      },
+      {
+        id: 'settings-appearance',
+        title: 'Appearance & Themes',
+        path: '/user/settings',
+        category: 'Settings',
+        queryParams: { tab: 'appearance' },
+      },
+      {
+        id: 'settings-notifications',
+        title: 'Notification Preferences',
+        path: '/user/settings',
+        category: 'Settings',
+        queryParams: { tab: 'notifications' },
+      },
+      {
+        id: 'settings-workspaces',
+        title: 'Workspace Configuration',
+        path: '/user/settings',
+        category: 'Settings',
+        queryParams: { tab: 'workspaces' },
+      },
+    ]);
+  }
+
+  ngOnDestroy(): void {
+    // Clean up search index when component is destroyed
+    this.searchService.unregister([
+      'settings-profile',
+      'settings-security',
+      'settings-appearance',
+      'settings-notifications',
+      'settings-workspaces',
+    ]);
+  }
 
   updateDuration(event: Event) {
     const value = (event.target as HTMLInputElement).value;
