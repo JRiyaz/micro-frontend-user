@@ -9,14 +9,16 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
   imports: [CommonModule, RouterModule],
   template: `
     <div
-      class="min-h-screen bg-slate-50 dark:bg-dark-base p-6 sm:p-8 relative overflow-hidden"
+      class="min-h-screen bg-slate-50 dark:bg-dark-base p-4 sm:p-8 relative overflow-hidden flex items-center justify-center"
     >
-      <div class="max-w-3xl mx-auto relative z-10">
-        <!-- Header -->
-        <div class="mb-8">
+      <div
+        class="w-full max-w-3xl relative z-10 flex flex-col h-[90vh] max-h-[850px]"
+      >
+        <!-- Header (Fixed) -->
+        <div class="mb-6 flex-shrink-0">
           <a
             routerLink="/dashboard"
-            class="inline-flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold uppercase tracking-widest mb-4 transition-colors"
+            class="inline-flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold uppercase tracking-widest mb-3 transition-colors"
           >
             <svg
               class="w-4 h-4"
@@ -43,31 +45,34 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
           </p>
         </div>
 
-        <!-- Tab Groups -->
-        <div class="space-y-8">
-          <!-- Navigation Tabs -->
-          <div
-            class="flex gap-1 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] rounded-xl p-1 overflow-x-auto shadow-sm dark:shadow-none sticky top-4 z-20 backdrop-blur-md"
+        <!-- Navigation Tabs (Fixed) -->
+        <div
+          class="flex w-full bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] rounded-xl p-1 shadow-sm dark:shadow-none mb-6 flex-shrink-0"
+        >
+          <button
+            *ngFor="let tab of tabs"
+            (click)="activeTab.set(tab.id)"
+            class="flex-1 px-2 py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 text-center"
+            [class.bg-primary]="activeTab() === tab.id"
+            [class.text-white]="activeTab() === tab.id"
+            [class.shadow-lg]="activeTab() === tab.id"
+            [class.text-slate-500]="activeTab() !== tab.id"
+            [class.dark:text-slate-400]="activeTab() !== tab.id"
+            [class.hover:text-slate-900]="activeTab() !== tab.id"
+            [class.dark:hover:text-white]="activeTab() !== tab.id"
           >
-            <button
-              *ngFor="let tab of tabs"
-              (click)="activeTab.set(tab.id)"
-              class="px-4 py-2.5 text-xs font-bold uppercase tracking-widest rounded-lg transition-all whitespace-nowrap flex items-center gap-2"
-              [class.bg-primary]="activeTab() === tab.id"
-              [class.text-white]="activeTab() === tab.id"
-              [class.shadow-lg]="activeTab() === tab.id"
-              [class.text-slate-500]="activeTab() !== tab.id"
-              [class.dark:text-slate-400]="activeTab() !== tab.id"
-              [class.hover:text-slate-900]="activeTab() !== tab.id"
-              [class.dark:hover:text-white]="activeTab() !== tab.id"
-            >
-              <span [innerHTML]="tab.icon" class="w-4 h-4"></span>
-              {{ tab.label }}
-            </button>
-          </div>
+            <span
+              *ngIf="tab.icon"
+              [innerHTML]="tab.icon"
+              class="w-4 h-4 hidden sm:block"
+            ></span>
+            <span class="truncate">{{ tab.label }}</span>
+          </button>
+        </div>
 
-          <!-- Tab Content -->
-          <div class="mt-8">
+        <!-- Tab Content (Scrollable) -->
+        <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar min-h-0">
+          <div class="pb-8">
             <!-- Profile Tab -->
             <div
               *ngIf="activeTab() === 'profile'"
@@ -220,23 +225,6 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                   </button>
                 </div>
               </div>
-              <div
-                class="bg-white dark:bg-white/[0.04] border border-red-500/20 rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-              >
-                <h3
-                  class="text-sm font-bold text-red-400 uppercase tracking-widest mb-2"
-                >
-                  Danger Zone
-                </h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
-                  Once you delete your account, there is no going back.
-                </p>
-                <button
-                  class="px-6 py-2.5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl font-bold text-sm hover:bg-red-500/20 transition-all"
-                >
-                  Delete Account
-                </button>
-              </div>
             </div>
 
             <!-- Appearance Tab -->
@@ -318,7 +306,7 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                   Notification Behavior
                 </h3>
 
-                <div class="space-y-8">
+                <div class="space-y-6">
                   <!-- Do Not Disturb -->
                   <div
                     class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
@@ -375,8 +363,73 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                     </button>
                   </div>
 
+                  <!-- Urgent Stick -->
+                  <div
+                    class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
+                  >
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500"
+                      >
+                        <svg
+                          class="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <h4
+                          class="text-sm font-bold text-slate-900 dark:text-white"
+                        >
+                          Urgent Persistence
+                        </h4>
+                        <p
+                          class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
+                        >
+                          Critical alerts stay on screen until manually
+                          dismissed.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      (click)="
+                        notificationService.updateConfig({
+                          urgentStick:
+                            !notificationService.config().urgentStick,
+                        })
+                      "
+                      class="w-11 h-6 rounded-full transition-colors relative"
+                      [class.bg-primary]="
+                        notificationService.config().urgentStick
+                      "
+                      [class.bg-slate-300]="
+                        !notificationService.config().urgentStick
+                      "
+                      [class.dark:bg-white/10]="
+                        !notificationService.config().urgentStick
+                      "
+                    >
+                      <div
+                        class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"
+                        [class.translate-x-5]="
+                          notificationService.config().urgentStick
+                        "
+                      ></div>
+                    </button>
+                  </div>
+
                   <!-- Duration -->
-                  <div>
+                  <div
+                    class="p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
+                  >
                     <div class="flex justify-between items-center mb-3">
                       <label
                         class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]"
@@ -407,7 +460,9 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                   </div>
 
                   <!-- Placement -->
-                  <div>
+                  <div
+                    class="p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
+                  >
                     <label
                       class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-4"
                       >On-Screen Placement</label
@@ -463,13 +518,24 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                 </div>
 
                 <div
-                  class="mt-8 pt-6 border-t border-slate-200 dark:border-white/[0.06]"
+                  class="mt-8 pt-6 border-t border-slate-200 dark:border-white/[0.06] flex gap-3"
                 >
                   <button
                     (click)="testUrgent()"
-                    class="px-5 py-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl font-bold text-xs hover:bg-rose-500/20 transition-all uppercase tracking-widest"
+                    class="flex-1 px-5 py-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl font-bold text-xs hover:bg-rose-500/20 transition-all uppercase tracking-widest"
                   >
-                    Test Urgent Alert
+                    Test Urgent
+                  </button>
+                  <button
+                    (click)="
+                      notificationService.success(
+                        'System Check',
+                        'All modules are operating normally.'
+                      )
+                    "
+                    class="flex-1 px-5 py-2.5 bg-green-500/10 border border-green-500/20 text-green-500 rounded-xl font-bold text-xs hover:bg-green-500/20 transition-all uppercase tracking-widest"
+                  >
+                    Test Standard
                   </button>
                 </div>
               </div>
@@ -480,6 +546,21 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
               *ngIf="activeTab() === 'workspaces'"
               class="space-y-6 animate-fade-in"
             >
+              <!-- Platform Version -->
+              <div class="flex flex-col items-center justify-center mb-4">
+                <div
+                  class="bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full flex items-center gap-2 shadow-sm"
+                >
+                  <div
+                    class="w-2 h-2 bg-primary rounded-full animate-pulse"
+                  ></div>
+                  <span
+                    class="text-[10px] font-black uppercase tracking-[0.2em] text-primary"
+                    >Platform v1.2.4-stable</span
+                  >
+                </div>
+              </div>
+
               <div
                 class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
               >
@@ -496,31 +577,30 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                   </span>
                 </div>
 
-                <div class="space-y-3">
+                <div class="space-y-4">
                   <div
-                    *ngFor="
-                      let project of workspaceService.subProjects();
-                      let i = index
-                    "
-                    class="group flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl hover:border-primary/30 transition-all cursor-pointer"
+                    *ngFor="let project of projectsWithDetails; let i = index"
+                    class="group relative bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-2xl overflow-hidden transition-all hover:border-primary/40"
                     [class.ring-2]="
                       workspaceService.selectedProjectIndex() === i
                     "
-                    [class.ring-primary/20]="
-                      workspaceService.selectedProjectIndex() === i
-                    "
-                    [class.border-primary/40]="
+                    [class.ring-primary/30]="
                       workspaceService.selectedProjectIndex() === i
                     "
                     (click)="workspaceService.selectProject(i)"
                   >
-                    <div class="flex items-center gap-4">
-                      <div class="relative">
+                    <div
+                      *ngIf="workspaceService.selectedProjectIndex() === i"
+                      class="absolute left-0 top-0 bottom-0 w-1 bg-primary"
+                    ></div>
+
+                    <div class="p-5 flex flex-col sm:flex-row gap-5">
+                      <div class="flex-shrink-0">
                         <div
-                          class="w-12 h-12 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors"
+                          class="w-14 h-14 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors shadow-sm"
                         >
                           <svg
-                            class="w-6 h-6"
+                            class="w-7 h-7"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -533,85 +613,110 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                             ></path>
                           </svg>
                         </div>
-                        <span
-                          class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-dark-base"
-                          [class.bg-green-400]="project.status === 'running'"
-                          [class.bg-slate-500]="project.status === 'offline'"
-                          [class.bg-red-500]="project.status === 'error'"
-                        ></span>
                       </div>
-                      <div>
-                        <h4
-                          class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2"
-                        >
-                          {{ project.name }}
-                          <span
-                            *ngIf="
-                              workspaceService.selectedProjectIndex() === i
-                            "
-                            class="text-[9px] bg-primary text-white px-1.5 py-0.5 rounded uppercase"
-                            >Active</span
+
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-2">
+                          <h4
+                            class="text-base font-black text-slate-900 dark:text-white truncate flex items-center gap-2"
                           >
-                        </h4>
-                        <p
-                          class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
-                        >
-                          Port: {{ project.port || 'N/A' }} • Status:
-                          {{ project.status }}
-                        </p>
+                            {{ project.name }}
+                            <span
+                              *ngIf="
+                                workspaceService.selectedProjectIndex() === i
+                              "
+                              class="text-[9px] bg-primary text-white px-1.5 py-0.5 rounded uppercase font-bold"
+                              >Active</span
+                            >
+                          </h4>
+                          <span class="flex items-center gap-1.5">
+                            <span
+                              class="w-2 h-2 rounded-full"
+                              [class.bg-green-400]="
+                                project.status === 'running'
+                              "
+                              [class.bg-red-400]="project.status === 'error'"
+                            ></span>
+                            <span
+                              class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400"
+                              >{{ project.status }}</span
+                            >
+                          </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+                          <div class="space-y-1">
+                            <p
+                              class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
+                            >
+                              Address
+                            </p>
+                            <p
+                              class="text-xs font-mono text-slate-700 dark:text-slate-300"
+                            >
+                              {{ project.ip }}
+                            </p>
+                          </div>
+                          <div class="space-y-1">
+                            <p
+                              class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
+                            >
+                              Port
+                            </p>
+                            <p
+                              class="text-xs font-mono text-slate-700 dark:text-slate-300"
+                            >
+                              {{ project.port }}
+                            </p>
+                          </div>
+                          <div class="space-y-1">
+                            <p
+                              class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
+                            >
+                              Version
+                            </p>
+                            <p
+                              class="text-xs font-mono text-slate-700 dark:text-slate-300"
+                            >
+                              v{{ project.version }}
+                            </p>
+                          </div>
+                          <div class="space-y-1">
+                            <p
+                              class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
+                            >
+                              Protocol
+                            </p>
+                            <p
+                              class="text-xs font-mono text-slate-700 dark:text-slate-300"
+                            >
+                              HTTP/1.1
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                      <button
-                        class="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+
+                    <div
+                      class="px-5 py-2.5 bg-slate-100 dark:bg-white/[0.03] border-t border-slate-200 dark:border-white/[0.06] flex justify-between items-center"
+                    >
+                      <span class="text-[9px] text-slate-500 font-medium italic"
+                        >Last heartbeat: {{ project.lastSeen }}</span
                       >
-                        <svg
-                          class="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                      <div class="flex items-center gap-3">
+                        <button
+                          class="text-[10px] font-bold text-primary uppercase hover:underline"
                         >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                          ></path>
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                          ></path>
-                        </svg>
-                      </button>
+                          Re-ping
+                        </button>
+                        <button
+                          class="text-[10px] font-bold text-slate-500 uppercase hover:text-slate-900 dark:hover:text-white transition-colors"
+                        >
+                          Logs
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div
-                  class="mt-8 p-4 bg-primary/5 border border-primary/10 rounded-xl flex items-start gap-3"
-                >
-                  <svg
-                    class="w-5 h-5 text-primary flex-shrink-0 mt-0.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                  <p
-                    class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed"
-                  >
-                    Workspaces allow you to manage different micro-frontend
-                    services connected to this shell. Active workspace
-                    determines the context of certain dashboard features.
-                  </p>
                 </div>
               </div>
             </div>
@@ -706,6 +811,16 @@ export class SettingsComponent {
   notificationService = inject(NotificationService);
   workspaceService = inject(WorkspaceService);
 
+  get projectsWithDetails() {
+    const versions = ['1.2.0', '1.1.5', '1.0.8', '0.9.4'];
+    return this.workspaceService.subProjects().map((p, i) => ({
+      ...p,
+      ip: `192.168.1.${10 + i}`,
+      version: versions[i % versions.length],
+      lastSeen: '2 mins ago',
+    }));
+  }
+
   constructor(public themeService: ThemeService) {}
 
   updateDuration(event: Event) {
@@ -716,8 +831,8 @@ export class SettingsComponent {
   testUrgent() {
     this.notificationService.notify(
       'error',
-      'System Alert',
-      'This is an urgent persistent notification that will stay until you close it.',
+      'Security Breach',
+      'Detected unauthorized access attempt from IP 192.168.1.45',
       true,
     );
   }
