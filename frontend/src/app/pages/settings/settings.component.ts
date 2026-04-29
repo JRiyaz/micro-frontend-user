@@ -241,7 +241,7 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                   Application Theme
                 </h3>
                 <div
-                  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+                  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
                 >
                   <div
                     *ngFor="let theme of themes"
@@ -261,11 +261,11 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                       class="h-20 rounded-lg mb-3 shadow-inner"
                       [style.background]="theme.preview"
                     ></div>
-                    <p class="text-sm font-bold text-slate-900 dark:text-white">
+                    <p class="text-xs font-bold text-slate-900 dark:text-white">
                       {{ theme.name }}
                     </p>
                     <p
-                      class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5"
+                      class="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5"
                     >
                       {{ theme.desc }}
                     </p>
@@ -467,7 +467,7 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                       class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-4"
                       >On-Screen Placement</label
                     >
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                       <button
                         *ngFor="let pos of placements"
                         (click)="
@@ -475,7 +475,7 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                             placement: pos.id,
                           })
                         "
-                        class="p-4 border rounded-xl flex flex-col items-center gap-3 transition-all"
+                        class="p-3 border rounded-xl flex flex-col items-center gap-2 transition-all"
                         [class.border-primary]="
                           notificationService.config().placement === pos.id
                         "
@@ -490,10 +490,10 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                         "
                       >
                         <div
-                          class="w-16 h-12 bg-slate-100 dark:bg-white/5 rounded border border-slate-200 dark:border-white/10 relative overflow-hidden"
+                          class="w-full aspect-[4/3] bg-slate-100 dark:bg-white/5 rounded border border-slate-200 dark:border-white/10 relative overflow-hidden"
                         >
                           <div
-                            class="absolute w-3 h-3 bg-primary rounded-sm shadow-[0_0_8px_rgba(109,116,255,0.5)]"
+                            class="absolute w-2.5 h-2.5 bg-primary rounded-sm shadow-[0_0_8px_rgba(109,116,255,0.5)]"
                             [style.top]="
                               pos.id.startsWith('top') ? '4px' : 'auto'
                             "
@@ -509,7 +509,7 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
                           ></div>
                         </div>
                         <span
-                          class="text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400"
+                          class="text-[9px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 text-center"
                           >{{ pos.label }}</span
                         >
                       </button>
@@ -740,6 +740,27 @@ import { ThemeService, NotificationService, WorkspaceService } from 'ui-shared';
           transform: translateY(0);
         }
       }
+
+      /* Custom Scrollbar */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(109, 116, 255, 0.2);
+        border-radius: 10px;
+        transition: background 0.3s ease;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(109, 116, 255, 0.4);
+      }
+
+      .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(109, 116, 255, 0.2) transparent;
+      }
     `,
   ],
 })
@@ -785,26 +806,26 @@ export class SettingsComponent {
     {
       id: 'void-blue',
       name: 'Void Blue',
-      desc: 'Default dark',
-      preview: 'linear-gradient(135deg, #0a0b1e, #16193b, #3b429f)',
+      desc: 'Deep Space',
+      preview: 'linear-gradient(135deg, #060714, #111333, #6d74ff)',
     },
     {
       id: 'emerald',
       name: 'Emerald',
-      desc: 'Lush green',
-      preview: 'linear-gradient(135deg, #022c22, #064e3b, #10b981)',
+      desc: 'Deep Jungle',
+      preview: 'linear-gradient(135deg, #020d0a, #06241c, #10b981)',
     },
     {
       id: 'rose',
       name: 'Rose',
-      desc: 'Vibrant red',
-      preview: 'linear-gradient(135deg, #2e1022, #4e1434, #f43f5e)',
+      desc: 'Crimson Velvet',
+      preview: 'linear-gradient(135deg, #0d0408, #260c19, #f43f5e)',
     },
     {
       id: 'obsidian',
       name: 'Obsidian',
-      desc: 'Sleek purple',
-      preview: 'linear-gradient(135deg, #0f172a, #334155, #a855f7)',
+      desc: 'Midnight Orchid',
+      preview: 'linear-gradient(135deg, #080511, #180f31, #a855f7)',
     },
     {
       id: 'gold',
