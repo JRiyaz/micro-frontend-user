@@ -14,11 +14,13 @@ import {
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import {
   ThemeService,
   NotificationService,
   WorkspaceService,
   SearchService,
+  AuthStateService,
 } from 'ui-shared';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs/operators';
@@ -203,7 +205,7 @@ import { map, startWith } from 'rxjs/operators';
                         <div class="relative sm:col-span-2">
                           <input
                             type="text"
-                            value="Lead Developer"
+                            [value]="auth.currentRole()"
                             disabled
                             class="w-full bg-transparent border-b-2 border-slate-100 dark:border-white/[0.04] py-2 text-sm text-slate-400 cursor-not-allowed opacity-60"
                           />
@@ -220,6 +222,113 @@ import { map, startWith } from 'rxjs/operators';
                         Save Profile
                       </button>
                     </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Roles Tab -->
+            <div
+              *ngIf="activeTab() === 'roles'"
+              class="space-y-6 animate-fade-in"
+            >
+              <div
+                class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
+              >
+                <div class="flex justify-between items-center mb-8">
+                  <div>
+                    <h3
+                      class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest"
+                    >
+                      Role Management
+                    </h3>
+                    <p
+                      class="text-[10px] text-slate-500 uppercase tracking-widest mt-1"
+                    >
+                      Add or remove system access levels
+                    </p>
+                  </div>
+                  <div
+                    class="px-3 py-1 bg-primary/10 border border-primary/20 rounded-lg"
+                  >
+                    <span
+                      class="text-[10px] font-black text-primary uppercase tracking-widest"
+                      >Active: {{ auth.currentRole() }}</span
+                    >
+                  </div>
+                </div>
+
+                <div class="space-y-4 mb-10">
+                  <div
+                    *ngFor="let role of auth.roles()"
+                    class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-xl group transition-all hover:border-primary/30"
+                  >
+                    <div class="flex items-center gap-3">
+                      <div
+                        [class.bg-primary]="auth.currentRole() === role"
+                        [class.bg-slate-200]="auth.currentRole() !== role"
+                        class="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(109,116,255,0.5)]"
+                      ></div>
+                      <span
+                        class="text-sm font-bold text-slate-700 dark:text-slate-300"
+                        >{{ role }}</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button
+                        *ngIf="auth.currentRole() !== role"
+                        (click)="selectRole(role)"
+                        class="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 rounded-lg transition-all"
+                      >
+                        Select
+                      </button>
+                      <button
+                        (click)="deleteRole(role)"
+                        class="p-1.5 text-slate-400 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <svg
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          ></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-8 border-t border-slate-100 dark:border-white/5">
+                  <label
+                    class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block"
+                    >Create New Role</label
+                  >
+                  <div class="flex gap-3">
+                    <div class="floating-input-group flex-1">
+                      <input
+                        type="text"
+                        [value]="newRoleName()"
+                        (input)="newRoleName.set($any($event.target).value)"
+                        placeholder=" "
+                        class="floating-input"
+                        id="new-role"
+                      />
+                      <label class="floating-label" for="new-role"
+                        >Role Name</label
+                      >
+                    </div>
+                    <button
+                      (click)="addRole()"
+                      class="px-6 bg-primary text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
+                    >
+                      Add Role
+                    </button>
                   </div>
                 </div>
               </div>
@@ -848,35 +957,84 @@ import { map, startWith } from 'rxjs/operators';
   `,
 })
 export class SettingsComponent {
-  activeTab = signal('profile');
-
   tabs = [
     {
       id: 'profile',
       label: 'Profile',
-      icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>',
+      icon: '<svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>',
+    },
+    {
+      id: 'roles',
+      label: 'Access Control',
+      icon: '<svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>',
     },
     {
       id: 'security',
       label: 'Security',
-      icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>',
+      icon: '<svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>',
     },
     {
       id: 'appearance',
       label: 'Appearance',
-      icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>',
+      icon: '<svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>',
     },
     {
       id: 'notifications',
       label: 'Notifications',
-      icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>',
+      icon: '<svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>',
     },
     {
       id: 'workspaces',
       label: 'Workspaces',
-      icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>',
+      icon: '<svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>',
     },
   ];
+
+  activeTab = signal('profile');
+  newRoleName = signal('');
+
+  auth = inject(AuthStateService);
+  themeService = inject(ThemeService);
+  notificationService = inject(NotificationService);
+  workspaceService = inject(WorkspaceService);
+  searchService = inject(SearchService);
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+
+  addRole() {
+    const role = this.newRoleName().trim();
+    if (role) {
+      this.auth.addRole(role);
+      this.newRoleName.set('');
+      this.notificationService.success(
+        'Role Created',
+        `Added "${role}" to available permissions.`,
+      );
+    }
+  }
+
+  deleteRole(role: string) {
+    if (this.auth.roles().length <= 1) {
+      this.notificationService.error(
+        'Action Restricted',
+        'Cannot delete the last remaining role.',
+      );
+      return;
+    }
+    this.auth.deleteRole(role);
+    this.notificationService.success(
+      'Role Removed',
+      `Deleted "${role}" from the system.`,
+    );
+  }
+
+  selectRole(role: string) {
+    this.auth.setCurrentRole(role);
+    this.notificationService.success(
+      'Role Updated',
+      `Switched active session to "${role}" permissions.`,
+    );
+  }
 
   placements: { id: any; label: string }[] = [
     { id: 'top-left', label: 'Top Left' },
@@ -917,11 +1075,6 @@ export class SettingsComponent {
       preview: 'linear-gradient(135deg, #14120a, #35301b, #d4af37)',
     },
   ];
-
-  notificationService = inject(NotificationService);
-  workspaceService = inject(WorkspaceService);
-  private searchService = inject(SearchService);
-  private fb = inject(FormBuilder);
 
   profileForm: FormGroup = this.fb.group({
     firstName: ['Riyaz', Validators.required],
@@ -1050,10 +1203,7 @@ export class SettingsComponent {
     }));
   }
 
-  constructor(
-    public themeService: ThemeService,
-    private route: ActivatedRoute,
-  ) {}
+  constructor(private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     // Deep link support for tabs via query parameters
