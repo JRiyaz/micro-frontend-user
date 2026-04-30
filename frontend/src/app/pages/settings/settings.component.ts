@@ -72,7 +72,7 @@ import { map, startWith } from 'rxjs/operators';
             @for (tab of tabs; track tab.id) {
               <button
                 (click)="activeTab.set(tab.id)"
-                class="w-full px-3 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2.5 text-left group"
+                class="w-full px-3 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-200 active:scale-95 flex items-center gap-2.5 text-left group"
                 [class.bg-primary]="activeTab() === tab.id"
                 [class.text-white]="activeTab() === tab.id"
                 [class.shadow-xl]="activeTab() === tab.id"
@@ -102,9 +102,7 @@ import { map, startWith } from 'rxjs/operators';
             <!-- Profile Tab -->
             @if (activeTab() === 'profile') {
               <div class="space-y-6 animate-fade-in">
-                <div
-                  class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-                >
+                <div class="card-premium p-6 sm:p-8">
                   <h3
                     class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-8"
                   >
@@ -219,10 +217,15 @@ import { map, startWith } from 'rxjs/operators';
                           </div>
                         </div>
                         <button
+                          type="button"
+                          (click)="saveProfile()"
                           [disabled]="
-                            isProfileInvalid() || profileForm.pristine
+                            isProfileInvalid() ||
+                            profileForm.pristine ||
+                            isSavingProfile()
                           "
-                          class="px-8 py-3 bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest"
+                          [class.btn-loading]="isSavingProfile()"
+                          class="btn-primary-premium"
                         >
                           Save Profile
                         </button>
@@ -236,9 +239,7 @@ import { map, startWith } from 'rxjs/operators';
             <!-- Roles Tab -->
             @if (activeTab() === 'roles') {
               <div class="space-y-6 animate-fade-in">
-                <div
-                  class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-                >
+                <div class="card-premium p-6 sm:p-8">
                   <div class="flex justify-between items-center mb-8">
                     <div>
                       <h3
@@ -326,8 +327,7 @@ import { map, startWith } from 'rxjs/operators';
                   <div
                     class="pt-8 border-t border-slate-100 dark:border-white/5"
                   >
-                    <label
-                      class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block"
+                    <label class="label-premium block mb-4"
                       >Create New Role</label
                     >
                     <div class="flex gap-3">
@@ -347,9 +347,22 @@ import { map, startWith } from 'rxjs/operators';
                       </div>
                       <button
                         (click)="addRole()"
-                        class="px-6 bg-primary text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
+                        class="btn-primary-premium flex items-center justify-center gap-2 group"
                       >
-                        Add Role
+                        <svg
+                          class="w-4 h-4 group-hover:rotate-45 transition-transform duration-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="3"
+                            d="M12 4v16m8-8H4"
+                          ></path>
+                        </svg>
+                        <span>Add Role</span>
                       </button>
                     </div>
                   </div>
@@ -360,9 +373,7 @@ import { map, startWith } from 'rxjs/operators';
             <!-- Security Tab -->
             @if (activeTab() === 'security') {
               <div class="space-y-6 animate-fade-in">
-                <div
-                  class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-                >
+                <div class="card-premium p-6 sm:p-8">
                   <h3
                     class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-10"
                   >
@@ -449,8 +460,15 @@ import { map, startWith } from 'rxjs/operators';
                       }
                     </div>
                     <button
-                      [disabled]="isSecurityInvalid()"
-                      class="px-8 py-3 bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest"
+                      type="button"
+                      (click)="saveSecurity()"
+                      [disabled]="
+                        isSecurityInvalid() ||
+                        securityForm.pristine ||
+                        isSavingSecurity()
+                      "
+                      [class.btn-loading]="isSavingSecurity()"
+                      class="btn-primary-premium"
                     >
                       Update Password
                     </button>
@@ -462,9 +480,7 @@ import { map, startWith } from 'rxjs/operators';
             <!-- Appearance Tab -->
             @if (activeTab() === 'appearance') {
               <div class="space-y-6 animate-fade-in">
-                <div
-                  class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-                >
+                <div class="card-premium p-6 sm:p-8">
                   <h3
                     class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
                   >
@@ -530,9 +546,7 @@ import { map, startWith } from 'rxjs/operators';
             <!-- Notifications Tab -->
             @if (activeTab() === 'notifications') {
               <div class="space-y-6 animate-fade-in">
-                <div
-                  class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-                >
+                <div class="card-premium p-6 sm:p-8">
                   <h3
                     class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
                   >
@@ -785,9 +799,7 @@ import { map, startWith } from 'rxjs/operators';
                     >
                   </div>
                 </div>
-                <div
-                  class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-                >
+                <div class="card-premium p-6 sm:p-8">
                   <div class="flex justify-between items-center mb-6">
                     <h3
                       class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest"
@@ -1043,6 +1055,8 @@ export class SettingsComponent {
 
   activeTab = signal('profile');
   newRoleName = signal('');
+  isSavingProfile = signal(false);
+  isSavingSecurity = signal(false);
 
   auth = inject(AuthStateService);
   themeService = inject(ThemeService);
@@ -1240,6 +1254,34 @@ export class SettingsComponent {
     return g.get('newPassword')?.value === g.get('confirmPassword')?.value
       ? null
       : { mismatch: true };
+  }
+
+  saveProfile() {
+    if (this.profileForm.valid) {
+      this.isSavingProfile.set(true);
+      setTimeout(() => {
+        this.isSavingProfile.set(false);
+        this.profileForm.markAsPristine();
+        this.notificationService.success(
+          'Profile Updated',
+          'Your profile information has been saved successfully.',
+        );
+      }, 1500);
+    }
+  }
+
+  saveSecurity() {
+    if (this.securityForm.valid) {
+      this.isSavingSecurity.set(true);
+      setTimeout(() => {
+        this.isSavingSecurity.set(false);
+        this.securityForm.reset();
+        this.notificationService.success(
+          'Password Changed',
+          'Your security credentials have been updated.',
+        );
+      }, 2000);
+    }
   }
 
   get projectsWithDetails() {

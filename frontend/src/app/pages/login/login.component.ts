@@ -9,6 +9,7 @@ import {
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs/operators';
+import { signal } from '@angular/core';
 
 @Component({
   selector: 'app-login',
@@ -114,8 +115,9 @@ import { map, startWith } from 'rxjs/operators';
 
             <button
               type="submit"
-              [disabled]="isFormInvalid()"
-              class="w-full bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
+              [disabled]="isFormInvalid() || isLoading()"
+              [class.btn-loading]="isLoading()"
+              class="w-full btn-primary-premium !py-3"
               id="login-submit"
             >
               Sign In
@@ -181,6 +183,7 @@ import { map, startWith } from 'rxjs/operators';
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);
+  isLoading = signal(false);
 
   loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -225,7 +228,12 @@ export class LoginComponent {
 
   onSubmit() {
     if (this.loginForm.valid) {
+      this.isLoading.set(true);
       console.log('Login Form Submitted', this.loginForm.value);
+      // Simulate backend call
+      setTimeout(() => {
+        this.isLoading.set(false);
+      }, 2000);
     } else {
       this.loginForm.markAllAsTouched();
     }

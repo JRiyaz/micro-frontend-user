@@ -9,6 +9,7 @@ import {
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs/operators';
+import { signal } from '@angular/core';
 
 @Component({
   selector: 'app-register',
@@ -37,9 +38,7 @@ import { map, startWith } from 'rxjs/operators';
           </p>
         </div>
 
-        <div
-          class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md p-8 sm:p-10 rounded-3xl shadow-xl dark:shadow-2xl"
-        >
+        <div class="card-premium p-8 sm:p-10 !rounded-3xl shadow-xl">
           <form
             [formGroup]="registerForm"
             (ngSubmit)="onSubmit()"
@@ -170,8 +169,9 @@ import { map, startWith } from 'rxjs/operators';
 
             <button
               type="submit"
-              [disabled]="isFormInvalid()"
-              class="sm:col-span-2 bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-primary-hover transition-all mt-2 shadow-lg shadow-primary/20"
+              [disabled]="isFormInvalid() || isLoading()"
+              [class.btn-loading]="isLoading()"
+              class="sm:col-span-2 btn-primary-premium !py-4 mt-2"
               id="register-submit"
             >
               Create My Account
@@ -194,6 +194,7 @@ import { map, startWith } from 'rxjs/operators';
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
+  isLoading = signal(false);
 
   registerForm: FormGroup = this.fb.group({
     firstName: ['', Validators.required],
@@ -265,7 +266,12 @@ export class RegisterComponent {
 
   onSubmit() {
     if (this.registerForm.valid) {
+      this.isLoading.set(true);
       console.log('Register Form Submitted', this.registerForm.value);
+      // Simulate backend call
+      setTimeout(() => {
+        this.isLoading.set(false);
+      }, 2000);
     } else {
       this.registerForm.markAllAsTouched();
     }
