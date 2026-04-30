@@ -57,13 +57,16 @@ import { map, startWith } from 'rxjs/operators';
               <label for="register-firstname" class="floating-label"
                 >First Name</label
               >
-              <div *ngIf="firstNameInvalid()" class="absolute -bottom-5 left-0">
-                <span
-                  *ngIf="registerForm.get('firstName')?.errors?.['required']"
-                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
-                  >Required</span
-                >
-              </div>
+              @if (firstNameInvalid()) {
+                <div class="absolute -bottom-5 left-0">
+                  @if (registerForm.get('firstName')?.errors?.['required']) {
+                    <span
+                      class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                      >Required</span
+                    >
+                  }
+                </div>
+              }
             </div>
 
             <!-- Last Name -->
@@ -78,13 +81,16 @@ import { map, startWith } from 'rxjs/operators';
               <label for="register-lastname" class="floating-label"
                 >Last Name</label
               >
-              <div *ngIf="lastNameInvalid()" class="absolute -bottom-5 left-0">
-                <span
-                  *ngIf="registerForm.get('lastName')?.errors?.['required']"
-                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
-                  >Required</span
-                >
-              </div>
+              @if (lastNameInvalid()) {
+                <div class="absolute -bottom-5 left-0">
+                  @if (registerForm.get('lastName')?.errors?.['required']) {
+                    <span
+                      class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                      >Required</span
+                    >
+                  }
+                </div>
+              }
             </div>
 
             <!-- Work Email -->
@@ -99,18 +105,22 @@ import { map, startWith } from 'rxjs/operators';
               <label for="register-email" class="floating-label"
                 >Work Email</label
               >
-              <div *ngIf="emailInvalid()" class="absolute -bottom-5 left-0">
-                <span
-                  *ngIf="registerForm.get('email')?.errors?.['required']"
-                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
-                  >Email is required</span
-                >
-                <span
-                  *ngIf="registerForm.get('email')?.errors?.['email']"
-                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
-                  >Invalid email format</span
-                >
-              </div>
+              @if (emailInvalid()) {
+                <div class="absolute -bottom-5 left-0">
+                  @if (registerForm.get('email')?.errors?.['required']) {
+                    <span
+                      class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                      >Email is required</span
+                    >
+                  }
+                  @if (registerForm.get('email')?.errors?.['email']) {
+                    <span
+                      class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                      >Invalid email format</span
+                    >
+                  }
+                </div>
+              }
             </div>
 
             <!-- Password -->
@@ -125,18 +135,22 @@ import { map, startWith } from 'rxjs/operators';
               <label for="register-password" class="floating-label"
                 >Password</label
               >
-              <div *ngIf="passwordInvalid()" class="absolute -bottom-5 left-0">
-                <span
-                  *ngIf="registerForm.get('password')?.errors?.['required']"
-                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
-                  >Password is required</span
-                >
-                <span
-                  *ngIf="registerForm.get('password')?.errors?.['minlength']"
-                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
-                  >Min 8 characters required</span
-                >
-              </div>
+              @if (passwordInvalid()) {
+                <div class="absolute -bottom-5 left-0">
+                  @if (registerForm.get('password')?.errors?.['required']) {
+                    <span
+                      class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                      >Password is required</span
+                    >
+                  }
+                  @if (registerForm.get('password')?.errors?.['minlength']) {
+                    <span
+                      class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                      >Min 8 characters required</span
+                    >
+                  }
+                </div>
+              }
             </div>
 
             <!-- Terms -->

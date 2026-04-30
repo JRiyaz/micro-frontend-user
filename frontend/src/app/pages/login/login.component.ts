@@ -58,18 +58,22 @@ import { map, startWith } from 'rxjs/operators';
                 >Email Address</label
               >
               <!-- Validation Error -->
-              <div *ngIf="emailInvalid()" class="absolute -bottom-5 left-0">
-                <span
-                  *ngIf="loginForm.get('email')?.errors?.['required']"
-                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
-                  >Email is required</span
-                >
-                <span
-                  *ngIf="loginForm.get('email')?.errors?.['email']"
-                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
-                  >Invalid email format</span
-                >
-              </div>
+              @if (emailInvalid()) {
+                <div class="absolute -bottom-5 left-0">
+                  @if (loginForm.get('email')?.errors?.['required']) {
+                    <span
+                      class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                      >Email is required</span
+                    >
+                  }
+                  @if (loginForm.get('email')?.errors?.['email']) {
+                    <span
+                      class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                      >Invalid email format</span
+                    >
+                  }
+                </div>
+              }
             </div>
 
             <!-- Password Field -->
@@ -85,18 +89,22 @@ import { map, startWith } from 'rxjs/operators';
                 >Password</label
               >
               <!-- Validation Error -->
-              <div *ngIf="passwordInvalid()" class="absolute -bottom-5 left-0">
-                <span
-                  *ngIf="loginForm.get('password')?.errors?.['required']"
-                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
-                  >Password is required</span
-                >
-                <span
-                  *ngIf="loginForm.get('password')?.errors?.['minlength']"
-                  class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
-                  >Min 6 characters required</span
-                >
-              </div>
+              @if (passwordInvalid()) {
+                <div class="absolute -bottom-5 left-0">
+                  @if (loginForm.get('password')?.errors?.['required']) {
+                    <span
+                      class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                      >Password is required</span
+                    >
+                  }
+                  @if (loginForm.get('password')?.errors?.['minlength']) {
+                    <span
+                      class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
+                      >Min 6 characters required</span
+                    >
+                  }
+                </div>
+              }
               <a
                 href="#"
                 class="absolute right-0 top-7 text-[10px] font-bold text-primary hover:underline uppercase tracking-widest z-10"

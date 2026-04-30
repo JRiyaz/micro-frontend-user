@@ -69,28 +69,30 @@ import { map, startWith } from 'rxjs/operators';
         <!-- Sidebar Navigation (Left Column) -->
         <div class="w-52 flex-shrink-0 overflow-y-auto custom-scrollbar pr-3">
           <div class="space-y-1.5">
-            <button
-              *ngFor="let tab of tabs"
-              (click)="activeTab.set(tab.id)"
-              class="w-full px-3 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2.5 text-left group"
-              [class.bg-primary]="activeTab() === tab.id"
-              [class.text-white]="activeTab() === tab.id"
-              [class.shadow-xl]="activeTab() === tab.id"
-              [class.shadow-primary/20]="activeTab() === tab.id"
-              [class.text-slate-500]="activeTab() !== tab.id"
-              [class.dark:text-slate-400]="activeTab() !== tab.id"
-              [class.hover:bg-slate-50]="activeTab() !== tab.id"
-              [class.dark:hover:bg-white/[0.03]]="activeTab() !== tab.id"
-            >
-              <div
-                *ngIf="tab.icon"
-                [innerHTML]="tab.icon"
-                class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110"
+            @for (tab of tabs; track tab.id) {
+              <button
+                (click)="activeTab.set(tab.id)"
+                class="w-full px-3 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2.5 text-left group"
+                [class.bg-primary]="activeTab() === tab.id"
                 [class.text-white]="activeTab() === tab.id"
-                [class.text-slate-400]="activeTab() !== tab.id"
-              ></div>
-              <span class="truncate">{{ tab.label }}</span>
-            </button>
+                [class.shadow-xl]="activeTab() === tab.id"
+                [class.shadow-primary/20]="activeTab() === tab.id"
+                [class.text-slate-500]="activeTab() !== tab.id"
+                [class.dark:text-slate-400]="activeTab() !== tab.id"
+                [class.hover:bg-slate-50]="activeTab() !== tab.id"
+                [class.dark:hover:bg-white/[0.03]]="activeTab() !== tab.id"
+              >
+                @if (tab.icon) {
+                  <div
+                    [innerHTML]="tab.icon"
+                    class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110"
+                    [class.text-white]="activeTab() === tab.id"
+                    [class.text-slate-400]="activeTab() !== tab.id"
+                  ></div>
+                }
+                <span class="truncate">{{ tab.label }}</span>
+              </button>
+            }
           </div>
         </div>
 
@@ -98,732 +100,454 @@ import { map, startWith } from 'rxjs/operators';
         <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 min-w-0">
           <div class="pb-8">
             <!-- Profile Tab -->
-            <div
-              *ngIf="activeTab() === 'profile'"
-              class="space-y-6 animate-fade-in"
-            >
-              <div
-                class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-              >
-                <h3
-                  class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-8"
+            @if (activeTab() === 'profile') {
+              <div class="space-y-6 animate-fade-in">
+                <div
+                  class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
                 >
-                  Profile Information
-                </h3>
-                <div class="flex flex-col sm:flex-row items-start gap-8 mb-10">
-                  <div class="relative group">
-                    <img
-                      src="https://ui-avatars.com/api/?name=Riyaz+Khan&background=3b429f&color=fff&size=80"
-                      class="w-20 h-20 rounded-2xl border border-primary/30"
-                    />
-                    <div
-                      class="absolute inset-0 bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer"
-                    >
-                      <svg
-                        class="w-5 h-5 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                        ></path>
-                        <circle cx="12" cy="13" r="3"></circle>
-                      </svg>
-                    </div>
-                  </div>
-                  <div class="flex-1 w-full">
-                    <form [formGroup]="profileForm" class="space-y-8">
+                  <h3
+                    class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-8"
+                  >
+                    Profile Information
+                  </h3>
+                  <div
+                    class="flex flex-col sm:flex-row items-start gap-8 mb-10"
+                  >
+                    <div class="relative group">
+                      <img
+                        src="https://ui-avatars.com/api/?name=Riyaz+Khan&background=3b429f&color=fff&size=80"
+                        class="w-20 h-20 rounded-2xl border border-primary/30"
+                      />
                       <div
-                        class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-8"
+                        class="absolute inset-0 bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer"
                       >
-                        <div class="floating-input-group">
-                          <input
-                            type="text"
-                            formControlName="firstName"
-                            placeholder=" "
-                            class="floating-input"
-                          />
-                          <label class="floating-label">First Name</label>
-                          <div
-                            *ngIf="firstNameInvalid()"
-                            class="absolute -bottom-5 left-0"
-                          >
-                            <span
-                              class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
-                              >Required</span
-                            >
-                          </div>
-                        </div>
-                        <div class="floating-input-group">
-                          <input
-                            type="text"
-                            formControlName="lastName"
-                            placeholder=" "
-                            class="floating-input"
-                          />
-                          <label class="floating-label">Last Name</label>
-                          <div
-                            *ngIf="lastNameInvalid()"
-                            class="absolute -bottom-5 left-0"
-                          >
-                            <span
-                              class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
-                              >Required</span
-                            >
-                          </div>
-                        </div>
-                        <div class="floating-input-group sm:col-span-2">
-                          <input
-                            type="email"
-                            formControlName="email"
-                            placeholder=" "
-                            class="floating-input"
-                          />
-                          <label class="floating-label">Email Address</label>
-                          <div
-                            *ngIf="emailInvalid()"
-                            class="absolute -bottom-5 left-0"
-                          >
-                            <span
-                              *ngIf="
-                                profileForm.get('email')?.errors?.['required']
-                              "
-                              class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
-                              >Email is required</span
-                            >
-                            <span
-                              *ngIf="
-                                profileForm.get('email')?.errors?.['email']
-                              "
-                              class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
-                              >Invalid format</span
-                            >
-                          </div>
-                        </div>
-                        <div class="relative sm:col-span-2">
-                          <input
-                            type="text"
-                            [value]="auth.userRoles().join(', ')"
-                            disabled
-                            class="w-full bg-transparent border-b-2 border-slate-100 dark:border-white/[0.04] py-2 text-sm text-slate-400 cursor-not-allowed opacity-60"
-                          />
-                          <label
-                            class="absolute left-0 -top-3.5 text-slate-400 text-[10px] uppercase font-bold tracking-widest"
-                            >Account Roles</label
-                          >
-                        </div>
+                        <svg
+                          class="w-5 h-5 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                          ></path>
+                          <circle cx="12" cy="13" r="3"></circle>
+                        </svg>
                       </div>
-                      <button
-                        [disabled]="isProfileInvalid() || profileForm.pristine"
-                        class="px-8 py-3 bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest"
-                      >
-                        Save Profile
-                      </button>
-                    </form>
+                    </div>
+                    <div class="flex-1 w-full">
+                      <form [formGroup]="profileForm" class="space-y-8">
+                        <div
+                          class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-8"
+                        >
+                          <div class="floating-input-group">
+                            <input
+                              type="text"
+                              formControlName="firstName"
+                              placeholder=" "
+                              class="floating-input"
+                            />
+                            <label class="floating-label">First Name</label>
+                            @if (firstNameInvalid()) {
+                              <div class="absolute -bottom-5 left-0">
+                                <span
+                                  class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                                  >Required</span
+                                >
+                              </div>
+                            }
+                          </div>
+                          <div class="floating-input-group">
+                            <input
+                              type="text"
+                              formControlName="lastName"
+                              placeholder=" "
+                              class="floating-input"
+                            />
+                            <label class="floating-label">Last Name</label>
+                            @if (lastNameInvalid()) {
+                              <div class="absolute -bottom-5 left-0">
+                                <span
+                                  class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                                  >Required</span
+                                >
+                              </div>
+                            }
+                          </div>
+                          <div class="floating-input-group sm:col-span-2">
+                            <input
+                              type="email"
+                              formControlName="email"
+                              placeholder=" "
+                              class="floating-input"
+                            />
+                            <label class="floating-label">Email Address</label>
+                            @if (emailInvalid()) {
+                              <div class="absolute -bottom-5 left-0">
+                                @if (
+                                  profileForm.get('email')?.errors?.['required']
+                                ) {
+                                  <span
+                                    class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                                    >Email is required</span
+                                  >
+                                }
+                                @if (
+                                  profileForm.get('email')?.errors?.['email']
+                                ) {
+                                  <span
+                                    class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                                    >Invalid format</span
+                                  >
+                                }
+                              </div>
+                            }
+                          </div>
+                          <div class="relative sm:col-span-2">
+                            <input
+                              type="text"
+                              [value]="auth.userRoles().join(', ')"
+                              disabled
+                              class="w-full bg-transparent border-b-2 border-slate-100 dark:border-white/[0.04] py-2 text-sm text-slate-400 cursor-not-allowed opacity-60"
+                            />
+                            <label
+                              class="absolute left-0 -top-3.5 text-slate-400 text-[10px] uppercase font-bold tracking-widest"
+                              >Account Roles</label
+                            >
+                          </div>
+                        </div>
+                        <button
+                          [disabled]="
+                            isProfileInvalid() || profileForm.pristine
+                          "
+                          class="px-8 py-3 bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest"
+                        >
+                          Save Profile
+                        </button>
+                      </form>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            }
 
             <!-- Roles Tab -->
-            <div
-              *ngIf="activeTab() === 'roles'"
-              class="space-y-6 animate-fade-in"
-            >
-              <div
-                class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-              >
-                <div class="flex justify-between items-center mb-8">
-                  <div>
-                    <h3
-                      class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest"
-                    >
-                      Role Management
-                    </h3>
-                    <p
-                      class="text-[10px] text-slate-500 uppercase tracking-widest mt-1"
-                    >
-                      Add or remove system access levels
-                    </p>
-                  </div>
-                  <div
-                    class="px-3 py-1 bg-primary/10 border border-primary/20 rounded-lg"
-                  >
-                    <span
-                      class="text-[10px] font-black text-primary uppercase tracking-widest"
-                      >Active Roles: {{ auth.userRoles().length }}</span
-                    >
-                  </div>
-                </div>
-
-                <div class="space-y-4 mb-10">
-                  <div
-                    *ngFor="let role of auth.availableRoles()"
-                    class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-xl group transition-all hover:border-primary/30"
-                  >
-                    <div class="flex items-center gap-3">
-                      <div
-                        [class.bg-primary]="auth.hasRole(role)"
-                        [class.bg-slate-200]="!auth.hasRole(role)"
-                        class="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(109,116,255,0.5)]"
-                      ></div>
-                      <span
-                        class="text-sm font-bold text-slate-700 dark:text-slate-300"
-                        >{{ role }}</span
-                      >
-                    </div>
-                    <div class="flex items-center gap-4">
-                      <button
-                        (click)="toggleRole(role)"
-                        [class.text-primary]="auth.hasRole(role)"
-                        [class.text-slate-400]="!auth.hasRole(role)"
-                        class="flex items-center gap-2 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest hover:bg-primary/10 rounded-lg transition-all"
-                      >
-                        <svg
-                          *ngIf="auth.hasRole(role)"
-                          class="w-3 h-3"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="3"
-                            d="M5 13l4 4L19 7"
-                          ></path>
-                        </svg>
-                        {{ auth.hasRole(role) ? 'Assigned' : 'Assign' }}
-                      </button>
-                      <button
-                        (click)="deleteRole(role)"
-                        class="p-1.5 text-slate-400 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        <svg
-                          class="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          ></path>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="pt-8 border-t border-slate-100 dark:border-white/5">
-                  <label
-                    class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block"
-                    >Create New Role</label
-                  >
-                  <div class="flex gap-3">
-                    <div class="floating-input-group flex-1">
-                      <input
-                        type="text"
-                        [value]="newRoleName()"
-                        (input)="newRoleName.set($any($event.target).value)"
-                        (keyup.enter)="addRole()"
-                        placeholder=" "
-                        class="floating-input"
-                        id="new-role"
-                      />
-                      <label class="floating-label" for="new-role"
-                        >Role Name</label
-                      >
-                    </div>
-                    <button
-                      (click)="addRole()"
-                      class="px-6 bg-primary text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
-                    >
-                      Add Role
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Security Tab -->
-            <div
-              *ngIf="activeTab() === 'security'"
-              class="space-y-6 animate-fade-in"
-            >
-              <div
-                class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-              >
-                <h3
-                  class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-10"
-                >
-                  Change Password
-                </h3>
-                <form [formGroup]="securityForm" class="space-y-10 max-w-md">
-                  <div class="floating-input-group">
-                    <input
-                      type="password"
-                      formControlName="currentPassword"
-                      placeholder=" "
-                      class="floating-input"
-                    />
-                    <label class="floating-label">Current Password</label>
-                    <div
-                      *ngIf="currentPasswordInvalid()"
-                      class="absolute -bottom-5 left-0"
-                    >
-                      <span
-                        class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
-                        >Required</span
-                      >
-                    </div>
-                  </div>
-                  <div class="floating-input-group">
-                    <input
-                      type="password"
-                      formControlName="newPassword"
-                      placeholder=" "
-                      class="floating-input"
-                    />
-                    <label class="floating-label">New Password</label>
-                    <div
-                      *ngIf="newPasswordInvalid()"
-                      class="absolute -bottom-5 left-0"
-                    >
-                      <span
-                        *ngIf="
-                          securityForm.get('newPassword')?.errors?.['required']
-                        "
-                        class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
-                        >Required</span
-                      >
-                      <span
-                        *ngIf="
-                          securityForm.get('newPassword')?.errors?.['minlength']
-                        "
-                        class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
-                        >Min 8 characters</span
-                      >
-                    </div>
-                  </div>
-                  <div class="floating-input-group">
-                    <input
-                      type="password"
-                      formControlName="confirmPassword"
-                      placeholder=" "
-                      class="floating-input"
-                    />
-                    <label class="floating-label">Confirm Password</label>
-                    <div
-                      *ngIf="confirmPasswordInvalid()"
-                      class="absolute -bottom-5 left-0"
-                    >
-                      <span
-                        *ngIf="
-                          securityForm.get('confirmPassword')?.errors?.[
-                            'required'
-                          ]
-                        "
-                        class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
-                        >Required</span
-                      >
-                      <span
-                        *ngIf="securityForm.errors?.['mismatch']"
-                        class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
-                        >Passwords do not match</span
-                      >
-                    </div>
-                  </div>
-                  <button
-                    [disabled]="isSecurityInvalid()"
-                    class="px-8 py-3 bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest"
-                  >
-                    Update Password
-                  </button>
-                </form>
-              </div>
-            </div>
-
-            <!-- Appearance Tab -->
-            <div
-              *ngIf="activeTab() === 'appearance'"
-              class="space-y-6 animate-fade-in"
-            >
-              <div
-                class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-              >
-                <h3
-                  class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
-                >
-                  Application Theme
-                </h3>
+            @if (activeTab() === 'roles') {
+              <div class="space-y-6 animate-fade-in">
                 <div
-                  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
+                  class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
                 >
-                  <div
-                    *ngFor="let theme of themes"
-                    class="bg-slate-50 dark:bg-white/[0.03] border rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02] relative group overflow-hidden"
-                    [class.border-primary]="
-                      themeService.currentTheme() === theme.id
-                    "
-                    [class.border-slate-200]="
-                      themeService.currentTheme() !== theme.id
-                    "
-                    [class.dark:border-white/[0.08]]="
-                      themeService.currentTheme() !== theme.id
-                    "
-                    (click)="themeService.setTheme(theme.id)"
-                  >
+                  <div class="flex justify-between items-center mb-8">
+                    <div>
+                      <h3
+                        class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest"
+                      >
+                        Role Management
+                      </h3>
+                      <p
+                        class="text-[10px] text-slate-500 uppercase tracking-widest mt-1"
+                      >
+                        Add or remove system access levels
+                      </p>
+                    </div>
                     <div
-                      class="h-20 rounded-lg mb-3 shadow-inner"
-                      [style.background]="theme.preview"
-                    ></div>
-                    <p class="text-xs font-bold text-slate-900 dark:text-white">
-                      {{ theme.name }}
-                    </p>
-                    <p
-                      class="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5"
+                      class="px-3 py-1 bg-primary/10 border border-primary/20 rounded-lg"
                     >
-                      {{ theme.desc }}
-                    </p>
-                    <div
-                      *ngIf="themeService.currentTheme() === theme.id"
-                      class="absolute top-2 right-2 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center"
-                    >
-                      <svg
-                        class="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                      <span
+                        class="text-[10px] font-black text-primary uppercase tracking-widest"
+                        >Active Roles: {{ auth.userRoles().length }}</span
                       >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="3"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Notifications Tab -->
-            <div
-              *ngIf="activeTab() === 'notifications'"
-              class="space-y-6 animate-fade-in"
-            >
-              <div
-                class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-              >
-                <h3
-                  class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
-                >
-                  Notification Behavior
-                </h3>
-
-                <div class="space-y-6">
-                  <!-- Do Not Disturb -->
-                  <div
-                    class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
-                  >
-                    <div class="flex items-center gap-3">
+                  <div class="space-y-4 mb-10">
+                    @for (role of auth.availableRoles(); track role) {
                       <div
-                        class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500"
+                        class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-xl group transition-all hover:border-primary/30"
                       >
-                        <svg
-                          class="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                          ></path>
-                        </svg>
+                        <div class="flex items-center gap-3">
+                          <div
+                            [class.bg-primary]="auth.hasRole(role)"
+                            [class.bg-slate-200]="!auth.hasRole(role)"
+                            class="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(109,116,255,0.5)]"
+                          ></div>
+                          <span
+                            class="text-sm font-bold text-slate-700 dark:text-slate-300"
+                            >{{ role }}</span
+                          >
+                        </div>
+                        <div class="flex items-center gap-4">
+                          <button
+                            (click)="toggleRole(role)"
+                            [class.text-primary]="auth.hasRole(role)"
+                            [class.text-slate-400]="!auth.hasRole(role)"
+                            class="flex items-center gap-2 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest hover:bg-primary/10 rounded-lg transition-all"
+                          >
+                            @if (auth.hasRole(role)) {
+                              <svg
+                                class="w-3 h-3"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="3"
+                                  d="M5 13l4 4L19 7"
+                                ></path>
+                              </svg>
+                            }
+                            {{ auth.hasRole(role) ? 'Assigned' : 'Assign' }}
+                          </button>
+                          <button
+                            (click)="deleteRole(role)"
+                            class="p-1.5 text-slate-400 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+                          >
+                            <svg
+                              class="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              ></path>
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-                      <div>
-                        <h4
-                          class="text-sm font-bold text-slate-900 dark:text-white"
-                        >
-                          Do Not Disturb
-                        </h4>
-                        <p
-                          class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
-                        >
-                          Mute all toast notifications while keeping them in
-                          history.
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      (click)="
-                        notificationService.updateConfig({
-                          dnd: !notificationService.config().dnd,
-                        })
-                      "
-                      class="w-11 h-6 rounded-full transition-colors relative"
-                      [class.bg-primary]="notificationService.config().dnd"
-                      [class.bg-slate-300]="!notificationService.config().dnd"
-                      [class.dark:bg-white/10]="
-                        !notificationService.config().dnd
-                      "
-                    >
-                      <div
-                        class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"
-                        [class.translate-x-5]="notificationService.config().dnd"
-                      ></div>
-                    </button>
+                    }
                   </div>
-
-                  <!-- Urgent Stick -->
                   <div
-                    class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
-                  >
-                    <div class="flex items-center gap-3">
-                      <div
-                        class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500"
-                      >
-                        <svg
-                          class="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                          ></path>
-                        </svg>
-                      </div>
-                      <div>
-                        <h4
-                          class="text-sm font-bold text-slate-900 dark:text-white"
-                        >
-                          Urgent Persistence
-                        </h4>
-                        <p
-                          class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
-                        >
-                          Critical alerts stay on screen until manually
-                          dismissed.
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      (click)="
-                        notificationService.updateConfig({
-                          urgentStick:
-                            !notificationService.config().urgentStick,
-                        })
-                      "
-                      class="w-11 h-6 rounded-full transition-colors relative"
-                      [class.bg-primary]="
-                        notificationService.config().urgentStick
-                      "
-                      [class.bg-slate-300]="
-                        !notificationService.config().urgentStick
-                      "
-                      [class.dark:bg-white/10]="
-                        !notificationService.config().urgentStick
-                      "
-                    >
-                      <div
-                        class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"
-                        [class.translate-x-5]="
-                          notificationService.config().urgentStick
-                        "
-                      ></div>
-                    </button>
-                  </div>
-
-                  <!-- Duration -->
-                  <div
-                    class="p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
-                  >
-                    <div class="flex justify-between items-center mb-3">
-                      <label
-                        class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]"
-                        >Display Duration</label
-                      >
-                      <span class="text-xs font-mono text-primary font-bold"
-                        >{{
-                          notificationService.config().duration / 1000
-                        }}s</span
-                      >
-                    </div>
-                    <input
-                      type="range"
-                      min="2000"
-                      max="10000"
-                      step="500"
-                      [value]="notificationService.config().duration"
-                      (input)="updateDuration($event)"
-                      class="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
-                    />
-                    <div
-                      class="flex justify-between mt-2 text-[10px] text-slate-400 font-medium"
-                    >
-                      <span>2s</span>
-                      <span>5s</span>
-                      <span>10s</span>
-                    </div>
-                  </div>
-
-                  <!-- Placement -->
-                  <div
-                    class="p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
+                    class="pt-8 border-t border-slate-100 dark:border-white/5"
                   >
                     <label
-                      class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-4"
-                      >On-Screen Placement</label
+                      class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block"
+                      >Create New Role</label
                     >
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="flex gap-3">
+                      <div class="floating-input-group flex-1">
+                        <input
+                          type="text"
+                          [value]="newRoleName()"
+                          (input)="newRoleName.set($any($event.target).value)"
+                          (keyup.enter)="addRole()"
+                          placeholder=" "
+                          class="floating-input"
+                          id="new-role"
+                        />
+                        <label class="floating-label" for="new-role"
+                          >Role Name</label
+                        >
+                      </div>
                       <button
-                        *ngFor="let pos of placements"
-                        (click)="
-                          notificationService.updateConfig({
-                            placement: pos.id,
-                          })
-                        "
-                        class="p-3 border rounded-xl flex flex-col items-center gap-2 transition-all"
-                        [class.border-primary]="
-                          notificationService.config().placement === pos.id
-                        "
-                        [class.bg-primary/5]="
-                          notificationService.config().placement === pos.id
-                        "
-                        [class.border-slate-200]="
-                          notificationService.config().placement !== pos.id
-                        "
-                        [class.dark:border-white/10]="
-                          notificationService.config().placement !== pos.id
-                        "
+                        (click)="addRole()"
+                        class="px-6 bg-primary text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
                       >
-                        <div
-                          class="w-full aspect-[4/3] bg-slate-100 dark:bg-white/5 rounded border border-slate-200 dark:border-white/10 relative overflow-hidden"
-                        >
-                          <div
-                            class="absolute w-2.5 h-2.5 bg-primary rounded-sm shadow-[0_0_8px_rgba(109,116,255,0.5)]"
-                            [style.top]="
-                              pos.id.startsWith('top') ? '4px' : 'auto'
-                            "
-                            [style.bottom]="
-                              pos.id.startsWith('bottom') ? '4px' : 'auto'
-                            "
-                            [style.left]="
-                              pos.id.endsWith('left') ? '4px' : 'auto'
-                            "
-                            [style.right]="
-                              pos.id.endsWith('right') ? '4px' : 'auto'
-                            "
-                          ></div>
-                        </div>
-                        <span
-                          class="text-[9px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 text-center"
-                          >{{ pos.label }}</span
-                        >
+                        Add Role
                       </button>
                     </div>
                   </div>
                 </div>
-
-                <div
-                  class="mt-8 pt-6 border-t border-slate-200 dark:border-white/[0.06] flex gap-3"
-                >
-                  <button
-                    (click)="testUrgent()"
-                    class="flex-1 px-5 py-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl font-bold text-xs hover:bg-rose-500/20 transition-all uppercase tracking-widest"
-                  >
-                    Test Urgent
-                  </button>
-                  <button
-                    (click)="
-                      notificationService.success(
-                        'System Check',
-                        'All modules are operating normally.'
-                      )
-                    "
-                    class="flex-1 px-5 py-2.5 bg-green-500/10 border border-green-500/20 text-green-500 rounded-xl font-bold text-xs hover:bg-green-500/20 transition-all uppercase tracking-widest"
-                  >
-                    Test Standard
-                  </button>
-                </div>
               </div>
-            </div>
+            }
 
-            <!-- Workspaces Tab -->
-            <div
-              *ngIf="activeTab() === 'workspaces'"
-              class="space-y-6 animate-fade-in"
-            >
-              <!-- Platform Version -->
-              <div class="flex flex-col items-center justify-center mb-4">
+            <!-- Security Tab -->
+            @if (activeTab() === 'security') {
+              <div class="space-y-6 animate-fade-in">
                 <div
-                  class="bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full flex items-center gap-2 shadow-sm"
+                  class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
                 >
-                  <div
-                    class="w-2 h-2 bg-primary rounded-full animate-pulse"
-                  ></div>
-                  <span
-                    class="text-[10px] font-black uppercase tracking-[0.2em] text-primary"
-                    >Platform v1.2.4-stable</span
-                  >
-                </div>
-              </div>
-
-              <div
-                class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
-              >
-                <div class="flex justify-between items-center mb-6">
                   <h3
-                    class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest"
+                    class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-10"
                   >
-                    Project Workspaces
+                    Change Password
                   </h3>
-                  <span
-                    class="px-2.5 py-1 bg-green-500/10 text-green-400 text-[10px] font-black uppercase tracking-wider rounded-lg border border-green-500/20"
-                  >
-                    {{ workspaceService.subProjects().length }} Connected
-                  </span>
+                  <form [formGroup]="securityForm" class="space-y-10 max-w-md">
+                    <div class="floating-input-group">
+                      <input
+                        type="password"
+                        formControlName="currentPassword"
+                        placeholder=" "
+                        class="floating-input"
+                      />
+                      <label class="floating-label">Current Password</label>
+                      @if (currentPasswordInvalid()) {
+                        <div class="absolute -bottom-5 left-0">
+                          <span
+                            class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                            >Required</span
+                          >
+                        </div>
+                      }
+                    </div>
+                    <div class="floating-input-group">
+                      <input
+                        type="password"
+                        formControlName="newPassword"
+                        placeholder=" "
+                        class="floating-input"
+                      />
+                      <label class="floating-label">New Password</label>
+                      @if (newPasswordInvalid()) {
+                        <div class="absolute -bottom-5 left-0">
+                          @if (
+                            securityForm.get('newPassword')?.errors?.[
+                              'required'
+                            ]
+                          ) {
+                            <span
+                              class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                              >Required</span
+                            >
+                          }
+                          @if (
+                            securityForm.get('newPassword')?.errors?.[
+                              'minlength'
+                            ]
+                          ) {
+                            <span
+                              class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                              >Min 8 characters</span
+                            >
+                          }
+                        </div>
+                      }
+                    </div>
+                    <div class="floating-input-group">
+                      <input
+                        type="password"
+                        formControlName="confirmPassword"
+                        placeholder=" "
+                        class="floating-input"
+                      />
+                      <label class="floating-label">Confirm Password</label>
+                      @if (confirmPasswordInvalid()) {
+                        <div class="absolute -bottom-5 left-0">
+                          @if (
+                            securityForm.get('confirmPassword')?.errors?.[
+                              'required'
+                            ]
+                          ) {
+                            <span
+                              class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                              >Required</span
+                            >
+                          }
+                          @if (securityForm.errors?.['mismatch']) {
+                            <span
+                              class="text-[9px] text-rose-500 font-bold uppercase tracking-tight"
+                              >Passwords do not match</span
+                            >
+                          }
+                        </div>
+                      }
+                    </div>
+                    <button
+                      [disabled]="isSecurityInvalid()"
+                      class="px-8 py-3 bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 uppercase tracking-widest"
+                    >
+                      Update Password
+                    </button>
+                  </form>
                 </div>
+              </div>
+            }
 
-                <div class="space-y-4">
-                  <div
-                    *ngFor="let project of projectsWithDetails; let i = index"
-                    class="group relative bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-2xl overflow-hidden transition-all hover:border-primary/40"
-                    [class.ring-2]="
-                      workspaceService.selectedProjectIndex() === i
-                    "
-                    [class.ring-primary/30]="
-                      workspaceService.selectedProjectIndex() === i
-                    "
-                    (click)="workspaceService.selectProject(i)"
+            <!-- Appearance Tab -->
+            @if (activeTab() === 'appearance') {
+              <div class="space-y-6 animate-fade-in">
+                <div
+                  class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
+                >
+                  <h3
+                    class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
                   >
-                    <div
-                      *ngIf="workspaceService.selectedProjectIndex() === i"
-                      class="absolute left-0 top-0 bottom-0 w-1 bg-primary"
-                    ></div>
-
-                    <div class="p-5 flex flex-col sm:flex-row gap-5">
-                      <div class="flex-shrink-0">
+                    Application Theme
+                  </h3>
+                  <div
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
+                  >
+                    @for (theme of themes; track theme.id) {
+                      <div
+                        class="bg-slate-50 dark:bg-white/[0.03] border rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02] relative group overflow-hidden"
+                        [class.border-primary]="
+                          themeService.currentTheme() === theme.id
+                        "
+                        [class.border-slate-200]="
+                          themeService.currentTheme() !== theme.id
+                        "
+                        [class.dark:border-white/[0.08]]="
+                          themeService.currentTheme() !== theme.id
+                        "
+                        (click)="themeService.setTheme(theme.id)"
+                      >
                         <div
-                          class="w-14 h-14 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors shadow-sm"
+                          class="h-20 rounded-lg mb-3 shadow-inner"
+                          [style.background]="theme.preview"
+                        ></div>
+                        <p
+                          class="text-xs font-bold text-slate-900 dark:text-white"
+                        >
+                          {{ theme.name }}
+                        </p>
+                        <p
+                          class="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5"
+                        >
+                          {{ theme.desc }}
+                        </p>
+                        @if (themeService.currentTheme() === theme.id) {
+                          <div
+                            class="absolute top-2 right-2 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center"
+                          >
+                            <svg
+                              class="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="3"
+                                d="M5 13l4 4L19 7"
+                              ></path>
+                            </svg>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Notifications Tab -->
+            @if (activeTab() === 'notifications') {
+              <div class="space-y-6 animate-fade-in">
+                <div
+                  class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
+                >
+                  <h3
+                    class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
+                  >
+                    Notification Behavior
+                  </h3>
+                  <div class="space-y-6">
+                    <div
+                      class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
+                    >
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500"
                         >
                           <svg
-                            class="w-7 h-7"
+                            class="w-5 h-5"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -831,137 +555,423 @@ import { map, startWith } from 'rxjs/operators';
                             <path
                               stroke-linecap="round"
                               stroke-linejoin="round"
-                              stroke-width="1.5"
-                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                              stroke-width="2"
+                              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
                             ></path>
                           </svg>
                         </div>
-                      </div>
-
-                      <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between mb-2">
+                        <div>
                           <h4
-                            class="text-base font-black text-slate-900 dark:text-white truncate flex items-center gap-2"
+                            class="text-sm font-bold text-slate-900 dark:text-white"
                           >
-                            {{ project.name }}
-                            <span
-                              *ngIf="
-                                workspaceService.selectedProjectIndex() === i
-                              "
-                              class="text-[9px] bg-primary text-white px-1.5 py-0.5 rounded uppercase font-bold"
-                              >Active</span
-                            >
+                            Do Not Disturb
                           </h4>
-                          <span class="flex items-center gap-1.5">
-                            <span
-                              class="w-2 h-2 rounded-full"
-                              [class.bg-green-400]="
-                                project.status === 'running'
-                              "
-                              [class.bg-red-400]="project.status === 'error'"
-                            ></span>
-                            <span
-                              class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400"
-                              >{{ project.status }}</span
-                            >
-                          </span>
-                        </div>
-
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
-                          <div class="space-y-1">
-                            <p
-                              class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
-                            >
-                              Address
-                            </p>
-                            <p
-                              class="text-xs font-mono text-slate-700 dark:text-slate-300"
-                            >
-                              {{ project.ip }}
-                            </p>
-                          </div>
-                          <div class="space-y-1">
-                            <p
-                              class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
-                            >
-                              Port
-                            </p>
-                            <p
-                              class="text-xs font-mono text-slate-700 dark:text-slate-300"
-                            >
-                              {{ project.port }}
-                            </p>
-                          </div>
-                          <div class="space-y-1">
-                            <p
-                              class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
-                            >
-                              Version
-                            </p>
-                            <p
-                              class="text-xs font-mono text-slate-700 dark:text-slate-300"
-                            >
-                              v{{ project.version }}
-                            </p>
-                          </div>
-                          <div class="space-y-1">
-                            <p
-                              class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
-                            >
-                              Protocol
-                            </p>
-                            <p
-                              class="text-xs font-mono text-slate-700 dark:text-slate-300"
-                            >
-                              HTTP/1.1
-                            </p>
-                          </div>
-                        </div>
-
-                        <!-- Services List -->
-                        <div
-                          class="mt-4 pt-4 border-t border-slate-200/50 dark:border-white/5"
-                        >
                           <p
-                            class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2"
+                            class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
                           >
-                            Active Services
+                            Mute all toast notifications while keeping them in
+                            history.
                           </p>
-                          <div class="flex flex-wrap gap-2">
-                            <div
-                              *ngFor="let svc of project.services"
-                              class="px-2 py-1 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-lg text-[9px] font-bold text-primary uppercase tracking-tight"
-                            >
-                              {{ svc }}
-                            </div>
-                          </div>
                         </div>
+                      </div>
+                      <button
+                        (click)="
+                          notificationService.updateConfig({
+                            dnd: !notificationService.config().dnd,
+                          })
+                        "
+                        class="w-11 h-6 rounded-full transition-colors relative"
+                        [class.bg-primary]="notificationService.config().dnd"
+                        [class.bg-slate-300]="!notificationService.config().dnd"
+                        [class.dark:bg-white/10]="
+                          !notificationService.config().dnd
+                        "
+                      >
+                        <div
+                          class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"
+                          [class.translate-x-5]="
+                            notificationService.config().dnd
+                          "
+                        ></div>
+                      </button>
+                    </div>
+                    <div
+                      class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
+                    >
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500"
+                        >
+                          <svg
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                            ></path>
+                          </svg>
+                        </div>
+                        <div>
+                          <h4
+                            class="text-sm font-bold text-slate-900 dark:text-white"
+                          >
+                            Urgent Persistence
+                          </h4>
+                          <p
+                            class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
+                          >
+                            Critical alerts stay on screen until manually
+                            dismissed.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        (click)="
+                          notificationService.updateConfig({
+                            urgentStick:
+                              !notificationService.config().urgentStick,
+                          })
+                        "
+                        class="w-11 h-6 rounded-full transition-colors relative"
+                        [class.bg-primary]="
+                          notificationService.config().urgentStick
+                        "
+                        [class.bg-slate-300]="
+                          !notificationService.config().urgentStick
+                        "
+                        [class.dark:bg-white/10]="
+                          !notificationService.config().urgentStick
+                        "
+                      >
+                        <div
+                          class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"
+                          [class.translate-x-5]="
+                            notificationService.config().urgentStick
+                          "
+                        ></div>
+                      </button>
+                    </div>
+                    <div
+                      class="p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
+                    >
+                      <div class="flex justify-between items-center mb-3">
+                        <label
+                          class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]"
+                          >Display Duration</label
+                        >
+                        <span class="text-xs font-mono text-primary font-bold"
+                          >{{
+                            notificationService.config().duration / 1000
+                          }}s</span
+                        >
+                      </div>
+                      <input
+                        type="range"
+                        min="2000"
+                        max="10000"
+                        step="500"
+                        [value]="notificationService.config().duration"
+                        (input)="updateDuration($event)"
+                        class="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
+                      />
+                      <div
+                        class="flex justify-between mt-2 text-[10px] text-slate-400 font-medium"
+                      >
+                        <span>2s</span>
+                        <span>5s</span>
+                        <span>10s</span>
                       </div>
                     </div>
-
                     <div
-                      class="px-5 py-2.5 bg-slate-100 dark:bg-white/[0.03] border-t border-slate-200 dark:border-white/[0.06] flex justify-between items-center"
+                      class="p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-xl"
                     >
-                      <span class="text-[9px] text-slate-500 font-medium italic"
-                        >Last heartbeat: {{ project.lastSeen }}</span
+                      <label
+                        class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] block mb-4"
+                        >On-Screen Placement</label
                       >
-                      <div class="flex items-center gap-3">
-                        <button
-                          class="text-[10px] font-bold text-primary uppercase hover:underline"
-                        >
-                          Re-ping
-                        </button>
-                        <button
-                          class="text-[10px] font-bold text-slate-500 uppercase hover:text-slate-900 dark:hover:text-white transition-colors"
-                        >
-                          Logs
-                        </button>
+                      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        @for (pos of placements; track pos.id) {
+                          <button
+                            (click)="
+                              notificationService.updateConfig({
+                                placement: pos.id,
+                              })
+                            "
+                            class="p-3 border rounded-xl flex flex-col items-center gap-2 transition-all"
+                            [class.border-primary]="
+                              notificationService.config().placement === pos.id
+                            "
+                            [class.bg-primary/5]="
+                              notificationService.config().placement === pos.id
+                            "
+                            [class.border-slate-200]="
+                              notificationService.config().placement !== pos.id
+                            "
+                            [class.dark:border-white/10]="
+                              notificationService.config().placement !== pos.id
+                            "
+                          >
+                            <div
+                              class="w-full aspect-[4/3] bg-slate-100 dark:bg-white/5 rounded border border-slate-200 dark:border-white/10 relative overflow-hidden"
+                            >
+                              <div
+                                class="absolute w-2.5 h-2.5 bg-primary rounded-sm shadow-[0_0_8px_rgba(109,116,255,0.5)]"
+                                [style.top]="
+                                  pos.id.startsWith('top') ? '4px' : 'auto'
+                                "
+                                [style.bottom]="
+                                  pos.id.startsWith('bottom') ? '4px' : 'auto'
+                                "
+                                [style.left]="
+                                  pos.id.endsWith('left') ? '4px' : 'auto'
+                                "
+                                [style.right]="
+                                  pos.id.endsWith('right') ? '4px' : 'auto'
+                                "
+                              ></div>
+                            </div>
+                            <span
+                              class="text-[9px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 text-center"
+                              >{{ pos.label }}</span
+                            >
+                          </button>
+                        }
                       </div>
                     </div>
                   </div>
+                  <div
+                    class="mt-8 pt-6 border-t border-slate-200 dark:border-white/[0.06] flex gap-3"
+                  >
+                    <button
+                      (click)="testUrgent()"
+                      class="flex-1 px-5 py-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl font-bold text-xs hover:bg-rose-500/20 transition-all uppercase tracking-widest"
+                    >
+                      Test Urgent
+                    </button>
+                    <button
+                      (click)="
+                        notificationService.success(
+                          'System Check',
+                          'All modules are operating normally.'
+                        )
+                      "
+                      class="flex-1 px-5 py-2.5 bg-green-500/10 border border-green-500/20 text-green-500 rounded-xl font-bold text-xs hover:bg-green-500/20 transition-all uppercase tracking-widest"
+                    >
+                      Test Standard
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            }
+
+            <!-- Workspaces Tab -->
+            @if (activeTab() === 'workspaces') {
+              <div class="space-y-6 animate-fade-in">
+                <div class="flex flex-col items-center justify-center mb-4">
+                  <div
+                    class="bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full flex items-center gap-2 shadow-sm"
+                  >
+                    <div
+                      class="w-2 h-2 bg-primary rounded-full animate-pulse"
+                    ></div>
+                    <span
+                      class="text-[10px] font-black uppercase tracking-[0.2em] text-primary"
+                      >Platform v1.2.4-stable</span
+                    >
+                  </div>
+                </div>
+                <div
+                  class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none"
+                >
+                  <div class="flex justify-between items-center mb-6">
+                    <h3
+                      class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest"
+                    >
+                      Project Workspaces
+                    </h3>
+                    <span
+                      class="px-2.5 py-1 bg-green-500/10 text-green-400 text-[10px] font-black uppercase tracking-wider rounded-lg border border-green-500/20"
+                      >{{
+                        workspaceService.subProjects().length
+                      }}
+                      Connected</span
+                    >
+                  </div>
+                  <div class="space-y-4">
+                    @for (
+                      project of projectsWithDetails;
+                      track project.name;
+                      let i = $index
+                    ) {
+                      <div
+                        class="group relative bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-2xl overflow-hidden transition-all hover:border-primary/40"
+                        [class.ring-2]="
+                          workspaceService.selectedProjectIndex() === i
+                        "
+                        [class.ring-primary/30]="
+                          workspaceService.selectedProjectIndex() === i
+                        "
+                        (click)="workspaceService.selectProject(i)"
+                      >
+                        @if (workspaceService.selectedProjectIndex() === i) {
+                          <div
+                            class="absolute left-0 top-0 bottom-0 w-1 bg-primary"
+                          ></div>
+                        }
+                        <div class="p-5 flex flex-col sm:flex-row gap-5">
+                          <div class="flex-shrink-0">
+                            <div
+                              class="w-14 h-14 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors shadow-sm"
+                            >
+                              <svg
+                                class="w-7 h-7"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="1.5"
+                                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                                ></path>
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-2">
+                              <h4
+                                class="text-base font-black text-slate-900 dark:text-white truncate flex items-center gap-2"
+                              >
+                                {{ project.name }}
+                                @if (
+                                  workspaceService.selectedProjectIndex() === i
+                                ) {
+                                  <span
+                                    class="text-[9px] bg-primary text-white px-1.5 py-0.5 rounded uppercase font-bold"
+                                    >Active</span
+                                  >
+                                }
+                              </h4>
+                              <span class="flex items-center gap-1.5">
+                                <span
+                                  class="w-2 h-2 rounded-full"
+                                  [class.bg-green-400]="
+                                    project.status === 'running'
+                                  "
+                                  [class.bg-red-400]="
+                                    project.status === 'error'
+                                  "
+                                ></span>
+                                <span
+                                  class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400"
+                                  >{{ project.status }}</span
+                                >
+                              </span>
+                            </div>
+                            <div
+                              class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4"
+                            >
+                              <div class="space-y-1">
+                                <p
+                                  class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
+                                >
+                                  Address
+                                </p>
+                                <p
+                                  class="text-xs font-mono text-slate-700 dark:text-slate-300"
+                                >
+                                  {{ project.ip }}
+                                </p>
+                              </div>
+                              <div class="space-y-1">
+                                <p
+                                  class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
+                                >
+                                  Port
+                                </p>
+                                <p
+                                  class="text-xs font-mono text-slate-700 dark:text-slate-300"
+                                >
+                                  {{ project.port }}
+                                </p>
+                              </div>
+                              <div class="space-y-1">
+                                <p
+                                  class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
+                                >
+                                  Version
+                                </p>
+                                <p
+                                  class="text-xs font-mono text-slate-700 dark:text-slate-300"
+                                >
+                                  v{{ project.version }}
+                                </p>
+                              </div>
+                              <div class="space-y-1">
+                                <p
+                                  class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest"
+                                >
+                                  Protocol
+                                </p>
+                                <p
+                                  class="text-xs font-mono text-slate-700 dark:text-slate-300"
+                                >
+                                  HTTP/1.1
+                                </p>
+                              </div>
+                            </div>
+                            <div
+                              class="mt-4 pt-4 border-t border-slate-200/50 dark:border-white/5"
+                            >
+                              <p
+                                class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2"
+                              >
+                                Active Services
+                              </p>
+                              <div class="flex flex-wrap gap-2">
+                                @for (svc of project.services; track svc) {
+                                  <div
+                                    class="px-2 py-1 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-lg text-[9px] font-bold text-primary uppercase tracking-tight"
+                                  >
+                                    {{ svc }}
+                                  </div>
+                                }
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="px-5 py-2.5 bg-slate-100 dark:bg-white/[0.03] border-t border-slate-200 dark:border-white/[0.06] flex justify-between items-center"
+                        >
+                          <span
+                            class="text-[9px] text-slate-500 font-medium italic"
+                            >Last heartbeat: {{ project.lastSeen }}</span
+                          >
+                          <div class="flex items-center gap-3">
+                            <button
+                              class="text-[10px] font-bold text-primary uppercase hover:underline"
+                            >
+                              Re-ping
+                            </button>
+                            <button
+                              class="text-[10px] font-bold text-slate-500 uppercase hover:text-slate-900 dark:hover:text-white transition-colors"
+                            >
+                              Logs
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
       </div>
