@@ -33,9 +33,9 @@ import { map, startWith } from 'rxjs/operators';
   encapsulation: ViewEncapsulation.None,
   template: `
     <div
-      class="h-[calc(100vh-80px)] flex flex-col p-4 sm:p-8 max-w-7xl mx-auto animate-fade-in overflow-hidden"
+      class="h-[calc(100vh-48px)] flex flex-col p-3 sm:p-5 max-w-7xl mx-auto animate-fade-in overflow-hidden"
     >
-      <div class="flex-shrink-0 mb-8">
+      <div class="flex-shrink-0 mb-5">
         <a
           routerLink="/dashboard"
           class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-all mb-4 group"
@@ -65,14 +65,14 @@ import { map, startWith } from 'rxjs/operators';
         </p>
       </div>
 
-      <div class="flex-1 flex gap-8 overflow-hidden">
+      <div class="flex-1 flex gap-5 overflow-hidden">
         <!-- Sidebar Navigation (Left Column) -->
-        <div class="w-64 flex-shrink-0 overflow-y-auto custom-scrollbar pr-4">
+        <div class="w-52 flex-shrink-0 overflow-y-auto custom-scrollbar pr-3">
           <div class="space-y-1.5">
             <button
               *ngFor="let tab of tabs"
               (click)="activeTab.set(tab.id)"
-              class="w-full px-4 py-3 text-xs font-black uppercase tracking-widest rounded-2xl transition-all flex items-center gap-3 text-left group"
+              class="w-full px-3 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2.5 text-left group"
               [class.bg-primary]="activeTab() === tab.id"
               [class.text-white]="activeTab() === tab.id"
               [class.shadow-xl]="activeTab() === tab.id"

@@ -19,16 +19,16 @@ import { map, startWith } from 'rxjs/operators';
       class="min-h-screen bg-slate-50 dark:bg-dark-base flex items-center justify-center p-6 relative overflow-hidden"
     >
       <div class="w-full max-w-md relative z-10">
-        <div class="flex flex-col items-center mb-10">
+        <div class="flex flex-col items-center mb-7">
           <a routerLink="/" class="flex items-center gap-2 mb-6">
             <div
-              class="w-14 h-14 bg-gradient-to-br from-primary to-blue-500 rounded-2xl flex items-center justify-center rotate-3"
+              class="w-11 h-11 bg-gradient-to-br from-primary to-blue-500 rounded-xl flex items-center justify-center rotate-3"
             >
-              <span class="text-white font-black text-2xl">I</span>
+              <span class="text-white font-black text-xl">I</span>
             </div>
           </a>
           <h1
-            class="text-3xl font-black tracking-tight text-slate-900 dark:text-white"
+            class="text-2xl font-black tracking-tight text-slate-900 dark:text-white"
           >
             Welcome Back
           </h1>
@@ -38,12 +38,12 @@ import { map, startWith } from 'rxjs/operators';
         </div>
 
         <div
-          class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md p-8 rounded-3xl shadow-xl dark:shadow-2xl"
+          class="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] backdrop-blur-md p-6 rounded-2xl shadow-xl dark:shadow-2xl"
         >
           <form
             [formGroup]="loginForm"
             (ngSubmit)="onSubmit()"
-            class="space-y-8"
+            class="space-y-6"
           >
             <!-- Email Field -->
             <div class="floating-input-group">
@@ -107,14 +107,14 @@ import { map, startWith } from 'rxjs/operators';
             <button
               type="submit"
               [disabled]="isFormInvalid()"
-              class="w-full bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
+              class="w-full bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
               id="login-submit"
             >
               Sign In
             </button>
           </form>
 
-          <div class="relative my-10">
+          <div class="relative my-7">
             <div class="absolute inset-0 flex items-center">
               <div
                 class="w-full border-t border-slate-200 dark:border-white/[0.08]"
