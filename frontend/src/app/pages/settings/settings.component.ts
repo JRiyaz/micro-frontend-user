@@ -487,7 +487,7 @@ import { map, startWith } from 'rxjs/operators';
                     Application Theme
                   </h3>
                   <div
-                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4"
                   >
                     @for (theme of themes; track theme.id) {
                       <div
@@ -1139,6 +1139,12 @@ export class SettingsComponent {
       name: 'Gold',
       desc: 'Warm Luxury',
       preview: 'linear-gradient(135deg, #14120a, #35301b, #d4af37)',
+    },
+    {
+      id: 'glass',
+      name: 'Glass',
+      desc: 'Translucent Nebula',
+      preview: 'url(assets/images/glass-bg.png)',
     },
   ];
 
