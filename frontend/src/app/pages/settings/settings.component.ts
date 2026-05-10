@@ -90,7 +90,8 @@ import {
             @for (tab of tabs; track tab.id) {
               <button
                 (click)="activeTab.set(tab.id)"
-                class="w-full px-3 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-200 active:scale-95 flex items-center gap-2.5 text-left group"
+                class="settings-tab-btn w-full px-3 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-200 active:scale-95 flex items-center gap-2.5 text-left group"
+                [class.active]="activeTab() === tab.id"
                 [class.bg-primary]="activeTab() === tab.id"
                 [class.text-white]="activeTab() === tab.id"
                 [class.shadow-xl]="activeTab() === tab.id"
@@ -1177,6 +1178,19 @@ import {
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
       background: rgba(109, 116, 255, 0.6);
     }
+    :root[data-theme='glass'] .settings-tab-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    :root[data-theme='glass'] .settings-tab-btn.active {
+      background: rgba(109, 116, 255, 0.3) !important;
+      backdrop-filter: blur(8px);
+      border-color: rgba(109, 116, 255, 0.4);
+    }
+    :root[data-theme='glass'].dark .settings-tab-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -1308,6 +1322,12 @@ export class SettingsComponent {
       preview: 'linear-gradient(135deg, #020d0a, #06241c, #10b981)',
     },
     {
+      id: 'glass',
+      name: 'Glass',
+      desc: 'Frosted Refraction',
+      preview: 'radial-gradient(circle at 15% 15%, #6d74ff 0%, #060714 100%)',
+    },
+    {
       id: 'rose',
       name: 'Rose',
       desc: 'Crimson Velvet',
@@ -1324,12 +1344,6 @@ export class SettingsComponent {
       name: 'Gold',
       desc: 'Warm Luxury',
       preview: 'linear-gradient(135deg, #14120a, #35301b, #d4af37)',
-    },
-    {
-      id: 'glass',
-      name: 'Glass',
-      desc: 'Translucent Nebula',
-      preview: 'url(assets/images/glass-bg.png)',
     },
   ];
 
