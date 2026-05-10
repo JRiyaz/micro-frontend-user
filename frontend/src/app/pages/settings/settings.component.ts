@@ -23,12 +23,19 @@ import {
   SearchService,
   ThemeService,
   WorkspaceService,
+  TypewriterComponent,
 } from 'ui-shared';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, LoaderComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    ReactiveFormsModule,
+    LoaderComponent,
+    TypewriterComponent,
+  ],
   encapsulation: ViewEncapsulation.None,
   template: `
     <div
@@ -59,8 +66,20 @@ import {
         >
           Settings
         </h1>
-        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Manage your account, preferences and workspace settings.
+        <p
+          class="text-slate-500 dark:text-slate-400 text-sm mt-1 h-5 flex items-center"
+        >
+          <lib-typewriter
+            [words]="[
+              'Personalize your profile.',
+              'Manage account security.',
+              'Customize platform theme.',
+              'Configure workspace settings.',
+            ]"
+            [typeSpeed]="60"
+            [deleteSpeed]="30"
+            [delayBetweenWords]="3000"
+          ></lib-typewriter>
         </p>
       </div>
 
