@@ -1,35 +1,34 @@
+import { CommonModule } from '@angular/common';
 import {
   Component,
-  signal,
-  inject,
   computed,
-  OnInit,
-  OnDestroy,
+  inject,
+  signal,
   ViewEncapsulation,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   FormGroup,
-  Validators,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
-import {
-  ThemeService,
-  NotificationService,
-  WorkspaceService,
-  SearchService,
-  AuthStateService,
-} from 'ui-shared';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { map, startWith } from 'rxjs/operators';
+import {
+  AuthStateService,
+  LoaderComponent,
+  LoaderType,
+  NotificationService,
+  SearchService,
+  ThemeService,
+  WorkspaceService,
+} from 'ui-shared';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, LoaderComponent],
   encapsulation: ViewEncapsulation.None,
   template: `
     <div
@@ -224,10 +223,12 @@ import { map, startWith } from 'rxjs/operators';
                             profileForm.pristine ||
                             isSavingProfile()
                           "
-                          [class.btn-loading]="isSavingProfile()"
                           class="btn-primary-premium"
                         >
-                          Save Profile
+                          <lib-loader
+                            [loading]="isSavingProfile()"
+                            label="Save Profile"
+                          ></lib-loader>
                         </button>
                       </form>
                     </div>
@@ -467,10 +468,12 @@ import { map, startWith } from 'rxjs/operators';
                         securityForm.pristine ||
                         isSavingSecurity()
                       "
-                      [class.btn-loading]="isSavingSecurity()"
                       class="btn-primary-premium"
                     >
-                      Update Password
+                      <lib-loader
+                        [loading]="isSavingSecurity()"
+                        label="Update Password"
+                      ></lib-loader>
                     </button>
                   </form>
                 </div>
@@ -539,6 +542,151 @@ import { map, startWith } from 'rxjs/operators';
                       </div>
                     }
                   </div>
+                </div>
+
+                <!-- Loading Animation Section -->
+                <div class="card-premium p-6 sm:p-8">
+                  <h3
+                    class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
+                  >
+                    Loading Animation
+                  </h3>
+                  <div
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+                  >
+                    @for (loader of loaders; track loader.id) {
+                      <div
+                        class="bg-slate-50 dark:bg-white/[0.03] border rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02] relative group overflow-hidden"
+                        [class.border-primary]="
+                          themeService.currentLoader() === loader.id
+                        "
+                        [class.border-slate-200]="
+                          themeService.currentLoader() !== loader.id
+                        "
+                        [class.dark:border-white/[0.08]]="
+                          themeService.currentLoader() !== loader.id
+                        "
+                        (click)="themeService.setLoader(loader.id)"
+                      >
+                        <div
+                          class="h-20 rounded-lg mb-3 bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden"
+                        >
+                          <lib-loader
+                            [type]="loader.id"
+                            [loading]="isPreviewLoading()"
+                            customClass="scale-[2] !text-primary"
+                          ></lib-loader>
+                        </div>
+                        <p
+                          class="text-xs font-bold text-slate-900 dark:text-white"
+                        >
+                          {{ loader.name }}
+                        </p>
+                        <p
+                          class="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5"
+                        >
+                          {{ loader.desc }}
+                        </p>
+                        @if (themeService.currentLoader() === loader.id) {
+                          <div
+                            class="absolute top-2 right-2 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center"
+                          >
+                            <svg
+                              class="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="3"
+                                d="M5 13l4 4L19 7"
+                              ></path>
+                            </svg>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Animation Tempo Section -->
+                <div class="card-premium p-6 sm:p-8 mt-6">
+                  <h3
+                    class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
+                  >
+                    Animation Tempo
+                  </h3>
+                  <div
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+                  >
+                    @for (tempo of tempos; track tempo.value) {
+                      <div
+                        class="bg-slate-50 dark:bg-white/[0.03] border rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02] relative"
+                        [class.border-primary]="
+                          themeService.loaderDuration() === tempo.value
+                        "
+                        [class.border-slate-200]="
+                          themeService.loaderDuration() !== tempo.value
+                        "
+                        [class.dark:border-white/[0.08]]="
+                          themeService.loaderDuration() !== tempo.value
+                        "
+                        (click)="themeService.setLoaderDuration(tempo.value)"
+                      >
+                        <div class="flex items-center justify-between mb-2">
+                          <span
+                            class="text-xs font-bold text-slate-900 dark:text-white"
+                            >{{ tempo.label }}</span
+                          >
+                          @if (themeService.loaderDuration() === tempo.value) {
+                            <div
+                              class="w-4 h-4 bg-primary text-white rounded-full flex items-center justify-center"
+                            >
+                              <svg
+                                class="w-2.5 h-2.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="4"
+                                  d="M5 13l4 4L19 7"
+                                ></path>
+                              </svg>
+                            </div>
+                          }
+                        </div>
+                        <p
+                          class="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+                        >
+                          {{ tempo.desc }}
+                        </p>
+                        <div
+                          class="mt-3 h-1 w-full bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden"
+                        >
+                          <div
+                            class="h-full bg-primary transition-all"
+                            [style.width.%]="
+                              themeService.loaderDuration() === tempo.value
+                                ? 100
+                                : 0
+                            "
+                            [style.transition-duration.ms]="tempo.value"
+                          ></div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  <p
+                    class="text-[10px] text-slate-400 dark:text-slate-500 mt-4 italic"
+                  >
+                    * Minimum duration the loader stays visible to ensure smooth
+                    transitions.
+                  </p>
                 </div>
               </div>
             }
@@ -1057,6 +1205,7 @@ export class SettingsComponent {
   newRoleName = signal('');
   isSavingProfile = signal(false);
   isSavingSecurity = signal(false);
+  isPreviewLoading = signal(true);
 
   auth = inject(AuthStateService);
   themeService = inject(ThemeService);
@@ -1065,6 +1214,17 @@ export class SettingsComponent {
   searchService = inject(SearchService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  constructor() {
+    // Cycle the preview loaders so user can see the "hold" duration effect
+    setInterval(() => {
+      this.isPreviewLoading.set(false);
+      setTimeout(() => {
+        this.isPreviewLoading.set(true);
+      }, 2000); // Wait 2s before starting again
+    }, 4000); // Total cycle 4s
+  }
 
   addRole() {
     const role = this.newRoleName().trim();
@@ -1109,6 +1269,12 @@ export class SettingsComponent {
     { id: 'bottom-right', label: 'Bottom Right' },
   ];
 
+  tempos = [
+    { label: 'Instant', value: 0, desc: 'No simulated delay' },
+    { label: 'Quick', value: 400, desc: 'Fast feedback' },
+    { label: 'Default', value: 800, desc: 'Balanced motion' },
+    { label: 'Smooth', value: 1500, desc: 'Elegant tempo' },
+  ];
   themes = [
     {
       id: 'void-blue',
@@ -1146,6 +1312,15 @@ export class SettingsComponent {
       desc: 'Translucent Nebula',
       preview: 'url(assets/images/glass-bg.png)',
     },
+  ];
+
+  loaders: { id: LoaderType; name: string; desc: string }[] = [
+    { id: 'bloom', name: 'Bloom', desc: 'Modern morphing' },
+    { id: 'windows', name: 'Fluent', desc: 'Circular Jitter' },
+    { id: 'flower', name: 'Flower', desc: 'Soft petals' },
+    { id: 'gravity', name: 'Gravity', desc: 'Orbital energy' },
+    { id: 'pulse', name: 'Pulse', desc: 'Expanding rings' },
+    { id: 'liquid', name: 'Liquid', desc: 'Fluid morph' },
   ];
 
   profileForm: FormGroup = this.fb.group({
@@ -1303,7 +1478,7 @@ export class SettingsComponent {
     }));
   }
 
-  constructor(private route: ActivatedRoute) {}
+  // Constructor removed and merged above
 
   ngOnInit(): void {
     // Deep link support for tabs via query parameters

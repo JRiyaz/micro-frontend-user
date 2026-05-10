@@ -10,11 +10,12 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs/operators';
 import { signal } from '@angular/core';
+import { LoaderComponent } from 'ui-shared';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, LoaderComponent],
   template: `
     <div
       class="min-h-screen bg-slate-50 dark:bg-dark-base flex items-center justify-center p-6 relative overflow-hidden"
@@ -170,11 +171,13 @@ import { signal } from '@angular/core';
             <button
               type="submit"
               [disabled]="isFormInvalid() || isLoading()"
-              [class.btn-loading]="isLoading()"
               class="sm:col-span-2 btn-primary-premium !py-4 mt-2"
               id="register-submit"
             >
-              Create My Account
+              <lib-loader
+                [loading]="isLoading()"
+                label="Create My Account"
+              ></lib-loader>
             </button>
           </form>
         </div>

@@ -10,11 +10,12 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs/operators';
 import { signal } from '@angular/core';
+import { LoaderComponent } from 'ui-shared';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, LoaderComponent],
   template: `
     <div
       class="min-h-screen bg-slate-50 dark:bg-dark-base flex items-center justify-center p-6 relative overflow-hidden"
@@ -116,11 +117,10 @@ import { signal } from '@angular/core';
             <button
               type="submit"
               [disabled]="isFormInvalid() || isLoading()"
-              [class.btn-loading]="isLoading()"
               class="w-full btn-primary-premium !py-3"
               id="login-submit"
             >
-              Sign In
+              <lib-loader [loading]="isLoading()" label="Sign In"></lib-loader>
             </button>
           </form>
 
