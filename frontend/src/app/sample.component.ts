@@ -1,7 +1,7 @@
-import { Component } from "@angular/core";
+import { Component } from '@angular/core';
 
 @Component({
-  selector: "app-sample",
+  selector: 'app-sample',
   imports: [],
   template: `
     <div class="accordion m-3" id="accordionExample">

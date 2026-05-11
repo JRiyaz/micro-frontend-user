@@ -1,37 +1,35 @@
-import { Routes } from "@angular/router";
-import { LoginComponent } from "./pages/login/login.component";
-import { RegisterComponent } from "./pages/register/register.component";
-import { SettingsComponent } from "./pages/settings/settings.component";
-import { NotFoundComponent } from "./not-found.component";
+import { Routes } from '@angular/router';
+import { LoginComponent } from './pages/login/login.component';
+import { RegisterComponent } from './pages/register/register.component';
+import { SettingsComponent } from './pages/settings/settings.component';
+import { NotFoundComponent } from './not-found.component';
 
 export const USER_ROUTES: Routes = [
   {
-    path: "login",
-    title: "Sign In - Inventory",
+    path: 'login',
+    title: 'Sign In - Inventory',
     component: LoginComponent,
   },
   {
-    path: "register",
-    title: "Create Account - Inventory",
+    path: 'register',
+    title: 'Create Account - Inventory',
     component: RegisterComponent,
   },
   {
-    path: "settings",
-    title: "Settings - Inventory",
+    path: 'settings',
+    title: 'Settings - Inventory',
     component: SettingsComponent,
   },
   {
-    path: "",
-    redirectTo: "login",
-    pathMatch: "full"
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full',
   },
   {
-    path: "**",
-    title: "Not Found",
+    path: '**',
+    title: 'Not Found',
     component: NotFoundComponent,
   },
 ];
 
-export const routes: Routes = [
-  ...USER_ROUTES,
-];
+export const routes: Routes = [...USER_ROUTES];

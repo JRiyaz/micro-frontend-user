@@ -1,13 +1,13 @@
-import { Injectable, signal, WritableSignal } from "@angular/core";
+import { Injectable, signal, WritableSignal } from '@angular/core';
 
-import { User } from "./user";
-import { HttpClient } from "@angular/common/http";
+import { User } from './user';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class UserService {
-  private readonly apiUrl = "https://jsonplaceholder.typicode.com/users";
+  private readonly apiUrl = 'https://jsonplaceholder.typicode.com/users';
   users: WritableSignal<User[]> = signal([]);
 
   constructor(private readonly http: HttpClient) {}
