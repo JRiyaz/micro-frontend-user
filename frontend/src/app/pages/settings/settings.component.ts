@@ -22,8 +22,8 @@ import {
   NotificationService,
   SearchService,
   ThemeService,
-  WorkspaceService,
   TypewriterComponent,
+  WorkspaceService,
 } from 'ui-shared';
 
 @Component({
@@ -43,7 +43,7 @@ import {
     >
       <div class="flex-shrink-0 mb-5">
         <a
-          routerLink="/dashboard"
+          routerLink="/inventory"
           class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-all mb-4 group"
         >
           <svg
@@ -59,7 +59,7 @@ import {
               d="M15 19l-7-7 7-7"
             ></path>
           </svg>
-          Back to Dashboard
+          Back to Inventory Hub
         </a>
         <h1
           class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white"
