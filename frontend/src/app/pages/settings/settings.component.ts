@@ -1355,25 +1355,25 @@ export class SettingsComponent {
   isProfileInvalid = computed(() => this.profileStatus());
 
   firstNameInvalid = toSignal(
-    this.profileForm.get('firstName')?.statusChanges.pipe(
-      startWith(this.profileForm.get('firstName')?.status),
-      map(() => this.profileForm.get('firstName')?.touched && this.profileForm.get('firstName')?.invalid),
+    this.profileForm.get('firstName')!.statusChanges.pipe(
+      startWith(this.profileForm.get('firstName')!.status),
+      map(() => this.profileForm.get('firstName')!.touched && this.profileForm.get('firstName')!.invalid),
     ),
     { initialValue: false },
   );
 
   lastNameInvalid = toSignal(
-    this.profileForm.get('lastName')?.statusChanges.pipe(
-      startWith(this.profileForm.get('lastName')?.status),
-      map(() => this.profileForm.get('lastName')?.touched && this.profileForm.get('lastName')?.invalid),
+    this.profileForm.get('lastName')!.statusChanges.pipe(
+      startWith(this.profileForm.get('lastName')!.status),
+      map(() => this.profileForm.get('lastName')!.touched && this.profileForm.get('lastName')!.invalid),
     ),
     { initialValue: false },
   );
 
   emailInvalid = toSignal(
-    this.profileForm.get('email')?.statusChanges.pipe(
-      startWith(this.profileForm.get('email')?.status),
-      map(() => this.profileForm.get('email')?.touched && this.profileForm.get('email')?.invalid),
+    this.profileForm.get('email')!.statusChanges.pipe(
+      startWith(this.profileForm.get('email')!.status),
+      map(() => this.profileForm.get('email')!.touched && this.profileForm.get('email')!.invalid),
     ),
     { initialValue: false },
   );
@@ -1389,17 +1389,17 @@ export class SettingsComponent {
   isSecurityInvalid = computed(() => this.securityStatus());
 
   currentPasswordInvalid = toSignal(
-    this.securityForm.get('currentPassword')?.statusChanges.pipe(
-      startWith(this.securityForm.get('currentPassword')?.status),
-      map(() => this.securityForm.get('currentPassword')?.touched && this.securityForm.get('currentPassword')?.invalid),
+    this.securityForm.get('currentPassword')!.statusChanges.pipe(
+      startWith(this.securityForm.get('currentPassword')!.status),
+      map(() => this.securityForm.get('currentPassword')!.touched && this.securityForm.get('currentPassword')!.invalid),
     ),
     { initialValue: false },
   );
 
   newPasswordInvalid = toSignal(
-    this.securityForm.get('newPassword')?.statusChanges.pipe(
-      startWith(this.securityForm.get('newPassword')?.status),
-      map(() => this.securityForm.get('newPassword')?.touched && this.securityForm.get('newPassword')?.invalid),
+    this.securityForm.get('newPassword')!.statusChanges.pipe(
+      startWith(this.securityForm.get('newPassword')!.status),
+      map(() => this.securityForm.get('newPassword')!.touched && this.securityForm.get('newPassword')!.invalid),
     ),
     { initialValue: false },
   );
@@ -1409,8 +1409,8 @@ export class SettingsComponent {
       startWith(this.securityForm.status),
       map(
         () =>
-          this.securityForm.get('confirmPassword')?.touched &&
-          (this.securityForm.get('confirmPassword')?.invalid || this.securityForm.errors?.mismatch),
+          this.securityForm.get('confirmPassword')!.touched &&
+          (this.securityForm.get('confirmPassword')!.invalid || this.securityForm.errors?.['mismatch']),
       ),
     ),
     { initialValue: false },

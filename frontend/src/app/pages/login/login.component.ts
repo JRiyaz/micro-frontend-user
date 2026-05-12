@@ -197,17 +197,17 @@ export class LoginComponent {
 
   // Signals for field validity
   emailInvalid = toSignal(
-    this.loginForm.get('email')?.statusChanges.pipe(
-      startWith(this.loginForm.get('email')?.status),
-      map(() => this.loginForm.get('email')?.touched && this.loginForm.get('email')?.invalid),
+    this.loginForm.get('email')!.statusChanges.pipe(
+      startWith(this.loginForm.get('email')!.status),
+      map(() => this.loginForm.get('email')!.touched && this.loginForm.get('email')!.invalid),
     ),
     { initialValue: false },
   );
 
   passwordInvalid = toSignal(
-    this.loginForm.get('password')?.statusChanges.pipe(
-      startWith(this.loginForm.get('password')?.status),
-      map(() => this.loginForm.get('password')?.touched && this.loginForm.get('password')?.invalid),
+    this.loginForm.get('password')!.statusChanges.pipe(
+      startWith(this.loginForm.get('password')!.status),
+      map(() => this.loginForm.get('password')!.touched && this.loginForm.get('password')!.invalid),
     ),
     { initialValue: false },
   );
