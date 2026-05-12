@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { UserService } from './user.service';
 import { CommonModule } from '@angular/common';
+import { Component, type OnInit } from '@angular/core';
+import type { UserService } from './user.service';
 
 @Component({
   selector: 'app-carousel',

@@ -1,15 +1,9 @@
-import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { FormBuilder, type FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { map, startWith } from 'rxjs/operators';
-import { signal } from '@angular/core';
 import { LoaderComponent } from 'ui-shared';
 
 @Component({
@@ -220,49 +214,33 @@ export class RegisterComponent {
 
   // Field validity signals
   firstNameInvalid = toSignal(
-    this.registerForm.get('firstName')!.statusChanges.pipe(
-      startWith(this.registerForm.get('firstName')!.status),
-      map(
-        () =>
-          this.registerForm.get('firstName')!.touched &&
-          this.registerForm.get('firstName')!.invalid,
-      ),
+    this.registerForm.get('firstName')?.statusChanges.pipe(
+      startWith(this.registerForm.get('firstName')?.status),
+      map(() => this.registerForm.get('firstName')?.touched && this.registerForm.get('firstName')?.invalid),
     ),
     { initialValue: false },
   );
 
   lastNameInvalid = toSignal(
-    this.registerForm.get('lastName')!.statusChanges.pipe(
-      startWith(this.registerForm.get('lastName')!.status),
-      map(
-        () =>
-          this.registerForm.get('lastName')!.touched &&
-          this.registerForm.get('lastName')!.invalid,
-      ),
+    this.registerForm.get('lastName')?.statusChanges.pipe(
+      startWith(this.registerForm.get('lastName')?.status),
+      map(() => this.registerForm.get('lastName')?.touched && this.registerForm.get('lastName')?.invalid),
     ),
     { initialValue: false },
   );
 
   emailInvalid = toSignal(
-    this.registerForm.get('email')!.statusChanges.pipe(
-      startWith(this.registerForm.get('email')!.status),
-      map(
-        () =>
-          this.registerForm.get('email')!.touched &&
-          this.registerForm.get('email')!.invalid,
-      ),
+    this.registerForm.get('email')?.statusChanges.pipe(
+      startWith(this.registerForm.get('email')?.status),
+      map(() => this.registerForm.get('email')?.touched && this.registerForm.get('email')?.invalid),
     ),
     { initialValue: false },
   );
 
   passwordInvalid = toSignal(
-    this.registerForm.get('password')!.statusChanges.pipe(
-      startWith(this.registerForm.get('password')!.status),
-      map(
-        () =>
-          this.registerForm.get('password')!.touched &&
-          this.registerForm.get('password')!.invalid,
-      ),
+    this.registerForm.get('password')?.statusChanges.pipe(
+      startWith(this.registerForm.get('password')?.status),
+      map(() => this.registerForm.get('password')?.touched && this.registerForm.get('password')?.invalid),
     ),
     { initialValue: false },
   );

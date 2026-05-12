@@ -1,8 +1,8 @@
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
+import { NotFoundComponent } from './not-found.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { SettingsComponent } from './pages/settings/settings.component';
-import { NotFoundComponent } from './not-found.component';
 
 export const USER_ROUTES: Routes = [
   {

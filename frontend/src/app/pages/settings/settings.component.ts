@@ -1,24 +1,13 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  computed,
-  inject,
-  signal,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, computed, inject, signal, ViewEncapsulation } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormBuilder, type FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { map, startWith } from 'rxjs/operators';
 import {
   AuthStateService,
   LoaderComponent,
-  LoaderType,
+  type LoaderType,
   NotificationService,
   SearchService,
   ThemeService,
@@ -29,13 +18,7 @@ import {
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    ReactiveFormsModule,
-    LoaderComponent,
-    TypewriterComponent,
-  ],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, LoaderComponent, TypewriterComponent],
   encapsulation: ViewEncapsulation.None,
   template: `
     <div
@@ -1246,7 +1229,6 @@ export class SettingsComponent {
   workspaceService = inject(WorkspaceService);
   searchService = inject(SearchService);
   private fb = inject(FormBuilder);
-  private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   constructor() {
@@ -1264,26 +1246,17 @@ export class SettingsComponent {
     if (role) {
       this.auth.addSystemRole(role);
       this.newRoleName.set('');
-      this.notificationService.success(
-        'Role Created',
-        `Added "${role}" to available system roles.`,
-      );
+      this.notificationService.success('Role Created', `Added "${role}" to available system roles.`);
     }
   }
 
   deleteRole(role: string) {
     if (this.auth.availableRoles().length <= 1) {
-      this.notificationService.error(
-        'Action Restricted',
-        'Cannot delete the last remaining system role.',
-      );
+      this.notificationService.error('Action Restricted', 'Cannot delete the last remaining system role.');
       return;
     }
     this.auth.deleteSystemRole(role);
-    this.notificationService.success(
-      'Role Removed',
-      `Deleted "${role}" from the system.`,
-    );
+    this.notificationService.success('Role Removed', `Deleted "${role}" from the system.`);
   }
 
   toggleRole(role: string) {
@@ -1382,37 +1355,25 @@ export class SettingsComponent {
   isProfileInvalid = computed(() => this.profileStatus());
 
   firstNameInvalid = toSignal(
-    this.profileForm.get('firstName')!.statusChanges.pipe(
-      startWith(this.profileForm.get('firstName')!.status),
-      map(
-        () =>
-          this.profileForm.get('firstName')!.touched &&
-          this.profileForm.get('firstName')!.invalid,
-      ),
+    this.profileForm.get('firstName')?.statusChanges.pipe(
+      startWith(this.profileForm.get('firstName')?.status),
+      map(() => this.profileForm.get('firstName')?.touched && this.profileForm.get('firstName')?.invalid),
     ),
     { initialValue: false },
   );
 
   lastNameInvalid = toSignal(
-    this.profileForm.get('lastName')!.statusChanges.pipe(
-      startWith(this.profileForm.get('lastName')!.status),
-      map(
-        () =>
-          this.profileForm.get('lastName')!.touched &&
-          this.profileForm.get('lastName')!.invalid,
-      ),
+    this.profileForm.get('lastName')?.statusChanges.pipe(
+      startWith(this.profileForm.get('lastName')?.status),
+      map(() => this.profileForm.get('lastName')?.touched && this.profileForm.get('lastName')?.invalid),
     ),
     { initialValue: false },
   );
 
   emailInvalid = toSignal(
-    this.profileForm.get('email')!.statusChanges.pipe(
-      startWith(this.profileForm.get('email')!.status),
-      map(
-        () =>
-          this.profileForm.get('email')!.touched &&
-          this.profileForm.get('email')!.invalid,
-      ),
+    this.profileForm.get('email')?.statusChanges.pipe(
+      startWith(this.profileForm.get('email')?.status),
+      map(() => this.profileForm.get('email')?.touched && this.profileForm.get('email')?.invalid),
     ),
     { initialValue: false },
   );
@@ -1428,25 +1389,17 @@ export class SettingsComponent {
   isSecurityInvalid = computed(() => this.securityStatus());
 
   currentPasswordInvalid = toSignal(
-    this.securityForm.get('currentPassword')!.statusChanges.pipe(
-      startWith(this.securityForm.get('currentPassword')!.status),
-      map(
-        () =>
-          this.securityForm.get('currentPassword')!.touched &&
-          this.securityForm.get('currentPassword')!.invalid,
-      ),
+    this.securityForm.get('currentPassword')?.statusChanges.pipe(
+      startWith(this.securityForm.get('currentPassword')?.status),
+      map(() => this.securityForm.get('currentPassword')?.touched && this.securityForm.get('currentPassword')?.invalid),
     ),
     { initialValue: false },
   );
 
   newPasswordInvalid = toSignal(
-    this.securityForm.get('newPassword')!.statusChanges.pipe(
-      startWith(this.securityForm.get('newPassword')!.status),
-      map(
-        () =>
-          this.securityForm.get('newPassword')!.touched &&
-          this.securityForm.get('newPassword')!.invalid,
-      ),
+    this.securityForm.get('newPassword')?.statusChanges.pipe(
+      startWith(this.securityForm.get('newPassword')?.status),
+      map(() => this.securityForm.get('newPassword')?.touched && this.securityForm.get('newPassword')?.invalid),
     ),
     { initialValue: false },
   );
@@ -1456,18 +1409,15 @@ export class SettingsComponent {
       startWith(this.securityForm.status),
       map(
         () =>
-          this.securityForm.get('confirmPassword')!.touched &&
-          (this.securityForm.get('confirmPassword')!.invalid ||
-            this.securityForm.errors?.['mismatch']),
+          this.securityForm.get('confirmPassword')?.touched &&
+          (this.securityForm.get('confirmPassword')?.invalid || this.securityForm.errors?.mismatch),
       ),
     ),
     { initialValue: false },
   );
 
   passwordMatchValidator(g: FormGroup) {
-    return g.get('newPassword')?.value === g.get('confirmPassword')?.value
-      ? null
-      : { mismatch: true };
+    return g.get('newPassword')?.value === g.get('confirmPassword')?.value ? null : { mismatch: true };
   }
 
   saveProfile() {
@@ -1476,10 +1426,7 @@ export class SettingsComponent {
       setTimeout(() => {
         this.isSavingProfile.set(false);
         this.profileForm.markAsPristine();
-        this.notificationService.success(
-          'Profile Updated',
-          'Your profile information has been saved successfully.',
-        );
+        this.notificationService.success('Profile Updated', 'Your profile information has been saved successfully.');
       }, 1500);
     }
   }
@@ -1490,10 +1437,7 @@ export class SettingsComponent {
       setTimeout(() => {
         this.isSavingSecurity.set(false);
         this.securityForm.reset();
-        this.notificationService.success(
-          'Password Changed',
-          'Your security credentials have been updated.',
-        );
+        this.notificationService.success('Password Changed', 'Your security credentials have been updated.');
       }, 2000);
     }
   }
@@ -1503,9 +1447,7 @@ export class SettingsComponent {
     return this.workspaceService.subProjects().map((p, i) => ({
       ...p,
       ip: `192.168.1.${10 + i}`,
-      version: p.name.includes('Shell')
-        ? '1.2.4'
-        : versions[i % versions.length],
+      version: p.name.includes('Shell') ? '1.2.4' : versions[i % versions.length],
       lastSeen: i === 0 ? 'Live' : `${i * 2 + 1} mins ago`,
       services: p.services || ['Core Module'],
     }));
