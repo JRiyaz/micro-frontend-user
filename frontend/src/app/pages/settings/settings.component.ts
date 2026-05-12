@@ -3,7 +3,7 @@ import { Component, computed, inject, signal, ViewEncapsulation } from '@angular
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, type FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { map, startWith } from 'rxjs/operators';
+import { map, of, startWith } from 'rxjs';
 import {
   AuthStateService,
   LoaderComponent,
@@ -1464,55 +1464,57 @@ export class SettingsComponent {
       }
     });
 
-    // Dynamic Search Registration
-    this.searchService.register([
-      {
-        id: 'settings-profile',
-        title: 'User Profile Settings',
-        path: '/user/settings',
-        category: 'Settings',
-        queryParams: { tab: 'profile' },
+    // Dynamic Search Provider Registration
+    this.searchService.registerProvider({
+      id: 'user-settings',
+      name: 'Settings',
+      search: (query: string) => {
+        const q = query.toLowerCase();
+        const settingsItems = [
+          {
+            id: 'settings-profile',
+            title: 'User Profile Settings',
+            path: '/user/settings',
+            category: 'Settings',
+            queryParams: { tab: 'profile' },
+          },
+          {
+            id: 'settings-security',
+            title: 'Security & Password',
+            path: '/user/settings',
+            category: 'Settings',
+            queryParams: { tab: 'security' },
+          },
+          {
+            id: 'settings-appearance',
+            title: 'Appearance & Themes',
+            path: '/user/settings',
+            category: 'Settings',
+            queryParams: { tab: 'appearance' },
+          },
+          {
+            id: 'settings-notifications',
+            title: 'Notification Preferences',
+            path: '/user/settings',
+            category: 'Settings',
+            queryParams: { tab: 'notifications' },
+          },
+          {
+            id: 'settings-workspaces',
+            title: 'Workspace Configuration',
+            path: '/user/settings',
+            category: 'Settings',
+            queryParams: { tab: 'workspaces' },
+          },
+        ];
+        return of(settingsItems.filter((item) => item.title.toLowerCase().includes(q)));
       },
-      {
-        id: 'settings-security',
-        title: 'Security & Password',
-        path: '/user/settings',
-        category: 'Settings',
-        queryParams: { tab: 'security' },
-      },
-      {
-        id: 'settings-appearance',
-        title: 'Appearance & Themes',
-        path: '/user/settings',
-        category: 'Settings',
-        queryParams: { tab: 'appearance' },
-      },
-      {
-        id: 'settings-notifications',
-        title: 'Notification Preferences',
-        path: '/user/settings',
-        category: 'Settings',
-        queryParams: { tab: 'notifications' },
-      },
-      {
-        id: 'settings-workspaces',
-        title: 'Workspace Configuration',
-        path: '/user/settings',
-        category: 'Settings',
-        queryParams: { tab: 'workspaces' },
-      },
-    ]);
+    });
   }
 
   ngOnDestroy(): void {
-    // Clean up search index when component is destroyed
-    this.searchService.unregister([
-      'settings-profile',
-      'settings-security',
-      'settings-appearance',
-      'settings-notifications',
-      'settings-workspaces',
-    ]);
+    // Clean up search provider when component is destroyed
+    this.searchService.unregisterProvider('user-settings');
   }
 
   updateDuration(event: Event) {
