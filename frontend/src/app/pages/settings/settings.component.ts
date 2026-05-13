@@ -1409,8 +1409,8 @@ export class SettingsComponent {
       startWith(this.securityForm.status),
       map(
         () =>
-          this.securityForm.get('confirmPassword')!.touched &&
-          (this.securityForm.get('confirmPassword')!.invalid || this.securityForm.errors?.['mismatch']),
+          this.securityForm.get('confirmPassword')?.touched &&
+          (this.securityForm.get('confirmPassword')?.invalid || this.securityForm.errors?.['mismatch']),
       ),
     ),
     { initialValue: false },
