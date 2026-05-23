@@ -6,6 +6,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { map, of, startWith } from 'rxjs';
 import {
   AuthStateService,
+  DisplayImageService,
   LoaderComponent,
   type LoaderType,
   NotificationService,
@@ -691,6 +692,71 @@ import {
                     transitions.
                   </p>
                 </div>
+
+                <!-- Image Preferences Section (Inventory Hub Only) -->
+                <div class="card-premium p-6 sm:p-8 mt-6">
+                  <h3
+                    class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-6"
+                  >
+                    Inventory Hub Preferences
+                  </h3>
+                  <div
+                    class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] rounded-2xl"
+                  >
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary"
+                      >
+                        <svg
+                          class="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <h4
+                          class="text-sm font-bold text-slate-900 dark:text-white"
+                        >
+                          Display Product Images
+                        </h4>
+                        <p
+                          class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
+                        >
+                          Toggle showing product visuals on listings and detail pages in Inventory Hub.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      (click)="
+                        displayImageService.setDisplayImage(
+                          !displayImageService.displayImage()
+                        )
+                      "
+                      class="w-11 h-6 rounded-full transition-colors relative"
+                      [class.bg-primary]="displayImageService.displayImage()"
+                      [class.bg-slate-300]="!displayImageService.displayImage()"
+                      [class.dark:bg-white/10]="
+                        !displayImageService.displayImage()
+                      "
+                      aria-label="Toggle product images display"
+                    >
+                      <div
+                        class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"
+                        [class.translate-x-5]="
+                          displayImageService.displayImage()
+                        "
+                      ></div>
+                    </button>
+                  </div>
+                </div>
               </div>
             }
 
@@ -1225,6 +1291,7 @@ export class SettingsComponent {
 
   auth = inject(AuthStateService);
   themeService = inject(ThemeService);
+  displayImageService = inject(DisplayImageService);
   notificationService = inject(NotificationService);
   workspaceService = inject(WorkspaceService);
   searchService = inject(SearchService);
