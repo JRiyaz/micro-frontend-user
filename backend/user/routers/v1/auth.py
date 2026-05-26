@@ -113,3 +113,17 @@ async def login(
     token_data = {"sub": user.username, "role": user.role}
     access_token = create_access_token(token_data)
     return Token(access_token=access_token, role=user.role, username=user.username)
+
+@router.get("/check-username")
+async def check_username_exists(
+    username: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Checks if a username is already taken in the system.
+    Supports asynchronous validation in the Angular registration MFE.
+    """
+    result = await db.execute(select(User).where(User.username == username))
+    user = result.scalar_one_or_none()
+    return {"exists": user is not None}
+

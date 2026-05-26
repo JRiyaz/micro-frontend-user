@@ -4,12 +4,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, type FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { map, startWith } from 'rxjs/operators';
-import { LoaderComponent } from 'ui-shared';
+import { LoaderComponent, UsernameValidatorDirective } from 'ui-shared';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, LoaderComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, LoaderComponent, UsernameValidatorDirective],
   template: `
     <div
       class="min-h-screen bg-slate-50 dark:bg-dark-base flex items-center justify-center p-6 relative overflow-hidden"
@@ -82,6 +82,32 @@ import { LoaderComponent } from 'ui-shared';
                       class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
                       >Required</span
                     >
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Username (Async Backend Validated) -->
+            <div class="floating-input-group sm:col-span-2">
+              <input
+                type="text"
+                formControlName="username"
+                id="register-username"
+                placeholder=" "
+                class="floating-input"
+                libUsernameValidator
+              />
+              <label for="register-username" class="floating-label">Username</label>
+              @if (usernameInvalid()) {
+                <div class="absolute -bottom-5 left-0">
+                  @if (registerForm.get('username')?.errors?.['required']) {
+                    <span class="text-[10px] text-rose-500 font-bold uppercase tracking-tight">Username is required</span>
+                  }
+                  @if (registerForm.get('username')?.errors?.['minlength']) {
+                    <span class="text-[10px] text-rose-500 font-bold uppercase tracking-tight">Min 3 characters required</span>
+                  }
+                  @if (registerForm.get('username')?.errors?.['usernameTaken']) {
+                    <span class="text-[10px] text-rose-500 font-bold uppercase tracking-tight">Username is already taken</span>
                   }
                 </div>
               }
@@ -196,6 +222,7 @@ export class RegisterComponent {
   registerForm: FormGroup = this.fb.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
+    username: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
     terms: [false, Validators.requiredTrue],
@@ -213,6 +240,14 @@ export class RegisterComponent {
   isFormInvalid = computed(() => this.formStatus());
 
   // Field validity signals
+  usernameInvalid = toSignal(
+    this.registerForm.get('username')!.statusChanges.pipe(
+      startWith(this.registerForm.get('username')!.status),
+      map(() => this.registerForm.get('username')!.touched && this.registerForm.get('username')!.invalid),
+    ),
+    { initialValue: false },
+  );
+
   firstNameInvalid = toSignal(
     this.registerForm.get('firstName')!.statusChanges.pipe(
       startWith(this.registerForm.get('firstName')!.status),
