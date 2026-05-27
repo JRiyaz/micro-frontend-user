@@ -2,9 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, type FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { map, startWith } from 'rxjs/operators';
-import { LoaderComponent, UsernameValidatorDirective } from 'ui-shared';
+import { LoaderComponent, UsernameValidatorDirective, AuthStateService, NotificationService } from 'ui-shared';
 
 @Component({
   selector: 'app-register',
@@ -217,6 +218,11 @@ import { LoaderComponent, UsernameValidatorDirective } from 'ui-shared';
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
+  private auth = inject(AuthStateService);
+  private router = inject(Router);
+  private notificationService = inject(NotificationService);
+
   isLoading = signal(false);
 
   registerForm: FormGroup = this.fb.group({
@@ -283,11 +289,37 @@ export class RegisterComponent {
   onSubmit() {
     if (this.registerForm.valid) {
       this.isLoading.set(true);
-      console.log('Register Form Submitted', this.registerForm.value);
-      // Simulate backend call
-      setTimeout(() => {
-        this.isLoading.set(false);
-      }, 2000);
+
+      const payload = {
+        username: this.registerForm.value.username,
+        email: this.registerForm.value.email,
+        password: this.registerForm.value.password,
+        name: `${this.registerForm.value.firstName} ${this.registerForm.value.lastName}`,
+        company: 'Dev Corp',
+      };
+
+      this.http.post<any>('http://localhost:3000/auth/register', payload, { withCredentials: true }).subscribe({
+        next: (res) => {
+          this.isLoading.set(false);
+          this.notificationService.success('Account Created', 'Registration successful! Directing to dashboard.');
+          
+          this.auth.login({
+            id: res.id,
+            name: payload.name,
+            email: payload.email,
+            username: payload.username,
+            roles: [res.role],
+            avatarUrl: '',
+          });
+
+          this.router.navigate(['/inventory']);
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          const errorMsg = err.error?.detail || 'Failed to create your account.';
+          this.notificationService.error('Registration Failed', errorMsg);
+        }
+      });
     } else {
       this.registerForm.markAllAsTouched();
     }

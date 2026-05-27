@@ -2,9 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, type FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { map, startWith } from 'rxjs/operators';
-import { LoaderComponent } from 'ui-shared';
+import { firstValueFrom } from 'rxjs';
+import { LoaderComponent, AuthStateService, NotificationService, UserSettingsService } from 'ui-shared';
 
 @Component({
   selector: 'app-login',
@@ -41,31 +43,31 @@ import { LoaderComponent } from 'ui-shared';
             (ngSubmit)="onSubmit()"
             class="space-y-6"
           >
-            <!-- Email Field -->
+            <!-- Username Field -->
             <div class="floating-input-group">
               <input
-                type="email"
-                formControlName="email"
-                id="login-email"
+                type="text"
+                formControlName="username"
+                id="login-username"
                 placeholder=" "
                 class="floating-input"
               />
-              <label for="login-email" class="floating-label"
-                >Email Address</label
+              <label for="login-username" class="floating-label"
+                >Username</label
               >
               <!-- Validation Error -->
-              @if (emailInvalid()) {
+              @if (usernameInvalid()) {
                 <div class="absolute -bottom-5 left-0">
-                  @if (loginForm.get('email')?.errors?.['required']) {
+                  @if (loginForm.get('username')?.errors?.['required']) {
                     <span
                       class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
-                      >Email is required</span
+                      >Username is required</span
                     >
                   }
-                  @if (loginForm.get('email')?.errors?.['email']) {
+                  @if (loginForm.get('username')?.errors?.['minlength']) {
                     <span
                       class="text-[10px] text-rose-500 font-bold uppercase tracking-tight"
-                      >Invalid email format</span
+                      >Min 3 characters required</span
                     >
                   }
                 </div>
@@ -177,10 +179,16 @@ import { LoaderComponent } from 'ui-shared';
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
+  private auth = inject(AuthStateService);
+  private router = inject(Router);
+  private notificationService = inject(NotificationService);
+  private userSettingsService = inject(UserSettingsService);
+
   isLoading = signal(false);
 
   loginForm: FormGroup = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    username: ['', [Validators.required, Validators.minLength(3)]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
@@ -196,10 +204,10 @@ export class LoginComponent {
   isFormInvalid = computed(() => this.formStatus());
 
   // Signals for field validity
-  emailInvalid = toSignal(
-    this.loginForm.get('email')!.statusChanges.pipe(
-      startWith(this.loginForm.get('email')!.status),
-      map(() => this.loginForm.get('email')!.touched && this.loginForm.get('email')!.invalid),
+  usernameInvalid = toSignal(
+    this.loginForm.get('username')!.statusChanges.pipe(
+      startWith(this.loginForm.get('username')!.status),
+      map(() => this.loginForm.get('username')!.touched && this.loginForm.get('username')!.invalid),
     ),
     { initialValue: false },
   );
@@ -215,11 +223,51 @@ export class LoginComponent {
   onSubmit() {
     if (this.loginForm.valid) {
       this.isLoading.set(true);
-      console.log('Login Form Submitted', this.loginForm.value);
-      // Simulate backend call
-      setTimeout(() => {
-        this.isLoading.set(false);
-      }, 2000);
+      
+      const payload = {
+        username: this.loginForm.value.username,
+        password: this.loginForm.value.password,
+      };
+
+      this.http.post<any>('http://localhost:3000/auth/login', payload, { withCredentials: true }).subscribe({
+        next: async (res) => {
+          try {
+            // Fetch real backend user profile
+            const profile = await firstValueFrom(
+              this.http.get<any>('http://localhost:3000/user/me', { withCredentials: true })
+            );
+
+            if (profile) {
+              // Log in reactively
+              this.auth.login({
+                id: profile.id,
+                name: profile.name,
+                email: profile.email,
+                username: profile.username,
+                roles: [profile.role],
+                avatarUrl: profile.avatar_url || '',
+              });
+
+              // Load preferences (theme, notification config, display image status)
+              await this.userSettingsService.loadAndApplySettings();
+
+              this.notificationService.success('Welcome back', `Logged in successfully as ${profile.name}`);
+              
+              // Redirect to main inventory hub dashboard MFE
+              this.router.navigate(['/inventory']);
+            }
+          } catch (e) {
+            this.notificationService.error('Profile Error', 'Failed to retrieve user profile after login.');
+          } finally {
+            this.isLoading.set(false);
+          }
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          const errorMsg = err.error?.detail || 'Incorrect username or credentials supplied.';
+          this.notificationService.error('Sign In Failed', errorMsg);
+        }
+      });
     } else {
       this.loginForm.markAllAsTouched();
     }

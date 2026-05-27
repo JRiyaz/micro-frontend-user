@@ -1,5 +1,6 @@
 import time
-from fastapi import Request, HTTPException, status
+from fastapi import HTTPException, status
+from starlette.requests import HTTPConnection
 from user.config import settings
 
 class InMemoryRateLimiter:
@@ -21,10 +22,13 @@ class InMemoryRateLimiter:
         # Map client IP to list of request timestamps (floats)
         self.history: dict[str, list[float]] = {}
 
-    async def __call__(self, request: Request) -> None:
+    async def __call__(
+        self,
+        request: HTTPConnection
+    ) -> None:
         """
         FastAPI Dependency call. Validates the client's current request count
-        against the configured rate limit window.
+        against the configured rate limit window. Supports both HTTP and WebSockets.
         """
         if not self.enabled:
             return

@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from user.database import get_db
-from user.models.domain import User, AuditLog
-from user.schemas.user import UserResponse, UserRoleUpdate
+from user.models.domain import User, AuditLog, UserSettings, UserPermission
+from user.schemas.user import UserResponse, UserRoleUpdate, UserSettingsResponse, UserSettingsUpdate
 from user.utils.dependencies import get_current_user, RoleChecker
 from user.utils.audit import create_audit_entry
 
@@ -129,3 +129,81 @@ async def get_audit_logs(
     result = await db.execute(select(AuditLog).order_by(AuditLog.timestamp.desc()).offset(offset).limit(limit))
     logs = result.scalars().all()
     return [{"id": l.id, "action": l.action, "resource": l.resource, "details": l.details, "username": l.username, "timestamp": l.timestamp} for l in logs]
+
+@router.get("/settings", response_model=UserSettingsResponse)
+async def get_user_settings(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Returns the currently authenticated user's settings profile.
+    """
+    res = await db.execute(select(UserSettings).where(UserSettings.user_id == current_user.id))
+    settings = res.scalar_one_or_none()
+    if not settings:
+        settings = UserSettings(user_id=current_user.id)
+        db.add(settings)
+        await db.commit()
+        await db.refresh(settings)
+    return settings
+
+@router.put("/settings", response_model=UserSettingsResponse)
+async def update_user_settings(
+    payload: UserSettingsUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Saves/updates the user's settings in the database.
+    """
+    res = await db.execute(select(UserSettings).where(UserSettings.user_id == current_user.id))
+    settings = res.scalar_one_or_none()
+    if not settings:
+        settings = UserSettings(user_id=current_user.id)
+        db.add(settings)
+        await db.flush()
+
+    data = payload.model_dump(exclude_unset=True)
+    for key, val in data.items():
+        setattr(settings, key, val)
+        
+    db.add(settings)
+    await db.commit()
+    await db.refresh(settings)
+    return settings
+
+@router.get("/permissions", response_model=list[dict])
+async def get_all_permissions(
+    current_user: User = Depends(RoleChecker(["Admin"])),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Gets permissions mapping for all system roles.
+    """
+    res = await db.execute(select(UserPermission))
+    return [{"role": p.role, "can_read": p.can_read, "can_write": p.can_write, "can_update": p.can_update, "can_delete": p.can_delete} for p in res.scalars().all()]
+
+@router.put("/permissions/{role}")
+async def update_role_permissions(
+    role: str,
+    payload: dict,
+    current_user: User = Depends(RoleChecker(["Admin"])),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Updates permission mapping for a specific role.
+    """
+    res = await db.execute(select(UserPermission).where(UserPermission.role == role))
+    perm = res.scalar_one_or_none()
+    if not perm:
+        perm = UserPermission(role=role)
+        db.add(perm)
+        
+    perm.can_read = payload.get("can_read", perm.can_read)
+    perm.can_write = payload.get("can_write", perm.can_write)
+    perm.can_update = payload.get("can_update", perm.can_update)
+    perm.can_delete = payload.get("can_delete", perm.can_delete)
+    
+    db.add(perm)
+    await db.commit()
+    return {"status": "success", "role": role}

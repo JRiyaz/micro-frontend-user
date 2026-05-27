@@ -3,6 +3,7 @@ import { Component, computed, inject, signal, ViewEncapsulation } from '@angular
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, type FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { map, of, startWith } from 'rxjs';
 import {
   AuthStateService,
@@ -14,12 +15,21 @@ import {
   ThemeService,
   TypewriterComponent,
   WorkspaceService,
+  UserSettingsService,
+  HasPermissionDirective,
 } from 'ui-shared';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, LoaderComponent, TypewriterComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    ReactiveFormsModule,
+    LoaderComponent,
+    TypewriterComponent,
+    HasPermissionDirective,
+  ],
   encapsulation: ViewEncapsulation.None,
   template: `
     <div
@@ -45,26 +55,53 @@ import {
           </svg>
           Back to Inventory Hub
         </a>
-        <h1
-          class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white"
-        >
-          Settings
-        </h1>
-        <p
-          class="text-slate-500 dark:text-slate-400 text-sm mt-1 h-5 flex items-center"
-        >
-          <lib-typewriter
-            [words]="[
-              'Personalize your profile.',
-              'Manage account security.',
-              'Customize platform theme.',
-              'Configure workspace settings.',
-            ]"
-            [typeSpeed]="60"
-            [deleteSpeed]="30"
-            [delayBetweenWords]="3000"
-          ></lib-typewriter>
-        </p>
+
+        <div class="flex justify-between items-center gap-4">
+          <div>
+            <h1
+              class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white"
+            >
+              Settings
+            </h1>
+            <p
+              class="text-slate-500 dark:text-slate-400 text-sm mt-1 h-5 flex items-center"
+            >
+              <lib-typewriter
+                [words]="[
+                  'Personalize your profile.',
+                  'Manage account security.',
+                  'Customize platform theme.',
+                  'Configure workspace settings.',
+                ]"
+                [typeSpeed]="60"
+                [deleteSpeed]="30"
+                [delayBetweenWords]="3000"
+              ></lib-typewriter>
+            </p>
+          </div>
+
+          <!-- Sticky Floating Settings Save Button -->
+          @if (userSettingsService.isDirty()) {
+            <button
+              (click)="saveChanges()"
+              [disabled]="userSettingsService.isSaving()"
+              class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-xl shadow-rose-500/30 border border-white/20 active:scale-95 transition-all animate-pulse"
+            >
+              @if (userSettingsService.isSaving()) {
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Saving...</span>
+              } @else {
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Save Changes</span>
+              }
+            </button>
+          }
+        </div>
       </div>
 
       <div class="flex-1 flex gap-5 overflow-hidden">
@@ -116,8 +153,8 @@ import {
                   >
                     <div class="relative group">
                       <img
-                        src="https://ui-avatars.com/api/?name=Riyaz+Khan&background=3b429f&color=fff&size=80"
-                        class="w-20 h-20 rounded-2xl border border-primary/30"
+                        [src]="auth.avatarUrl()"
+                        class="w-20 h-20 rounded-2xl border border-primary/30 object-cover"
                       />
                       <div
                         class="absolute inset-0 bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer"
@@ -245,7 +282,7 @@ import {
             @if (activeTab() === 'roles') {
               <div class="space-y-6 animate-fade-in">
                 <div class="card-premium p-6 sm:p-8">
-                  <div class="flex justify-between items-center mb-8">
+                  <div class="flex justify-between items-center mb-6">
                     <div>
                       <h3
                         class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest"
@@ -255,7 +292,7 @@ import {
                       <p
                         class="text-[10px] text-slate-500 uppercase tracking-widest mt-1"
                       >
-                        Add or remove system access levels
+                        Configure roles, permissions matrix, and system access
                       </p>
                     </div>
                     <div
@@ -263,36 +300,82 @@ import {
                     >
                       <span
                         class="text-[10px] font-black text-primary uppercase tracking-widest"
-                        >Active Roles: {{ auth.userRoles().length }}</span
+                        >System Roles: {{ auth.availableRoles().length }}</span
                       >
                     </div>
                   </div>
-                  <div class="space-y-4 mb-10">
-                    @for (role of auth.availableRoles(); track role) {
-                      <div
-                        class="flex items-center justify-between p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-xl group transition-all hover:border-primary/30"
+
+                  <!-- Fuzzy Search Autocomplete -->
+                  <div class="relative mb-6">
+                    <input
+                      type="text"
+                      [value]="roleSearchQuery()"
+                      (input)="roleSearchQuery.set($any($event.target).value)"
+                      placeholder="Fuzzy search roles..."
+                      class="w-full bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 px-4 py-2.5 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:border-primary/50 transition-colors"
+                    />
+                    @if (roleSearchQuery()) {
+                      <button
+                        (click)="roleSearchQuery.set('')"
+                        class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
                       >
-                        <div class="flex items-center gap-3">
-                          <div
-                            [class.bg-primary]="auth.hasRole(role)"
-                            [class.bg-slate-200]="!auth.hasRole(role)"
-                            class="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(109,116,255,0.5)]"
-                          ></div>
-                          <span
-                            class="text-sm font-bold text-slate-700 dark:text-slate-300"
-                            >{{ role }}</span
-                          >
-                        </div>
-                        <div class="flex items-center gap-4">
-                          <button
-                            (click)="toggleRole(role)"
-                            [class.text-primary]="auth.hasRole(role)"
-                            [class.text-slate-400]="!auth.hasRole(role)"
-                            class="flex items-center gap-2 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest hover:bg-primary/10 rounded-lg transition-all"
-                          >
-                            @if (auth.hasRole(role)) {
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                      </button>
+                    }
+                  </div>
+
+                  <div class="space-y-4 mb-10">
+                    @for (role of filteredRoles(); track role) {
+                      <div
+                        class="flex flex-col gap-4 p-5 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-2xl transition-all hover:border-primary/30"
+                      >
+                        <div class="flex items-center justify-between">
+                          <div class="flex items-center gap-3">
+                            <div
+                              [class.bg-primary]="auth.hasRole(role)"
+                              [class.bg-slate-200]="!auth.hasRole(role)"
+                              class="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(109,116,255,0.5)]"
+                            ></div>
+                            <span
+                              class="text-sm font-black text-slate-900 dark:text-white tracking-wide"
+                              >{{ role }}</span
+                            >
+                          </div>
+                          <div class="flex items-center gap-4">
+                            <button
+                              (click)="toggleRole(role)"
+                              [class.text-primary]="auth.hasRole(role)"
+                              [class.text-slate-400]="!auth.hasRole(role)"
+                              class="flex items-center gap-2 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest hover:bg-primary/10 rounded-lg transition-all"
+                            >
+                              @if (auth.hasRole(role)) {
+                                <svg
+                                  class="w-3 h-3"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="3"
+                                    d="M5 13l4 4L19 7"
+                                  ></path>
+                                </svg>
+                              }
+                              {{ auth.hasRole(role) ? 'Assigned' : 'Assign' }}
+                            </button>
+                            
+                            <!-- Delete button restricted via custom functional guards / directives -->
+                            <button
+                              *libHasPermission="'can_write'"
+                              (click)="deleteRole(role)"
+                              class="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
+                            >
                               <svg
-                                class="w-3 h-3"
+                                class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -300,36 +383,41 @@ import {
                                 <path
                                   stroke-linecap="round"
                                   stroke-linejoin="round"
-                                  stroke-width="3"
-                                  d="M5 13l4 4L19 7"
+                                  stroke-width="2"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                                 ></path>
                               </svg>
-                            }
-                            {{ auth.hasRole(role) ? 'Assigned' : 'Assign' }}
-                          </button>
-                          <button
-                            (click)="deleteRole(role)"
-                            class="p-1.5 text-slate-400 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
-                          >
-                            <svg
-                              class="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              ></path>
-                            </svg>
-                          </button>
+                            </button>
+                          </div>
                         </div>
+
+                        <!-- CRUD Permissions Matrix (Wired directly to backend) -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-200/50 dark:border-white/[0.04]">
+                          @for (pKey of ['can_read', 'can_write', 'can_update', 'can_delete']; track pKey) {
+                            <label class="flex items-center gap-2 cursor-pointer group select-none">
+                              <input
+                                type="checkbox"
+                                [disabled]="userSettingsService.isSavingPermissions()"
+                                [checked]="getRolePermissionFlag(role, pKey)"
+                                (change)="toggleRolePermission(role, pKey)"
+                                class="w-4 h-4 rounded border-slate-300 dark:border-white/15 bg-transparent text-primary focus:ring-primary focus:ring-offset-0"
+                              />
+                              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-slate-800 dark:group-hover:text-slate-300 transition-colors">
+                                {{ pKey.replace('can_', '') }}
+                              </span>
+                            </label>
+                          }
+                        </div>
+                      </div>
+                    } @empty {
+                      <div class="text-center py-10 border border-dashed border-slate-200 dark:border-white/10 rounded-2xl text-slate-400">
+                        No system roles found matching your query.
                       </div>
                     }
                   </div>
+
                   <div
+                    *libHasPermission="'can_write'"
                     class="pt-8 border-t border-slate-100 dark:border-white/5"
                   >
                     <label class="label-premium block mb-4"
@@ -508,7 +596,7 @@ import {
                         [class.dark:border-white/[0.08]]="
                           themeService.currentTheme() !== theme.id
                         "
-                        (click)="themeService.setTheme(theme.id)"
+                        (click)="themeService.setTheme(theme.id); userSettingsService.markDirty()"
                       >
                         <div
                           class="h-20 rounded-lg mb-3 shadow-inner"
@@ -570,7 +658,7 @@ import {
                         [class.dark:border-white/[0.08]]="
                           themeService.currentLoader() !== loader.id
                         "
-                        (click)="themeService.setLoader(loader.id)"
+                        (click)="themeService.setLoader(loader.id); userSettingsService.markDirty()"
                       >
                         <div
                           class="h-20 rounded-lg mb-3 bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden"
@@ -637,7 +725,7 @@ import {
                         [class.dark:border-white/[0.08]]="
                           themeService.loaderDuration() !== tempo.value
                         "
-                        (click)="themeService.setLoaderDuration(tempo.value)"
+                        (click)="themeService.setLoaderDuration(tempo.value); userSettingsService.markDirty()"
                       >
                         <div class="flex items-center justify-between mb-2">
                           <span
@@ -738,7 +826,8 @@ import {
                       (click)="
                         displayImageService.setDisplayImage(
                           !displayImageService.displayImage()
-                        )
+                        );
+                        userSettingsService.markDirty()
                       "
                       class="w-11 h-6 rounded-full transition-colors relative"
                       [class.bg-primary]="displayImageService.displayImage()"
@@ -809,7 +898,8 @@ import {
                         (click)="
                           notificationService.updateConfig({
                             dnd: !notificationService.config().dnd,
-                          })
+                          });
+                          userSettingsService.markDirty()
                         "
                         class="w-11 h-6 rounded-full transition-colors relative"
                         [class.bg-primary]="notificationService.config().dnd"
@@ -866,7 +956,8 @@ import {
                           notificationService.updateConfig({
                             urgentStick:
                               !notificationService.config().urgentStick,
-                          })
+                          });
+                          userSettingsService.markDirty()
                         "
                         class="w-11 h-6 rounded-full transition-colors relative"
                         [class.bg-primary]="
@@ -931,7 +1022,8 @@ import {
                             (click)="
                               notificationService.updateConfig({
                                 placement: pos.id,
-                              })
+                              });
+                              userSettingsService.markDirty()
                             "
                             class="p-3 border rounded-xl flex flex-col items-center gap-2 transition-all"
                             [class.border-primary]="
@@ -1018,18 +1110,43 @@ import {
                 </div>
                 <div class="card-premium p-6 sm:p-8">
                   <div class="flex justify-between items-center mb-6">
-                    <h3
-                      class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest"
-                    >
-                      Project Workspaces
-                    </h3>
-                    <span
-                      class="px-2.5 py-1 bg-green-500/10 text-green-400 text-[10px] font-black uppercase tracking-wider rounded-lg border border-green-500/20"
-                      >{{
-                        workspaceService.subProjects().length
-                      }}
-                      Connected</span
-                    >
+                    <div>
+                      <h3
+                        class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest"
+                      >
+                        Project Workspaces
+                      </h3>
+                      <p class="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5">
+                        Decoupled Micro-Frontends and API nodes
+                      </p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <button
+                        (click)="loadHealth()"
+                        [disabled]="isRefreshingHealth()"
+                        class="px-3 py-1.5 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary/20 active:scale-95 transition-all flex items-center gap-1.5"
+                      >
+                        @if (isRefreshingHealth()) {
+                          <svg class="animate-spin h-3 w-3 text-primary" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span>Refreshing...</span>
+                        } @else {
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 11H18.66"></path>
+                          </svg>
+                          <span>Refresh Health</span>
+                        }
+                      </button>
+                      <span
+                        class="px-2.5 py-1.5 bg-green-500/10 text-green-400 text-[10px] font-black uppercase tracking-wider rounded-lg border border-green-500/20"
+                        >{{
+                          workspaceService.subProjects().length
+                        }}
+                        Connected</span
+                      >
+                    </div>
                   </div>
                   <div class="space-y-4">
                     @for (
@@ -1089,12 +1206,12 @@ import {
                               </h4>
                               <span class="flex items-center gap-1.5">
                                 <span
-                                  class="w-2 h-2 rounded-full"
+                                  class="w-2 h-2 rounded-full animate-pulse"
                                   [class.bg-green-400]="
                                     project.status === 'running'
                                   "
                                   [class.bg-red-400]="
-                                    project.status === 'error'
+                                    project.status === 'offline' || project.status === 'error'
                                   "
                                 ></span>
                                 <span
@@ -1184,11 +1301,13 @@ import {
                           >
                           <div class="flex items-center gap-3">
                             <button
+                              (click)="loadHealth(); $event.stopPropagation()"
                               class="text-[10px] font-bold text-primary uppercase hover:underline"
                             >
                               Re-ping
                             </button>
                             <button
+                              (click)="$event.stopPropagation()"
                               class="text-[10px] font-bold text-slate-500 uppercase hover:text-slate-900 dark:hover:text-white transition-colors"
                             >
                               Logs
@@ -1289,14 +1408,32 @@ export class SettingsComponent {
   isSavingSecurity = signal(false);
   isPreviewLoading = signal(true);
 
+  // Auth, state and settings services
   auth = inject(AuthStateService);
   themeService = inject(ThemeService);
   displayImageService = inject(DisplayImageService);
   notificationService = inject(NotificationService);
   workspaceService = inject(WorkspaceService);
   searchService = inject(SearchService);
+  userSettingsService = inject(UserSettingsService);
+  
+  private http = inject(HttpClient);
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
+
+  // Search input for role management autocomplete
+  roleSearchQuery = signal('');
+  
+  // Health query state
+  healthData = signal<any>(null);
+  isRefreshingHealth = signal(false);
+
+  // Fuzzy autocomplete computed roles list
+  filteredRoles = computed(() => {
+    const q = this.roleSearchQuery().toLowerCase().trim();
+    if (!q) return this.auth.availableRoles();
+    return this.auth.availableRoles().filter((r) => r.toLowerCase().includes(q));
+  });
 
   constructor() {
     // Cycle the preview loaders so user can see the "hold" duration effect
@@ -1304,16 +1441,186 @@ export class SettingsComponent {
       this.isPreviewLoading.set(false);
       setTimeout(() => {
         this.isPreviewLoading.set(true);
-      }, 2000); // Wait 2s before starting again
-    }, 4000); // Total cycle 4s
+      }, 2000);
+    }, 4000);
   }
 
+  ngOnInit(): void {
+    // Fetch and sync user settings & role permissions from DB
+    this.userSettingsService.loadAndApplySettings();
+    this.loadHealth();
+
+    // Deep link support for tabs via query parameters
+    this.route.queryParamMap.subscribe((params) => {
+      const tabId = params.get('tab');
+      if (tabId && this.tabs.some((t) => t.id === tabId)) {
+        this.activeTab.set(tabId);
+      }
+    });
+
+    // Dynamic Search Provider Registration
+    this.searchService.registerProvider({
+      id: 'user-settings',
+      name: 'Settings',
+      search: (query: string) => {
+        const q = query.toLowerCase();
+        const settingsItems = [
+          {
+            id: 'settings-profile',
+            title: 'User Profile Settings',
+            path: '/user/settings',
+            category: 'Settings',
+            queryParams: { tab: 'profile' },
+          },
+          {
+            id: 'settings-security',
+            title: 'Security & Password',
+            path: '/user/settings',
+            category: 'Settings',
+            queryParams: { tab: 'security' },
+          },
+          {
+            id: 'settings-appearance',
+            title: 'Appearance & Themes',
+            path: '/user/settings',
+            category: 'Settings',
+            queryParams: { tab: 'appearance' },
+          },
+          {
+            id: 'settings-notifications',
+            title: 'Notification Preferences',
+            path: '/user/settings',
+            category: 'Settings',
+            queryParams: { tab: 'notifications' },
+          },
+          {
+            id: 'settings-workspaces',
+            title: 'Workspace Configuration',
+            path: '/user/settings',
+            category: 'Settings',
+            queryParams: { tab: 'workspaces' },
+          },
+        ];
+        return of(settingsItems.filter((item) => item.title.toLowerCase().includes(q)));
+      },
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.searchService.unregisterProvider('user-settings');
+  }
+
+  // --- Real-time Gateway Health Probe ---
+  loadHealth() {
+    this.isRefreshingHealth.set(true);
+    this.http.get<any>('http://localhost:3000/health').subscribe({
+      next: (data) => {
+        this.healthData.set(data);
+        this.isRefreshingHealth.set(false);
+      },
+      error: () => {
+        this.isRefreshingHealth.set(false);
+      }
+    });
+  }
+
+  get projectsWithDetails() {
+    const versions = ['1.2.4', '1.1.2', '1.0.0'];
+    const subProjects = this.workspaceService.subProjects();
+    const h = this.healthData();
+
+    return subProjects.map((p, i) => {
+      const key = p.name.toLowerCase().replace(/\s+/g, '-');
+      let status: any = p.status;
+      let lastSeen = i === 0 ? 'Live' : `${i * 2 + 1} mins ago`;
+
+      if (h && h.services) {
+        let gateKey = '';
+        if (key.includes('shell')) gateKey = 'frontend-shell';
+        else if (key.includes('user')) gateKey = 'user-service';
+        else if (key.includes('inventory')) gateKey = 'inventory-hub';
+        else if (key.includes('store')) gateKey = 'store-service';
+
+        if (gateKey && h.services[gateKey]) {
+          const sObj = h.services[gateKey];
+          status = sObj.online ? 'running' : 'offline';
+          lastSeen = sObj.online ? 'Live' : 'Offline';
+        }
+      }
+
+      return {
+        ...p,
+        status: status,
+        ip: `192.168.1.${10 + i}`,
+        version: p.name.includes('Shell') ? '1.2.4' : versions[i % versions.length],
+        lastSeen: lastSeen,
+        services: p.services || ['Core Module'],
+      };
+    });
+  }
+
+  // --- Persistent Settings Saving Bridge ---
+  saveChanges() {
+    this.userSettingsService.saveSettings().then((success) => {
+      if (success) {
+        this.notificationService.success(
+          'Settings Persisted',
+          'Preferences successfully committed to sqlite database.'
+        );
+      } else {
+        this.notificationService.error(
+          'Save Failed',
+          'Could not synchronize preferences to the user-service backend.'
+        );
+      }
+    });
+  }
+
+  // --- CRUD Role Permissions Checkbox Matrix Operations ---
+  getRolePermissionFlag(role: string, pKey: string): boolean {
+    const perm = this.userSettingsService.allRolePermissions().find((p) => p.role === role);
+    if (!perm) return false;
+    return (perm as any)[pKey] === true;
+  }
+
+  toggleRolePermission(role: string, pKey: string) {
+    const perm = this.userSettingsService.allRolePermissions().find((p) => p.role === role);
+    const currentPerms = perm || { can_read: true, can_write: false, can_update: false, can_delete: false };
+    const updated = {
+      can_read: currentPerms.can_read,
+      can_write: currentPerms.can_write,
+      can_update: currentPerms.can_update,
+      can_delete: currentPerms.can_delete,
+      [pKey]: !(currentPerms as any)[pKey],
+    };
+
+    this.userSettingsService.saveRolePermissions(role, updated).then((success) => {
+      if (success) {
+        this.notificationService.success(
+          'Permission Saved',
+          `Successfully updated "${pKey.replace('can_', '')}" flag for role: ${role}`
+        );
+      } else {
+        this.notificationService.error(
+          'Save Failed',
+          `Failed to save permissions for role: ${role}`
+        );
+      }
+    });
+  }
+
+  // --- Role Management Operations ---
   addRole() {
     const role = this.newRoleName().trim();
     if (role) {
       this.auth.addSystemRole(role);
       this.newRoleName.set('');
-      this.notificationService.success('Role Created', `Added "${role}" to available system roles.`);
+      
+      // Seed default permissions for this new role on backend
+      const defaultPerms = { can_read: true, can_write: false, can_update: false, can_delete: false };
+      this.userSettingsService.saveRolePermissions(role, defaultPerms);
+      
+      this.notificationService.success('Role Created', `Added "${role}" to system roles database.`);
     }
   }
 
@@ -1348,6 +1655,7 @@ export class SettingsComponent {
     { label: 'Default', value: 800, desc: 'Balanced motion' },
     { label: 'Smooth', value: 1500, desc: 'Elegant tempo' },
   ];
+  
   themes = [
     {
       id: 'void-blue',
@@ -1509,84 +1817,10 @@ export class SettingsComponent {
     }
   }
 
-  get projectsWithDetails() {
-    const versions = ['1.2.4', '1.1.2', '1.0.0'];
-    return this.workspaceService.subProjects().map((p, i) => ({
-      ...p,
-      ip: `192.168.1.${10 + i}`,
-      version: p.name.includes('Shell') ? '1.2.4' : versions[i % versions.length],
-      lastSeen: i === 0 ? 'Live' : `${i * 2 + 1} mins ago`,
-      services: p.services || ['Core Module'],
-    }));
-  }
-
-  // Constructor removed and merged above
-
-  ngOnInit(): void {
-    // Deep link support for tabs via query parameters
-    this.route.queryParamMap.subscribe((params) => {
-      const tabId = params.get('tab');
-      if (tabId && this.tabs.some((t) => t.id === tabId)) {
-        this.activeTab.set(tabId);
-      }
-    });
-
-    // Dynamic Search Provider Registration
-    this.searchService.registerProvider({
-      id: 'user-settings',
-      name: 'Settings',
-      search: (query: string) => {
-        const q = query.toLowerCase();
-        const settingsItems = [
-          {
-            id: 'settings-profile',
-            title: 'User Profile Settings',
-            path: '/user/settings',
-            category: 'Settings',
-            queryParams: { tab: 'profile' },
-          },
-          {
-            id: 'settings-security',
-            title: 'Security & Password',
-            path: '/user/settings',
-            category: 'Settings',
-            queryParams: { tab: 'security' },
-          },
-          {
-            id: 'settings-appearance',
-            title: 'Appearance & Themes',
-            path: '/user/settings',
-            category: 'Settings',
-            queryParams: { tab: 'appearance' },
-          },
-          {
-            id: 'settings-notifications',
-            title: 'Notification Preferences',
-            path: '/user/settings',
-            category: 'Settings',
-            queryParams: { tab: 'notifications' },
-          },
-          {
-            id: 'settings-workspaces',
-            title: 'Workspace Configuration',
-            path: '/user/settings',
-            category: 'Settings',
-            queryParams: { tab: 'workspaces' },
-          },
-        ];
-        return of(settingsItems.filter((item) => item.title.toLowerCase().includes(q)));
-      },
-    });
-  }
-
-  ngOnDestroy(): void {
-    // Clean up search provider when component is destroyed
-    this.searchService.unregisterProvider('user-settings');
-  }
-
   updateDuration(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.notificationService.updateConfig({ duration: parseInt(value, 10) });
+    this.userSettingsService.markDirty();
   }
 
   testUrgent() {

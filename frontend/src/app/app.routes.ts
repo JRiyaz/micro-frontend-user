@@ -3,6 +3,7 @@ import { NotFoundComponent } from './not-found.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { SettingsComponent } from './pages/settings/settings.component';
+import { authGuard } from './guards/auth.guard';
 
 export const USER_ROUTES: Routes = [
   {
@@ -19,6 +20,7 @@ export const USER_ROUTES: Routes = [
     path: 'settings',
     title: 'Settings - Inventory',
     component: SettingsComponent,
+    canActivate: [authGuard],
   },
   {
     path: '',

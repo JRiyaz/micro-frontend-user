@@ -81,13 +81,16 @@ async def login(
     """
     Authenticates a user and issues an access JWT token.
     """
-    result = await db.execute(select(User).where(User.username == payload.username))
+    # Search by either username or email for flexibility
+    result = await db.execute(
+        select(User).where((User.username == payload.username) | (User.email == payload.username))
+    )
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or credentials supplied"
+            detail="Incorrect username/email or credentials supplied"
         )
 
     if user.status != "Active":
